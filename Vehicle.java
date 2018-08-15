@@ -23,8 +23,8 @@ public class Vehicle implements Steppable, Driveable {
     public Person manifest[];
 
     //// Physical
-    public Int2D location = null;
-    public Direction direction = null;
+    public Int2D location;
+    public AgentCity.Direction direction;
     public int speed = 0;
 
     // Accessors
@@ -41,26 +41,30 @@ public class Vehicle implements Steppable, Driveable {
     public void removePassenger(Person passenger) { /*TODO*/ }
     //// Physical
     public Int2D getLocation() { return location; }
-    public void setLocation() { /*TODO*/ }
-    public Direction getDirection() { return direction; }
+    public AgentCity.Direction getDirection() { return direction; }
     public int getSpeed() { return speed; }
 
     /** Constructor */
     public Vehicle(int id) {
-        this(id, 1, 4, new Int2D(0,0));
+        this(id, 1, 4, AgentCity.Direction.NONE);
     }
 
     /** Constructor */
-    public Vehicle(int id, final int len, final int cap, Int2D loc) {
+    public Vehicle(int id, AgentCity.Direction dir) {
+        this(id, 1, 4, dir);
+    }
+
+    /** Constructor */
+    public Vehicle(int id, final int len, final int cap, AgentCity.Direction dir) {
         idNum = id;
         length = len;
         passengerCap = cap;
         manifest = new Person[passengerCap];
-        location = loc;
+        direction = dir;
     }
 
     /** Move Vehicle realistically according to Driver directive*/
-    public void move(Direction dir, SimState state) {
+    public void move(AgentCity.Direction dir, SimState state) {
         /*TODO*/
         // Check if cell in Direction dir is valid from networkGrid
         //// Check if desired cell is a road, parking, or grid exit cell
@@ -74,9 +78,7 @@ public class Vehicle implements Steppable, Driveable {
         AgentCity ac = (AgentCity)state;
 
         // Get location from state of not set
-        if(location == null) {
-            location = ac.agentGrid.getObjectLocation(this);
-        }
+        location = ac.agentGrid.getObjectLocation(this);
 
         // Check if there is a directive from Driver, execute dir
     }

@@ -33,7 +33,7 @@ public class AgentCityWithUI extends GUIState {
     public static String getName() { return "Transportation City"; }
 
     public void setupPortrayals() {
-        AgentCity tc = (AgentCity)state;
+        AgentCity ac = (AgentCity)state;
 
         // Road colors
         int numDir = AgentCity.Direction.values().length; // count Directions enum
@@ -42,24 +42,27 @@ public class AgentCityWithUI extends GUIState {
         for (int i = 1; i < numDir; i++) {
             roadColors[i] = new Color(0,0,0,128);
         }
-        roadPortrayal.setField(tc.roadGrid); 
+        roadPortrayal.setField(ac.roadGrid); 
         roadPortrayal.setMap(new sim.util.gui.SimpleColorMap(roadColors));
 
         // Block colors
         Color blockColors[] = new Color[2];
         blockColors[0] = new Color(0,0,0,0);
         blockColors[1] = new Color(0,255,0,128);
-        blockPortrayal.setField(tc.blockGrid);
+        blockPortrayal.setField(ac.blockGrid);
         blockPortrayal.setMap(new sim.util.gui.SimpleColorMap(blockColors));
 
         // Intersection colors
         Color intersectionColors[] = new Color[2];
         intersectionColors[0] = new Color(0,0,0,0);
         intersectionColors[1] = new Color(0,0,0,64);
-        intersectionPortrayal.setField(tc.intersectionGrid);
+        intersectionPortrayal.setField(ac.intersectionGrid);
         intersectionPortrayal.setMap(new sim.util.gui.SimpleColorMap(intersectionColors));
 
-        //agentPortrayal.setField(tc.agentGrid);
+        // Agent Colors
+        agentPortrayal.setField(ac.agentGrid);
+        agentPortrayal.setPortrayalForClass(Vehicle.class, 
+                new sim.portrayal.simple.OvalPortrayal2D(Color.red));
 
         display.reset();
         display.repaint();
@@ -86,7 +89,7 @@ public class AgentCityWithUI extends GUIState {
         display.attach(roadPortrayal, "Road");
         display.attach(blockPortrayal, "Block");
         display.attach(intersectionPortrayal, "Intersection");
-        //display.attach(agentPortrayal, "Agents");
+        display.attach(agentPortrayal, "Agents");
 
         display.setBackdrop(Color.white);
     }

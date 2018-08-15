@@ -6,6 +6,9 @@ package sim.app.agentcity;
 import sim.engine.*;
 import sim.util.*;
 import sim.field.grid.*;
+import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.toMap;
+import java.util.Map;
 
 public class AgentCity extends SimState {
 
@@ -32,12 +35,19 @@ public class AgentCity extends SimState {
         ALL(9);
 
         private final int dirNum;
+
+        private final static Map<Integer, Direction> map =
+            stream(Direction.values()).collect(toMap(dir -> dir.dirNum, dir -> dir));
         
-        Direction(int dir) {
+        private Direction(final int dir) {
             this.dirNum = dir;
         }
 
         public int toInt() { return dirNum; }
+
+        public static Direction byInt(int dirNum) {
+            return map.get(dirNum);
+        }
     }
 
     // Intersection turning movements
@@ -143,12 +153,14 @@ public class AgentCity extends SimState {
         }
 
         // Make some agents
-        Vehicle testCar = new Vehicle(0); // one Vehicle
         // Get random location on road
         Int2D newLocation = new Int2D(random.nextInt(gridWidth), random.nextInt(gridHeight));
         while (roadGrid.get(newLocation.x, newLocation.y) == 0) {
             newLocation = new Int2D(random.nextInt(gridWidth), random.nextInt(gridHeight));
         }
+        // One Vehicle on a road cell in the correct direction
+        Direction newDir = Direction.byInt(roadGrid.get(newLocation.x, newLocation.y));
+        Vehicle testCar = new Vehicle(0, newDir);
         agentGrid.setObjectLocation(testCar, newLocation);
         testCar.stopper = schedule.scheduleRepeating(testCar);
     }
