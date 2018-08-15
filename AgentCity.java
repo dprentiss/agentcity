@@ -102,6 +102,8 @@ public class AgentCity extends SimState {
         intersectionGrid = new IntGrid2D(gridWidth, gridHeight, 0);
         blockGrid = new IntGrid2D(gridWidth, gridHeight, 1);
 
+        agentGrid = new SparseGrid2D(gridWidth, gridHeight);
+
         // Make some roads and blocks
         for (int x = 0; x < gridWidth; x++) { 
             for (int y = 0; y < gridHeight; y++) { 
@@ -141,16 +143,14 @@ public class AgentCity extends SimState {
         }
 
         // Make some agents
-        //Vehicle testCar = new Vehicle(0); // one Vehicle
+        Vehicle testCar = new Vehicle(0); // one Vehicle
         // Get random location on road
         Int2D newLocation = new Int2D(random.nextInt(gridWidth), random.nextInt(gridHeight));
         while (roadGrid.get(newLocation.x, newLocation.y) == 0) {
             newLocation = new Int2D(random.nextInt(gridWidth), random.nextInt(gridHeight));
         }
-        /*
         agentGrid.setObjectLocation(testCar, newLocation);
         testCar.stopper = schedule.scheduleRepeating(testCar);
-        */
     }
 
     /** Main */
