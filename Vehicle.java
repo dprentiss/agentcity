@@ -14,18 +14,17 @@ public class Vehicle implements Steppable, Driveable {
     Stoppable stopper;
 
     // Properties
-    public final int length, idNum, passengerCap;
+    protected final int length, idNum, passengerCap;
 
     // Variables
     //// Agents
-    public boolean isStopped = true;
-    public Driver driver = null;
-    public Person manifest[];
+    protected Driver driver;
+    protected Person manifest[];
 
     //// Physical
-    public Int2D location;
-    public AgentCity.Direction direction;
-    public int speed = 0;
+    protected Int2D location;
+    protected Direction direction;
+    protected int speed = 0;
 
     // Accessors
     //// Properties
@@ -33,29 +32,29 @@ public class Vehicle implements Steppable, Driveable {
     public int getIdNum() { return idNum; }
     public int getPassengerCap() { return passengerCap; }
     //// Agents
-    public Driver getDriver(Driver newDriver) { return driver; }
+    public Driver getDriver() { return driver; }
     public void setDriver(Driver newDriver) { driver = newDriver; }
-    public void removeDriver(Driver oldDriver) { /*TODO*/ }
+    public void removeDriver() { /*TODO*/ }
     public Person[] getManifest() { return manifest; }
     public void addPassenger(Person passenger) { /*TODO*/ }
     public void removePassenger(Person passenger) { /*TODO*/ }
     //// Physical
     public Int2D getLocation() { return location; }
-    public AgentCity.Direction getDirection() { return direction; }
+    public Direction getDirection() { return direction; }
     public int getSpeed() { return speed; }
 
     /** Constructor */
     public Vehicle(int id) {
-        this(id, 1, 4, AgentCity.Direction.NONE);
+        this(id, 1, 4, Direction.NONE);
     }
 
     /** Constructor */
-    public Vehicle(int id, AgentCity.Direction dir) {
+    public Vehicle(int id, Direction dir) {
         this(id, 1, 4, dir);
     }
 
     /** Constructor */
-    public Vehicle(int id, final int len, final int cap, AgentCity.Direction dir) {
+    public Vehicle(int id, final int len, final int cap, Direction dir) {
         idNum = id;
         length = len;
         passengerCap = cap;
@@ -64,21 +63,35 @@ public class Vehicle implements Steppable, Driveable {
     }
 
     /** Move Vehicle realistically according to Driver directive*/
-    public void move(AgentCity.Direction dir, SimState state) {
+    private void moveStraightOneCell(AgentCity ac) {
         /*TODO*/
-        // Check if cell in Direction dir is valid from networkGrid
-        //// Check if desired cell is a road, parking, or grid exit cell
-        //// Check if desired cell has room for Vehicle
-        //// Check if Vehicle has pemission to occupy cell
-        // Update location of Vehicle in agentGrid
+        // Check if Vehicle can move as desired
+        Int2D nextLocation = new Int2D(location.x + direction.getXOffset(),
+                location.y + direction.getYOffset());
+        // Check if cell is in the grid
+        if ((nextLocation.x >= 0) && (nextLocation.x < ac.gridWidth)
+                && (nextLocation.y >= 0) && (nextLocation.y < ac.gridHeight)) {
+            // Check if desired cell is a road, parking, or grid exit cell
+            boolean isRoad = ac.roadGrid.get(nextLocation.x, nextLocation.y) != 0;
+            //// Check for conflict with other vehicles
+            //// Check if Vehicle has pemission to occupy cell
+            // Update location of Vehicle in agentGrid
+            if (isRoad) {
+                ac.agentGrid.setObjectLocation(this, nextLocation);
+            } else {
+                if (stopper != null) stopper.stop();
+                return;
+            }
+        }
         // Update location of Driver and Passengers in agentGrid
     }
 
     public void step(final SimState state) {
         AgentCity ac = (AgentCity)state;
 
-        // Get location from state of not set
+        // Get location from state
         location = ac.agentGrid.getObjectLocation(this);
+        moveStraightOneCell(ac);
 
         // Check if there is a directive from Driver, execute dir
     }

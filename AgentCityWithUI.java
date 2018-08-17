@@ -36,7 +36,7 @@ public class AgentCityWithUI extends GUIState {
         AgentCity ac = (AgentCity)state;
 
         // Road colors
-        int numDir = AgentCity.Direction.values().length; // count Directions enum
+        int numDir = Direction.values().length; // count Directions enum
         Color roadColors[] = new Color[numDir]; // make an array of colors
         roadColors[0] = new Color(0,0,0,0); // Direction.NONE is transparent
         for (int i = 1; i < numDir; i++) {

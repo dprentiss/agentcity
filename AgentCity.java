@@ -6,9 +6,6 @@ package sim.app.agentcity;
 import sim.engine.*;
 import sim.util.*;
 import sim.field.grid.*;
-import static java.util.Arrays.stream;
-import static java.util.stream.Collectors.toMap;
-import java.util.Map;
 
 public class AgentCity extends SimState {
 
@@ -20,35 +17,6 @@ public class AgentCity extends SimState {
     // Grid dimensions
     public int gridHeight;
     public int gridWidth;
-
-    // Grid directions
-    enum Direction {
-        NONE(0),
-        NORTH(1),
-        NORTH_EAST(2),
-        EAST(3),
-        SOUTH_EAST(4),
-        SOUTH(5),
-        SOUTH_WEST(6),
-        WEST(7),
-        NORTH_WEST(8),
-        ALL(9);
-
-        private final int dirNum;
-
-        private final static Map<Integer, Direction> map =
-            stream(Direction.values()).collect(toMap(dir -> dir.dirNum, dir -> dir));
-        
-        private Direction(final int dir) {
-            this.dirNum = dir;
-        }
-
-        public int toInt() { return dirNum; }
-
-        public static Direction byInt(int dirNum) {
-            return map.get(dirNum);
-        }
-    }
 
     // Intersection turning movements
     enum LaneSignalState {
@@ -155,7 +123,8 @@ public class AgentCity extends SimState {
         // Make some agents
         // Get random location on road
         Int2D newLocation = new Int2D(random.nextInt(gridWidth), random.nextInt(gridHeight));
-        while (roadGrid.get(newLocation.x, newLocation.y) == 0) {
+        while (roadGrid.get(newLocation.x, newLocation.y) == 0
+                || roadGrid.get(newLocation.x, newLocation.y) == 9) {
             newLocation = new Int2D(random.nextInt(gridWidth), random.nextInt(gridHeight));
         }
         // One Vehicle on a road cell in the correct direction
