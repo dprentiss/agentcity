@@ -19,7 +19,7 @@ public class AgentCity extends SimState {
     public int gridWidth;
 
     // Intersection turning movements
-    enum LaneSignalState {
+    enum TurningMovements {
         NONE,
         STOP,
         STRAIGHT,
