@@ -62,7 +62,6 @@ public class Vehicle implements Steppable, Driveable {
         direction = dir;
     }
 
-    /** Move Vehicle realistically according to Driver directive*/
     private void moveStraightOneCell(AgentCity ac) {
         /*TODO*/
         // Check if Vehicle can move as desired
@@ -77,13 +76,23 @@ public class Vehicle implements Steppable, Driveable {
             //// Check if Vehicle has pemission to occupy cell
             // Update location of Vehicle in agentGrid
             if (isRoad) {
-                ac.agentGrid.setObjectLocation(this, nextLocation);
+                setLocation(ac, nextLocation);
             } else {
                 if (stopper != null) stopper.stop();
                 return;
             }
         }
         // Update location of Driver and Passengers in agentGrid
+    }
+
+    private void setLocation(AgentCity ac, int x, int y) {
+        if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+            ac.agentGrid.setObjectLocation(this, x, y);
+        }
+    }
+
+    private void setLocation(AgentCity ac, Int2D loc) {
+        setLocation(ac, loc.x, loc.y);
     }
 
     public void step(final SimState state) {
