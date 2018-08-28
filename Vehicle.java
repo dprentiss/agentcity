@@ -11,34 +11,34 @@ public class Vehicle implements Steppable, Driveable {
     // Required for serialization
     private static final long serialVersionUID = 1;
 
+    // Stopper
     Stoppable stopper;
 
     // Properties
-    protected final int length, idNum, passengerCap;
+    private final int length, idNum, passengerCap;
 
-    // Variables
-    //// Agents
-    protected Driver driver;
-    protected Person manifest[];
+    // Agents
+    private Driver driver;
+    private Person manifest[];
 
-    //// Physical
-    protected Int2D location;
-    protected Direction direction;
-    protected int speed = 0;
+    // Physical
+    private Int2D location;
+    private Direction direction;
+    private int speed = 0;
 
     // Accessors
-    //// Properties
+    // Properties
     public int getLength() { return length; }
     public int getIdNum() { return idNum; }
     public int getPassengerCap() { return passengerCap; }
-    //// Agents
+    // Agents
     public Driver getDriver() { return driver; }
     public void setDriver(Driver newDriver) { driver = newDriver; }
     public void removeDriver() { /*TODO*/ }
     public Person[] getManifest() { return manifest; }
     public void addPassenger(Person passenger) { /*TODO*/ }
     public void removePassenger(Person passenger) { /*TODO*/ }
-    //// Physical
+    // Physical
     public Int2D getLocation() { return location; }
     public Direction getDirection() { return direction; }
     public int getSpeed() { return speed; }
@@ -85,14 +85,24 @@ public class Vehicle implements Steppable, Driveable {
         // Update location of Driver and Passengers in agentGrid
     }
 
+    // classes for changing location, direction, and speed
     private void setLocation(AgentCity ac, int x, int y) {
         if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
             ac.agentGrid.setObjectLocation(this, x, y);
+            location = new Int2D(x, y);
         }
     }
 
     private void setLocation(AgentCity ac, Int2D loc) {
         setLocation(ac, loc.x, loc.y);
+    }
+    
+    private void setDirection(Direction dir) {
+        direction = dir;
+    }
+
+    private void setSpeed(int s) {
+        speed = s;
     }
 
     public void step(final SimState state) {
