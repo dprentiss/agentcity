@@ -6,7 +6,7 @@ package sim.app.agentcity;
 import sim.util.*;
 import sim.engine.*;
 
-public class Person implements Steppable, VehicleClient {
+public class Person implements Steppable, VehicleClient, Driver {
 
     // Required for serialization
     private static final long serialVersionUID = 1;
@@ -24,6 +24,10 @@ public class Person implements Steppable, VehicleClient {
     /** Constructor */
     public Person(int id) {
         idNum = id;
+    }
+
+    public Driver.Directive getNextDirective() {
+        return Driver.Directive.MOVE_FORWARD;
     }
 
     /** Choose trip */

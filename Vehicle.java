@@ -10,18 +10,19 @@ public class Vehicle implements Steppable, Driveable {
 
     // Required for serialization
     private static final long serialVersionUID = 1;
-
+    
     // Stopper
     Stoppable stopper;
 
     // Properties
-    private final int length, idNum, passengerCap;
+    public final int length, idNum, passengerCap;
+    public final int MAX_SPEED = 1;
 
     // Agents
     private Driver driver;
     private Person manifest[];
 
-    // Physical
+    // Physical Variables
     private Int2D location;
     private Direction direction;
     private int speed = 0;
@@ -107,10 +108,57 @@ public class Vehicle implements Steppable, Driveable {
 
     public void step(final SimState state) {
         AgentCity ac = (AgentCity)state;
+        int xOffset = 0;
+        int yOffset = 0;
 
         // Get location from state
         location = ac.agentGrid.getObjectLocation(this);
-        moveStraightOneCell(ac);
+
+        // Get next directive from Driver
+        Driver.Directive nextDirective = driver.getNextDirective();
+
+        // Execute Directive from Driver
+        switch (nextDirective) {
+            case MOVE_FORWARD:
+                if (speed == 0) {
+                    setSpeed(1);
+                } else {
+                    Int2D nextLocation = new Int2D(location.x + direction.getXOffset(),
+                            location.y + direction.getYOffset());
+                    setLocation(ac, nextLocation);
+                }
+                break;
+            case STOP:
+                if (speed > 0) {
+                    Int2D nextLocation = new Int2D(location.x + direction.getXOffset(),
+                            location.y + direction.getYOffset());
+                    setLocation(ac, nextLocation);
+                    setSpeed(0);
+                }
+                break;
+            case TURN_RIGHT:
+                if (speed == 0) {
+                    setDirection(direction.onRight());
+                    setSpeed(1);
+                }
+                break;
+            case TURN_LEFT:
+                if (speed == 0) {
+                    setDirection(direction.onLeft());
+                    setSpeed(1);
+                }
+                break;
+            case MERGE_RIGHT:
+                xOffset = location.x + direction.getXOffset() + direction.onRight().getXOffset();
+                yOffset = location.y + direction.getYOffset() + direction.onRight().getYOffset();
+                setLocation(ac, xOffset, yOffset);
+                break;
+            case MERGE_LEFT:
+                xOffset = location.x + direction.getXOffset() + direction.onLeft().getXOffset();
+                yOffset = location.y + direction.getYOffset() + direction.onLeft().getYOffset();
+                setLocation(ac, xOffset, yOffset);
+                break;
+        }
 
         // Check if there is a directive from Driver, execute dir
     }
