@@ -134,9 +134,13 @@ public class AgentCity extends SimState {
             Direction newDir = Direction.byInt(roadGrid.get(newLocation.x, newLocation.y));
             Vehicle testCar = new Vehicle(i, newDir);
             agentGrid.setObjectLocation(testCar, newLocation);
+            // Add Vehicle to Schedule
             testCar.stopper = schedule.scheduleRepeating(testCar);
+            // DriverAgent for Vehicle
             DriverAgent newDriver = new DriverAgent(i);
             testCar.setDriver(newDriver);
+            newDriver.setVehicle(testCar);
+            // add Driver to Schedule
             newDriver.stopper = schedule.scheduleRepeating(newDriver);
         }
     }

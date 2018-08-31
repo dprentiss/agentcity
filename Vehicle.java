@@ -40,7 +40,7 @@ public class Vehicle implements Steppable, Driveable {
     public void addPassenger(Person passenger) { /*TODO*/ }
     public void removePassenger(Person passenger) { /*TODO*/ }
     // Physical
-    public Int2D getLocation() { return location; }
+    public Int2D getLocation(AgentCity ac) { return ac.agentGrid.getObjectLocation(this); }
     public Direction getDirection() { return direction; }
     public int getSpeed() { return speed; }
 
