@@ -135,8 +135,9 @@ public class AgentCity extends SimState {
             Vehicle testCar = new Vehicle(i, newDir);
             agentGrid.setObjectLocation(testCar, newLocation);
             testCar.stopper = schedule.scheduleRepeating(testCar);
-            Person newPerson = new Person(i);
-            testCar.setDriver(newPerson);
+            DriverAgent newDriver = new DriverAgent(i);
+            testCar.setDriver(newDriver);
+            newDriver.stopper = schedule.scheduleRepeating(newDriver);
         }
     }
 

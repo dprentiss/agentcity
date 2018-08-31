@@ -8,7 +8,7 @@ import sim.engine.*;
 
 public class Vehicle implements Steppable, Driveable {
 
-    // Required for serialization
+    // Required by MASON for serialization
     private static final long serialVersionUID = 1;
     
     // Stopper
@@ -121,7 +121,7 @@ public class Vehicle implements Steppable, Driveable {
         switch (nextDirective) {
             case MOVE_FORWARD:
                 if (speed == 0) {
-                    setSpeed(1);
+                    setSpeed(MAX_SPEED);
                 } else {
                     Int2D nextLocation = new Int2D(location.x + direction.getXOffset(),
                             location.y + direction.getYOffset());
@@ -145,7 +145,7 @@ public class Vehicle implements Steppable, Driveable {
             case TURN_LEFT:
                 if (speed == 0) {
                     setDirection(direction.onLeft());
-                    setSpeed(1);
+                    setSpeed(MAX_SPEED);
                 }
                 break;
             case MERGE_RIGHT:
