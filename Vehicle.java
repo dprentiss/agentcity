@@ -90,6 +90,9 @@ public class Vehicle implements Steppable, Driveable {
     private void setLocation(AgentCity ac, int x, int y) {
         if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
             ac.agentGrid.setObjectLocation(this, x, y);
+            if (ac.agentGrid.numObjectsAtLocation(x, y) > 1) {
+                System.out.printf("Collision at %d, %d.\n", x, y);
+            }
             location = new Int2D(x, y);
         }
     }

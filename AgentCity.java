@@ -71,7 +71,7 @@ public class AgentCity extends SimState {
 
     public void makeTestGrids() {
 
-        final int NUM_VEHICLES = 4;
+        final int NUM_VEHICLES = 32;
 
         gridHeight = 40;
         gridWidth = 40;
@@ -127,7 +127,8 @@ public class AgentCity extends SimState {
             // Get random location on road
             Int2D newLocation = new Int2D(random.nextInt(gridWidth), random.nextInt(gridHeight));
             while (roadGrid.get(newLocation.x, newLocation.y) == 0
-                    || roadGrid.get(newLocation.x, newLocation.y) == 9) {
+                    || roadGrid.get(newLocation.x, newLocation.y) == 9
+                    || agentGrid.getObjectsAtLocation(newLocation.x, newLocation.y) != null) {
                 newLocation = new Int2D(random.nextInt(gridWidth), random.nextInt(gridHeight));
                     }
             // One Vehicle on a road cell in the correct direction
@@ -135,13 +136,13 @@ public class AgentCity extends SimState {
             Vehicle testCar = new Vehicle(i, newDir);
             agentGrid.setObjectLocation(testCar, newLocation);
             // Add Vehicle to Schedule
-            testCar.stopper = schedule.scheduleRepeating(testCar);
+            testCar.stopper = schedule.scheduleRepeating(testCar, 1, 1);
             // DriverAgent for Vehicle
             DriverAgent newDriver = new DriverAgent(i);
             testCar.setDriver(newDriver);
             newDriver.setVehicle(testCar);
             // add Driver to Schedule
-            newDriver.stopper = schedule.scheduleRepeating(newDriver);
+            newDriver.stopper = schedule.scheduleRepeating(newDriver, 0, 1);
         }
     }
 

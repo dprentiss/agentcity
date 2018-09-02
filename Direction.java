@@ -56,4 +56,13 @@ enum Direction {
             return this;
         }
     }
+
+    public Direction opposite() {
+        if (dirNum > 0 && dirNum < 9) { 
+            return this.byInt((dirNum + 4) % 8);
+        } else {
+            return this;
+        }
+    }
 }
+
