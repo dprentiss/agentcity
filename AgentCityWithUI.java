@@ -55,7 +55,7 @@ public class AgentCityWithUI extends GUIState {
         // Intersection colors
         Color intersectionColors[] = new Color[2];
         intersectionColors[0] = new Color(0,0,0,0);
-        intersectionColors[1] = new Color(0,0,0,64);
+        intersectionColors[1] = new Color(0,0,0,0);
         intersectionPortrayal.setField(ac.intersectionGrid);
         intersectionPortrayal.setMap(new sim.util.gui.SimpleColorMap(intersectionColors));
 

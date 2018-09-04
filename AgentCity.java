@@ -69,12 +69,38 @@ public class AgentCity extends SimState {
         }
     }
 
+    private int labelIntersection(int cellX, int cellY, int num) {
+        int label = 0;
+        for (int x = -1; x < 2; x++) {
+            for (int y = -1; y < 2; y++) {
+                if (!checkBounds(cellX + x, cellY + y)) {
+                    continue;
+                }
+                label = intersectionGrid.field[cellX + x][cellY + y];
+                if (label != 0) {
+                    intersectionGrid.field[cellX][cellY] = label;
+                    return 0;
+                }
+            }
+        }
+        intersectionGrid.field[cellX][cellY] = num + 1;
+        return 1;
+    }
+
+    public boolean checkBounds(int x, int y) {
+        if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
+            return true;
+        return false;
+    }
+
     public void makeTestGrids() {
 
         final int NUM_VEHICLES = 32;
 
         gridHeight = 40;
         gridWidth = 40;
+
+        int numIntersections = 0;
 
         roadGrid = new IntGrid2D(gridWidth, gridHeight, Direction.NONE.toInt());
         walkwayGrid = new IntGrid2D(gridWidth, gridHeight, 0);
@@ -84,12 +110,15 @@ public class AgentCity extends SimState {
 
         agentGrid = new SparseGrid2D(gridWidth, gridHeight);
 
+        // check the neighbors of each intersection cell for previous labels
+        // apply a new iteger label if not
+
         // Make some roads and blocks
         for (int x = 0; x < gridWidth; x++) { 
             for (int y = 0; y < gridHeight; y++) { 
                 if (x == 0 || x == 18 || x == 19 || x == 38) {
                     if (roadGrid.field[x][y] != 0) {
-                        intersectionGrid.field[x][y] = 1;
+                        numIntersections += labelIntersection(x, y, numIntersections);
                         roadGrid.field[x][y] = Direction.ALL.toInt();
                     }
                     else roadGrid.field[x][y] = Direction.SOUTH.toInt();
@@ -97,7 +126,7 @@ public class AgentCity extends SimState {
                 }
                 if (x == 1 || x == 20 || x == 21 || x == 39) {
                     if (roadGrid.field[x][y] != 0) {
-                        intersectionGrid.field[x][y] = 1;
+                        numIntersections += labelIntersection(x, y, numIntersections);
                         roadGrid.field[x][y] = Direction.ALL.toInt();
                     }
                     else roadGrid.field[x][y] = Direction.NORTH.toInt();
@@ -105,7 +134,7 @@ public class AgentCity extends SimState {
                 }
                 if (y == 0 || y == 18 || y == 19 || y == 38) {
                     if (roadGrid.field[x][y] != 0) {
-                        intersectionGrid.field[x][y] = 1;
+                        numIntersections += labelIntersection(x, y, numIntersections);
                         roadGrid.field[x][y] = Direction.ALL.toInt();
                     }
                     else roadGrid.field[x][y] = Direction.WEST.toInt();
@@ -113,7 +142,7 @@ public class AgentCity extends SimState {
                 }
                 if (y == 1 || y == 20 || y == 21 || y == 39) {
                     if (roadGrid.field[x][y] != 0) {
-                        intersectionGrid.field[x][y] = 1;
+                        numIntersections += labelIntersection(x, y, numIntersections);
                         roadGrid.field[x][y] = Direction.ALL.toInt();
                     }
                     else roadGrid.field[x][y] = Direction.EAST.toInt();
