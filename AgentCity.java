@@ -69,6 +69,8 @@ public class AgentCity extends SimState {
         }
     }
 
+    // check the neighbors of each intersection cell for previous labels
+    // apply a new iteger label if not
     private int labelIntersection(int cellX, int cellY, int num) {
         int label = 0;
         for (int x = -1; x < 2; x++) {
@@ -95,7 +97,7 @@ public class AgentCity extends SimState {
 
     public void makeTestGrids() {
 
-        final int NUM_VEHICLES = 32;
+        final int NUM_VEHICLES = 64;
 
         gridHeight = 40;
         gridWidth = 40;
@@ -109,9 +111,6 @@ public class AgentCity extends SimState {
         blockGrid = new IntGrid2D(gridWidth, gridHeight, 1);
 
         agentGrid = new SparseGrid2D(gridWidth, gridHeight);
-
-        // check the neighbors of each intersection cell for previous labels
-        // apply a new iteger label if not
 
         // Make some roads and blocks
         for (int x = 0; x < gridWidth; x++) { 

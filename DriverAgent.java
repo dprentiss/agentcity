@@ -69,7 +69,7 @@ public class DriverAgent implements Steppable, Driver {
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.onLeft()
-                            || v.getSpeed() == 0;
+                            /*|| v.getSpeed() == 0*/;
                         if (!isFree) {
                             System.out.printf("Vehicle %d stopped because Vehicle %d is on the right.\n",
                                     vehicle.idNum, v.idNum);
