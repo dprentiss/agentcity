@@ -35,6 +35,7 @@ public class DriverAgent implements Steppable, Driver {
         int y;
         boolean isRoad = true;
         boolean isFree = true;
+        boolean hasRightOfWay = true;
 
         switch (speed) {
             case 0:
@@ -70,7 +71,8 @@ public class DriverAgent implements Steppable, Driver {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.onLeft()
                             /*|| v.getSpeed() == 0*/;
-                        if (!isFree) {
+                        hasRightOfWay = v.getSpeed() == 0 && v.idNum < vehicle.idNum;
+                        if (!isFree && !hasRightOfWay) {
                             System.out.printf("Vehicle %d stopped because Vehicle %d is on the right.\n",
                                     vehicle.idNum, v.idNum);
                             return false;
@@ -86,7 +88,8 @@ public class DriverAgent implements Steppable, Driver {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.onRight() 
                             /*|| v.getSpeed() == 0*/;
-                        if (!isFree) {
+                        hasRightOfWay = v.getSpeed() == 0 && v.idNum < vehicle.idNum;
+                        if (!isFree && !hasRightOfWay) {
                             System.out.printf("Vehicle %d stopped because Vehicle %d is on the left.\n",
                                     vehicle.idNum, v.idNum);
                             return false;
