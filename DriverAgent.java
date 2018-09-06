@@ -84,8 +84,8 @@ public class DriverAgent implements Steppable, Driver {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
-                        isFree = v.getDirection() == dir.onRight() 
-                            || v.getSpeed() == 0;
+                        isFree = v.getDirection() != dir.onRight() 
+                            /*|| v.getSpeed() == 0*/;
                         if (!isFree) {
                             System.out.printf("Vehicle %d stopped because Vehicle %d is on the left.\n",
                                     vehicle.idNum, v.idNum);
@@ -129,6 +129,38 @@ public class DriverAgent implements Steppable, Driver {
                     }
                     if (!isFree) { return false; }
                 }
+                //  two cells ahead and one cell right
+                x = loc.x + 2 * dir.getXOffset() + dir.onRight().getXOffset();
+                y = loc.y + 2 * dir.getYOffset() + dir.onRight().getYOffset();
+                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                    Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
+                    if (b != null) {
+                        Vehicle v = (Vehicle)b.objs[0];
+                        isFree = v.getDirection() != dir.onLeft()
+                            /*|| v.getSpeed() == 0*/;
+                        if (!isFree) {
+                            System.out.printf("Vehicle %d stopped at (%d, %d) because Vehicle %d is on the right.\n",
+                                    vehicle.idNum, loc.x, loc.y, v.idNum);
+                            return false;
+                        }
+                    }
+                }
+                //  two cells ahead and one cell left
+                x = loc.x + 2 * dir.getXOffset() + dir.onLeft().getXOffset();
+                y = loc.y + 2 * dir.getYOffset() + dir.onLeft().getYOffset();
+                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                    Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
+                    if (b != null) {
+                        Vehicle v = (Vehicle)b.objs[0];
+                        isFree = v.getDirection() != dir.onRight() 
+                            /*|| v.getSpeed() == 0*/;
+                        if (!isFree) {
+                            System.out.printf("Vehicle %d stopped at (%d, %d) because Vehicle %d is on the left.\n",
+                                    vehicle.idNum, loc.x, loc.y, v.idNum);
+                            return false;
+                        }
+                    }
+                }
                 //  two cells ahead and two cells right
                 x = loc.x + 2 * dir.getXOffset() + 2 * dir.onRight().getXOffset();
                 y = loc.y + 2 * dir.getYOffset() + 2 * dir.onRight().getYOffset();
@@ -139,8 +171,8 @@ public class DriverAgent implements Steppable, Driver {
                         isFree = v.getDirection() != dir.onLeft()
                             || v.getSpeed() == 0;
                         if (!isFree) {
-                            System.out.printf("Vehicle %d stopped because Vehicle %d is on the right.\n",
-                                    vehicle.idNum, v.idNum);
+                            System.out.printf("Vehicle %d stopped at (%d, %d) because Vehicle %d is on the right.\n",
+                                    vehicle.idNum, loc.x, loc.y, v.idNum);
                             return false;
                         }
                     }
@@ -155,8 +187,8 @@ public class DriverAgent implements Steppable, Driver {
                         isFree = v.getDirection() != dir.onRight() 
                             || v.getSpeed() == 0;
                         if (!isFree) {
-                            System.out.printf("Vehicle %d stopped because Vehicle %d is on the left.\n",
-                                    vehicle.idNum, v.idNum);
+                            System.out.printf("Vehicle %d stopped at (%d, %d) because Vehicle %d is on the left.\n",
+                                    vehicle.idNum, loc.x, loc.y, v.idNum);
                             return false;
                         }
                     }
