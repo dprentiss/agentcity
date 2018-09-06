@@ -205,6 +205,18 @@ public class DriverAgent implements Steppable, Driver {
         //vehicle.idNum, x, y);
     }
 
+    int getLastIntersection(AgentCity ac, Int2D loc, Int2D dest) {
+        int cellX = dest.x;
+        int cellY = dest.y;
+        Direction cellDirection = Direction.byInt(ac.roadGrid.get(cellX, cellY));
+        while (cellDirection != Direction.ALL) {
+            cellX += cellDirection.opposite().getXOffset();
+            cellY += cellDirection.opposite().getYOffset();
+            cellDirection = Direction.byInt(ac.roadGrid.get(cellX, cellY));
+        }
+        return ac.intersectionGrid.get(cellX, cellY);
+    }
+
     public void step(final SimState state) {
         // World state
         AgentCity ac = (AgentCity)state;
@@ -216,14 +228,19 @@ public class DriverAgent implements Steppable, Driver {
         // if at destination get a destination from Client
         // random road location for testing
         if (location == destination || destination == null) {
-            destination = new Int2D(ac.random.nextInt(ac.gridWidth), ac.random.nextInt(ac.gridHeight));
+            destination = new Int2D(ac.random.nextInt(ac.gridWidth),
+                    ac.random.nextInt(ac.gridHeight));
             while (ac.roadGrid.get(destination.x, destination.y) == 0
                     || ac.roadGrid.get(destination.x, destination.y) == 9) {
-                destination = new Int2D(ac.random.nextInt(ac.gridWidth), ac.random.nextInt(ac.gridHeight));
+                destination = new Int2D(ac.random.nextInt(ac.gridWidth),
+                        ac.random.nextInt(ac.gridHeight));
             }
+        // Get intersection before destination
+        int tmp = getLastIntersection(ac, location, destination);
+        System.out.printf("Vehicle %d is headed to intersection %d.\n", vehicle.idNum, tmp);
         }
 
-        // get path to destination from RouteFindingService
+
 
         // calculate step to next waypoint in path
         // check next step for hazards and set nextDirective
