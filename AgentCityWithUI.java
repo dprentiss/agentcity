@@ -6,6 +6,7 @@ package sim.app.agentcity;
 
 import sim.engine.*;
 import sim.display.*;
+import sim.util.*;
 import sim.portrayal.grid.*;
 import java.awt.*;
 import javax.swing.*;
@@ -63,6 +64,13 @@ public class AgentCityWithUI extends GUIState {
         agentPortrayal.setField(ac.agentGrid);
         agentPortrayal.setPortrayalForClass(Vehicle.class, 
                 new sim.portrayal.simple.OvalPortrayal2D(Color.red));
+        Bag vehicles = ac.agentGrid.getAllObjects();
+        for (int i = 0; i < vehicles.numObjs; i++) {
+            Color newColor = new Color(ac.random.nextInt(255),
+                    ac.random.nextInt(255), ac.random.nextInt(255));
+            agentPortrayal.setPortrayalForObject(vehicles.objs[i],
+                    new sim.portrayal.simple.OvalPortrayal2D(newColor));
+        }
 
         display.reset();
         display.repaint();
