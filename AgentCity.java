@@ -47,6 +47,9 @@ public class AgentCity extends SimState {
     public IntGrid2D intersectionGrid;
     public IntGrid2D blockGrid;
 
+    // Array of Intersection agents
+    public IntersectionAgent[] intersections;
+
     /** Constructor default */
     public AgentCity(long seed) {
         // Required by SimState
@@ -150,7 +153,7 @@ public class AgentCity extends SimState {
             }
         }
 
-        // Make some agents
+        // Make some Vehicle and Driver agents
         for (int i = 0; i < NUM_VEHICLES; i++) {
             // Get random location on road
             Int2D newLocation = new Int2D(random.nextInt(gridWidth), random.nextInt(gridHeight));
@@ -172,6 +175,8 @@ public class AgentCity extends SimState {
             // add Driver to Schedule
             newDriver.stopper = schedule.scheduleRepeating(newDriver, 0, 1);
         }
+
+        // Make some Intersection agents
     }
 
     /** Main */
