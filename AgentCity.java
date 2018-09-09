@@ -47,8 +47,12 @@ public class AgentCity extends SimState {
     public IntGrid2D intersectionGrid;
     public IntGrid2D blockGrid;
 
+    // Array of Intersections
+    public Intersection[] intersections;
     // Array of Intersection agents
-    public IntersectionAgent[] intersections;
+    public IntersectionAgent[] intersectionAgents;
+
+    /** Constructor default */
 
     /** Constructor default */
     public AgentCity(long seed) {
@@ -73,7 +77,7 @@ public class AgentCity extends SimState {
     }
 
     // check the neighbors of each intersection cell for previous labels
-    // apply a new iteger label if not
+    // apply a new integer label if not
     private int labelIntersection(int cellX, int cellY, int num) {
         int label = 0;
         for (int x = -1; x < 2; x++) {
@@ -176,7 +180,11 @@ public class AgentCity extends SimState {
             newDriver.stopper = schedule.scheduleRepeating(newDriver, 0, 1);
         }
 
-        // Make some Intersection agents
+        // Make some Intersections and IntersectionAgents
+        intersectionAgents = new IntersectionAgent[numIntersections];
+        for (int i = 0; i < numIntersections; i++) {
+            intersectionAgents[i] = new IntersectionAgent(i);
+        }
     }
 
     /** Main */

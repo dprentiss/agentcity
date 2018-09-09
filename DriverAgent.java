@@ -71,7 +71,8 @@ public class DriverAgent implements Steppable, Driver {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.onLeft()
                             /*|| v.getSpeed() == 0*/;
-                        hasRightOfWay = v.getSpeed() == 0 && v.idNum < vehicle.idNum;
+                        hasRightOfWay = v.getSpeed() == 0 
+                            && v.idNum < vehicle.idNum;
                         if (!isFree && !hasRightOfWay) {
                             System.out.printf("Vehicle %d stopped because Vehicle %d is on the right.\n",
                                     vehicle.idNum, v.idNum);
@@ -205,7 +206,7 @@ public class DriverAgent implements Steppable, Driver {
         //vehicle.idNum, x, y);
     }
 
-    int getLastIntersection(AgentCity ac, Int2D loc, Int2D dest) {
+    Intersection getLastIntersection(AgentCity ac, Int2D dest) {
         int cellX = dest.x;
         int cellY = dest.y;
         Direction cellDirection = Direction.byInt(ac.roadGrid.get(cellX, cellY));
@@ -214,7 +215,24 @@ public class DriverAgent implements Steppable, Driver {
             cellY += cellDirection.opposite().getYOffset();
             cellDirection = Direction.byInt(ac.roadGrid.get(cellX, cellY));
         }
-        return ac.intersectionGrid.get(cellX, cellY);
+        return ac.intersections[ac.intersectionGrid.get(cellX, cellY) - 1];
+    }
+    
+    Intersection getIntersectionAhead(AgentCity ac, Int2D loc) {
+        int cellX = loc.x;
+        int cellY = loc.y;
+        Direction cellDirection = Direction.byInt(ac.roadGrid.get(cellX, cellY));
+        while (cellDirection != Direction.ALL) {
+            cellX += cellDirection.getXOffset();
+            cellY += cellDirection.getYOffset();
+            cellDirection = Direction.byInt(ac.roadGrid.get(cellX, cellY));
+        }
+        return ac.intersections[ac.intersectionGrid.get(cellX, cellY) - 1];
+    }
+
+    Direction getRandomDirection(AgentCity ac, Intersection inter, Direction dir) {
+        //Int2D departureLegs = inter.getDepartureLegs(dir);
+        return Direction.NONE;
     }
 
     public void step(final SimState state) {
@@ -236,13 +254,15 @@ public class DriverAgent implements Steppable, Driver {
                         ac.random.nextInt(ac.gridHeight));
             }
         // Get intersection before destination
-        int tmp = getLastIntersection(ac, location, destination);
-        System.out.printf("Vehicle %d is headed to intersection %d.\n", vehicle.idNum, tmp);
+        Intersection tmp = getLastIntersection(ac, destination);
+        //System.out.printf("Vehicle %d is headed to intersection %d.\n", vehicle.idNum, tmp);
         }
+        
+        // Get intersection ahead
+        Intersection nextIntersection = getIntersectionAhead(ac, location);
+        // Get random turn Direction for next intersection
+        Direction nextDir = getRandomDirection(ac, nextIntersection, direction);
 
-
-
-        // calculate step to next waypoint in path
         // check next step for hazards and set nextDirective
         if (pathAheadClear(ac, location, direction, speed)) {
             nextDirective = Driver.Directive.MOVE_FORWARD;

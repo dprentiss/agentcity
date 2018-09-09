@@ -27,6 +27,8 @@ public class Intersection implements Steppable {
 
     // Accessors
     public int getID() { return idNum; }
+    public Int2D[] getDepartureLegs() { return departureLegs; }
+    public Int2D[] getApproachLegs() { return approachLegs; }
 
     /** Constructor */
     public Intersection(int id, int minX, int maxX, int minY, int maxY) {
@@ -37,9 +39,15 @@ public class Intersection implements Steppable {
         this.maxY = maxY;
     }
 
+    /** Constructor */
+    public Intersection(int id, AgentCity ac) {
+        this(id, 0, 0, 0, 0);
+    }
+
+    // Get departure legs by Direction
     public Int2D[] getDepartureLegs(AgentCity ac, Direction dir) {
-        int numLegs = 0;
-        Int2D[] legs = new Int2D[numLegs];
+        int numLegs = 0; // numeber of relevant departure legs
+        Int2D[] legs; // array to return
         // Count relevant departure legs
         for (int i = 0; i < departureLegs.length; i++) {
             if (ac.roadGrid.get(departureLegs[i].x, departureLegs[i].y) 
@@ -47,7 +55,8 @@ public class Intersection implements Steppable {
                 numLegs++;
             }
         }
-        // Fill new array with departure legs
+        // Fill new array with relevant departure legs
+        legs = new Int2D[numLegs];
         for (int i = 0; i < departureLegs.length; i++) {
             int nextIndex = 0;
             if (ac.roadGrid.get(departureLegs[i].x, departureLegs[i].y) 
