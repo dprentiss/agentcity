@@ -181,8 +181,28 @@ public class AgentCity extends SimState {
         }
 
         // Make some Intersections and IntersectionAgents
-        intersectionAgents = new IntersectionAgent[numIntersections];
-        for (int i = 0; i < numIntersections; i++) {
+        int maxXs[] = new int[numIntersections + 1];
+        int minXs[] = new int[numIntersections + 1];
+        int maxYs[] = new int[numIntersections + 1];
+        int minYs[] = new int[numIntersections + 1];
+        intersections = new Intersection[numIntersections + 1];
+        intersectionAgents = new IntersectionAgent[numIntersections + 1];
+        intersections[0] = null;
+        intersectionAgents[0] = null;
+        int inter;
+        for (int x = 0; x < gridWidth; x++) { 
+            for (int y = 0; y < gridHeight; y++) { 
+                inter = intersectionGrid.field[x][y];   
+                if (inter != 0) {
+                    maxXs[inter] = (x > maxXs[inter]) ? x : maxXs[inter];
+                    minXs[inter] = (x < minXs[inter]) ? x : minXs[inter];
+                    maxYs[inter] = (y > maxYs[inter]) ? y : maxYs[inter];
+                    minYs[inter] = (y < minYs[inter]) ? y : minYs[inter];
+                }
+            }
+        }
+        for (int i = 1; i < numIntersections + 1; i++) {
+            intersections[i] = new Intersection(i, minXs[i], maxXs[i], minYs[i], maxYs[i], this);
             intersectionAgents[i] = new IntersectionAgent(i);
         }
     }
