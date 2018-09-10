@@ -6,6 +6,7 @@ package sim.app.agentcity;
 import sim.engine.*;
 import sim.util.*;
 import sim.field.grid.*;
+import java.util.Arrays;
 
 public class AgentCity extends SimState {
 
@@ -185,10 +186,10 @@ public class AgentCity extends SimState {
         int minXs[] = new int[numIntersections + 1];
         int maxYs[] = new int[numIntersections + 1];
         int minYs[] = new int[numIntersections + 1];
+        Arrays.fill(minXs, gridWidth);
+        Arrays.fill(minYs, gridHeight);
         intersections = new Intersection[numIntersections + 1];
         intersectionAgents = new IntersectionAgent[numIntersections + 1];
-        intersections[0] = null;
-        intersectionAgents[0] = null;
         int inter;
         for (int x = 0; x < gridWidth; x++) { 
             for (int y = 0; y < gridHeight; y++) { 
