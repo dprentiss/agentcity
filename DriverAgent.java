@@ -5,6 +5,7 @@
 package sim.app.agentcity;
 import sim.util.*;
 import sim.engine.*;
+import java.util.Arrays;
 
 public class DriverAgent implements Steppable, Driver {
 
@@ -227,12 +228,19 @@ public class DriverAgent implements Steppable, Driver {
             cellY += cellDirection.getYOffset();
             cellDirection = Direction.byInt(ac.roadGrid.get(cellX, cellY));
         }
-        return ac.intersections[ac.intersectionGrid.get(cellX, cellY) - 1];
+        return ac.intersections[ac.intersectionGrid.get(cellX, cellY)];
     }
 
-    Direction getRandomDirection(AgentCity ac, Intersection inter, Direction dir) {
-        //Int2D departureLegs = inter.getDepartureLegs(dir);
-        return Direction.NONE;
+    Int2D getRandomDepartureLeg(AgentCity ac, Intersection in, Direction dir) {
+        /*
+        System.out.println();
+        System.out.println(vehicle.idNum);
+        System.out.println(vehicle.getLocation(ac));
+        System.out.println(in.idNum);
+        System.out.println(Arrays.toString(in.getDepartureLegs()));
+        */
+        Int2D[] departureLegs = in.getDepartureLegs(ac, dir);
+        return departureLegs[ac.random.nextInt(departureLegs.length)];
     }
 
     public void step(final SimState state) {
@@ -243,6 +251,7 @@ public class DriverAgent implements Steppable, Driver {
         Direction direction = vehicle.getDirection();
         int speed = vehicle.getSpeed();
 
+        /*
         // if at destination get a destination from Client
         // random road location for testing
         if (location == destination || destination == null) {
@@ -257,11 +266,12 @@ public class DriverAgent implements Steppable, Driver {
         Intersection tmp = getLastIntersection(ac, destination);
         //System.out.printf("Vehicle %d is headed to intersection %d.\n", vehicle.idNum, tmp);
         }
+        */
         
         // Get intersection ahead
         Intersection nextIntersection = getIntersectionAhead(ac, location);
         // Get random turn Direction for next intersection
-        Direction nextDir = getRandomDirection(ac, nextIntersection, direction);
+        Int2D nextWaypoint = getRandomDepartureLeg(ac, nextIntersection, direction);
 
         // check next step for hazards and set nextDirective
         if (pathAheadClear(ac, location, direction, speed)) {

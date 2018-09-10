@@ -136,6 +136,8 @@ public class Intersection implements Steppable {
                 index++;
             }
         }
+        /*
+        // testing
         System.out.printf("id: %d, minX: %d, maxX: %d, minY: %d, maxY: %d\n", idNum, minX, maxX, minY, maxY);
         System.out.printf("Intesection %d, width %d, height %d\n", idNum, width, height);
         System.out.println("Departure legs:");
@@ -145,6 +147,7 @@ public class Intersection implements Steppable {
         System.out.println(approachLegs.length);
         System.out.println(Arrays.toString(approachLegs));
         System.out.println(" ");
+        */
     }
 
     // Get all departure legs execpt Direction dir
