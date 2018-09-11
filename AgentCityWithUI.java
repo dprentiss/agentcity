@@ -41,7 +41,7 @@ public class AgentCityWithUI extends GUIState {
         Color roadColors[] = new Color[numDir]; // make an array of colors
         roadColors[0] = new Color(0,0,0,0); // Direction.NONE is transparent
         for (int i = 1; i < numDir; i++) {
-            roadColors[i] = new Color(0,0,0,128);
+            roadColors[i] = new Color(111,110,99);
         }
         roadPortrayal.setField(ac.roadGrid); 
         roadPortrayal.setMap(new sim.util.gui.SimpleColorMap(roadColors));
@@ -49,7 +49,7 @@ public class AgentCityWithUI extends GUIState {
         // Block colors
         Color blockColors[] = new Color[2];
         blockColors[0] = new Color(0,0,0,0);
-        blockColors[1] = new Color(0,255,0,128);
+        blockColors[1] = new Color(96,128,56);
         blockPortrayal.setField(ac.blockGrid);
         blockPortrayal.setMap(new sim.util.gui.SimpleColorMap(blockColors));
 
