@@ -157,16 +157,16 @@ public class Intersection implements Steppable {
         // Count relevant departure legs
         for (int i = 0; i < departureLegs.length; i++) {
             if (ac.roadGrid.get(departureLegs[i].x, departureLegs[i].y) 
-                    != dir.toInt()) {
+                    != dir.opposite().toInt()) {
                 numLegs++;
             }
         }
         // Fill new array with relevant departure legs
         legs = new Int2D[numLegs];
+        int nextIndex = 0;
         for (int i = 0; i < departureLegs.length; i++) {
-            int nextIndex = 0;
             if (ac.roadGrid.get(departureLegs[i].x, departureLegs[i].y) 
-                    != dir.toInt()) {
+                    != dir.opposite().toInt()) {
                 legs[nextIndex] = departureLegs[i];
                 nextIndex++;
             }

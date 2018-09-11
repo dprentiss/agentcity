@@ -7,6 +7,10 @@ import sim.util.*;
 import sim.engine.*;
 import java.util.Arrays;
 
+/**
+ * Generic agent for controlling {@link Vehicles}
+ */
+
 public class DriverAgent implements Steppable, Driver {
 
     // Required for serialization
@@ -26,7 +30,11 @@ public class DriverAgent implements Steppable, Driver {
     public void setVehicle(Vehicle v) { vehicle = v; }
     public Driver.Directive getNextDirective() { return nextDirective; }
 
-    /** Constructor */
+    /** Constructor 
+     *
+     * @param id (required) int label for this class. Should be unique but 
+     * uniqueness is not checked.
+     */
     public DriverAgent(int id) {
         idNum = id;
     }
@@ -75,8 +83,6 @@ public class DriverAgent implements Steppable, Driver {
                         hasRightOfWay = v.getSpeed() == 0 
                             && v.idNum < vehicle.idNum;
                         if (!isFree && !hasRightOfWay) {
-                            System.out.printf("Vehicle %d stopped because Vehicle %d is on the right.\n",
-                                    vehicle.idNum, v.idNum);
                             return false;
                         }
                     }
@@ -92,8 +98,6 @@ public class DriverAgent implements Steppable, Driver {
                             /*|| v.getSpeed() == 0*/;
                         hasRightOfWay = v.getSpeed() == 0 && v.idNum < vehicle.idNum;
                         if (!isFree && !hasRightOfWay) {
-                            System.out.printf("Vehicle %d stopped because Vehicle %d is on the left.\n",
-                                    vehicle.idNum, v.idNum);
                             return false;
                         }
                     }
@@ -144,8 +148,6 @@ public class DriverAgent implements Steppable, Driver {
                         isFree = v.getDirection() != dir.onLeft()
                             /*|| v.getSpeed() == 0*/;
                         if (!isFree) {
-                            System.out.printf("Vehicle %d stopped at (%d, %d) because Vehicle %d is on the right.\n",
-                                    vehicle.idNum, loc.x, loc.y, v.idNum);
                             return false;
                         }
                     }
@@ -160,8 +162,6 @@ public class DriverAgent implements Steppable, Driver {
                         isFree = v.getDirection() != dir.onRight() 
                             /*|| v.getSpeed() == 0*/;
                         if (!isFree) {
-                            System.out.printf("Vehicle %d stopped at (%d, %d) because Vehicle %d is on the left.\n",
-                                    vehicle.idNum, loc.x, loc.y, v.idNum);
                             return false;
                         }
                     }
@@ -176,8 +176,6 @@ public class DriverAgent implements Steppable, Driver {
                         isFree = v.getDirection() != dir.onLeft()
                             || v.getSpeed() == 0;
                         if (!isFree) {
-                            System.out.printf("Vehicle %d stopped at (%d, %d) because Vehicle %d is on the right.\n",
-                                    vehicle.idNum, loc.x, loc.y, v.idNum);
                             return false;
                         }
                     }
@@ -192,8 +190,6 @@ public class DriverAgent implements Steppable, Driver {
                         isFree = v.getDirection() != dir.onRight() 
                             || v.getSpeed() == 0;
                         if (!isFree) {
-                            System.out.printf("Vehicle %d stopped at (%d, %d) because Vehicle %d is on the left.\n",
-                                    vehicle.idNum, loc.x, loc.y, v.idNum);
                             return false;
                         }
                     }
@@ -207,6 +203,7 @@ public class DriverAgent implements Steppable, Driver {
         //vehicle.idNum, x, y);
     }
 
+    /*
     Intersection getLastIntersection(AgentCity ac, Int2D dest) {
         int cellX = dest.x;
         int cellY = dest.y;
@@ -218,7 +215,16 @@ public class DriverAgent implements Steppable, Driver {
         }
         return ac.intersections[ac.intersectionGrid.get(cellX, cellY) - 1];
     }
+    */
     
+    /**
+     * Gets the intersection ahead of the {@link Vehicle}.
+     *
+     * @param ac the current state of the simulation.
+     * @param loc currrent location of the {@link Vehicle}.
+     *
+     * @return the intersection ahead of the {@link Vehicle}.
+     */
     Intersection getIntersectionAhead(AgentCity ac, Int2D loc) {
         int cellX = loc.x;
         int cellY = loc.y;
@@ -240,10 +246,16 @@ public class DriverAgent implements Steppable, Driver {
         System.out.println(Arrays.toString(in.getDepartureLegs()));
         */
         Int2D[] departureLegs = in.getDepartureLegs(ac, dir);
+        //System.out.println(Arrays.toString(departureLegs));
         return departureLegs[ac.random.nextInt(departureLegs.length)];
     }
 
-    public void step(final SimState state) {
+    Int2D setTurnCell() {
+        return new Int2D(0,0);
+    }
+
+    public void step(final SimState state)
+    {
         // World state
         AgentCity ac = (AgentCity)state;
         // Current Vehicle position and velocity; 
@@ -268,10 +280,16 @@ public class DriverAgent implements Steppable, Driver {
         }
         */
         
-        // Get intersection ahead
         Intersection nextIntersection = getIntersectionAhead(ac, location);
         // Get random turn Direction for next intersection
         Int2D nextWaypoint = getRandomDepartureLeg(ac, nextIntersection, direction);
+        /*
+        System.out.println(vehicle.idNum);
+        System.out.println(vehicle.getLocation(ac));
+        System.out.println(nextIntersection.idNum);
+        System.out.println(nextWaypoint);
+        System.out.println(Direction.byInt(ac.roadGrid.get(nextWaypoint.x, nextWaypoint.y)));
+        */
 
         // check next step for hazards and set nextDirective
         if (pathAheadClear(ac, location, direction, speed)) {
