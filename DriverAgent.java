@@ -265,12 +265,14 @@ public class DriverAgent implements Steppable, Driver {
             cellY = Math.abs(locDir.getYOffset()) * leg.y
                 + Math.abs(legDir.getYOffset()) * loc.y;
         }
+        /*
         System.out.println();
         System.out.println(leg);
         System.out.println(legDir);
         System.out.println(loc);
         System.out.println(locDir);
         System.out.println(new Int2D(cellX, cellY));
+        */
         return new Int2D(cellX, cellY);
     }
 
@@ -304,6 +306,7 @@ public class DriverAgent implements Steppable, Driver {
         // Get random turn Direction for next intersection
         Int2D nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
         Int2D nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
+        Direction nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
         /*
         System.out.println(vehicle.idNum);
         System.out.println(vehicle.getLocation(ac));
@@ -312,9 +315,22 @@ public class DriverAgent implements Steppable, Driver {
         System.out.println(Direction.byInt(ac.roadGrid.get(nextWaypoint.x, nextWaypoint.y)));
         */
 
+        boolean nearTurnCell = location.x + direction.getXOffset() == nextTurnCell.x
+            && location.y + direction.getYOffset() == nextTurnCell.y;
         // check next step for hazards and set nextDirective
         if (pathAheadClear(ac, location, direction, speed)) {
-            nextDirective = Driver.Directive.MOVE_FORWARD;
+            if (nearTurnCell) {
+                if (nextDirection == direction.onRight()) {
+                    nextDirective = Driver.Directive.TURN_RIGHT;
+                } else if (nextDirection == direction.onLeft()) {
+                    nextDirective = Driver.Directive.TURN_LEFT;
+                } else {
+                    System.out.printf("Vehicle %d at (%d, %d) had a problem turning.\n", vehicle.idNum, location.x, location.y);
+                    nextDirective = Driver.Directive.STOP;
+                }
+            } else {
+                nextDirective = Driver.Directive.MOVE_FORWARD;
+            }
         } else {
             nextDirective = Driver.Directive.STOP;
         }

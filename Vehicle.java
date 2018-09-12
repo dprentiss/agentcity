@@ -142,7 +142,11 @@ public class Vehicle implements Steppable, Driveable {
             case TURN_RIGHT:
                 if (speed == 0) {
                     setDirection(direction.onRight());
-                    setSpeed(1);
+                } else {
+                    Int2D nextLocation = new Int2D(location.x + direction.getXOffset(),
+                            location.y + direction.getYOffset());
+                    setLocation(ac, nextLocation);
+                    setSpeed(0);
                 }
                 break;
             case TURN_LEFT:
