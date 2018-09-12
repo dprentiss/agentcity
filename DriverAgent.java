@@ -19,11 +19,17 @@ public class DriverAgent implements Steppable, Driver {
 
     // Properties
     public final int idNum;
+    public Intersection nextIntersection;
+    public Int2D nextLeg;
+    public Int2D nextTurnCell;
+    public Direction nextDirection;
 
     // Variables
-    private Vehicle vehicle = null;
-    private Driver.Directive nextDirective = Driver.Directive.NONE;
-    private Int2D destination = null;
+    public Vehicle vehicle = null;
+    public Driver.Directive nextDirective = Driver.Directive.NONE;
+    public Int2D destination = null;
+    public boolean nearTurnCell = false;
+    public boolean atNextLeg = false;
 
     // Accessors
     public Vehicle getVehicle() { return vehicle; }
@@ -259,6 +265,7 @@ public class DriverAgent implements Steppable, Driver {
                 + Math.abs(legDir.getYOffset()) * loc.x;
             cellY = Math.abs(locDir.getYOffset()) * leg.y
                 + Math.abs(legDir.getXOffset()) * loc.y;
+            nextLeg = new Int2D(cellX, cellY);
         } else {
             cellX = Math.abs(locDir.getXOffset()) * leg.x 
                 + Math.abs(legDir.getXOffset()) * loc.x;
@@ -276,8 +283,7 @@ public class DriverAgent implements Steppable, Driver {
         return new Int2D(cellX, cellY);
     }
 
-    public void step(final SimState state)
-    {
+    public void step(final SimState state) {
         // World state
         AgentCity ac = (AgentCity)state;
         // Current Vehicle position and velocity; 
@@ -285,53 +291,37 @@ public class DriverAgent implements Steppable, Driver {
         Direction direction = vehicle.getDirection();
         int speed = vehicle.getSpeed();
 
-        /*
-        // if at destination get a destination from Client
-        // random road location for testing
-        if (location == destination || destination == null) {
-            destination = new Int2D(ac.random.nextInt(ac.gridWidth),
-                    ac.random.nextInt(ac.gridHeight));
-            while (ac.roadGrid.get(destination.x, destination.y) == 0
-                    || ac.roadGrid.get(destination.x, destination.y) == 9) {
-                destination = new Int2D(ac.random.nextInt(ac.gridWidth),
-                        ac.random.nextInt(ac.gridHeight));
-            }
-        // Get intersection before destination
-        Intersection tmp = getLastIntersection(ac, destination);
-        //System.out.printf("Vehicle %d is headed to intersection %d.\n", vehicle.idNum, tmp);
+        if (atNextLeg || nextIntersection == null) {
+            nextIntersection = getIntersectionAhead(ac, location);
+            nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+            nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
         }
-        */
-        
-        Intersection nextIntersection = getIntersectionAhead(ac, location);
-        // Get random turn Direction for next intersection
-        Int2D nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
-        Int2D nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
-        Direction nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
-        /*
-        System.out.println(vehicle.idNum);
-        System.out.println(vehicle.getLocation(ac));
-        System.out.println(nextIntersection.idNum);
-        System.out.println(nextWaypoint);
-        System.out.println(Direction.byInt(ac.roadGrid.get(nextWaypoint.x, nextWaypoint.y)));
-        */
-
-        boolean nearTurnCell = location.x + direction.getXOffset() == nextTurnCell.x
-            && location.y + direction.getYOffset() == nextTurnCell.y;
-        // check next step for hazards and set nextDirective
-        if (pathAheadClear(ac, location, direction, speed)) {
-            if (nearTurnCell) {
-                if (nextDirection == direction.onRight()) {
-                    nextDirective = Driver.Directive.TURN_RIGHT;
-                } else if (nextDirection == direction.onLeft()) {
-                    nextDirective = Driver.Directive.TURN_LEFT;
-                } else {
-                    System.out.printf("Vehicle %d at (%d, %d) had a problem turning.\n", vehicle.idNum, location.x, location.y);
-                    nextDirective = Driver.Directive.STOP;
-                }
-            } else {
+        nearTurnCell = location.x + speed * direction.getXOffset() == nextTurnCell.x
+            && location.y + speed * direction.getYOffset() == nextTurnCell.y;
+        atNextLeg = location.x == nextLeg.x && location.y == nextLeg.y;
+        if (nearTurnCell) {
+            nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+            if (nextDirection == direction.onRight()) {
+                nextDirective = Driver.Directive.TURN_RIGHT;
+                //System.out.printf("Vehicle %d at (%d, %d) Should turn right.\n", vehicle.idNum, location.x, location.y);
+            } else if (nextDirection == direction.onLeft()) {
+                nextDirective = Driver.Directive.TURN_LEFT;
+                //System.out.printf("Vehicle %d at (%d, %d) Should turn left.\n", vehicle.idNum, location.x, location.y);
+            } else if (nextDirection == direction) {
                 nextDirective = Driver.Directive.MOVE_FORWARD;
+                //System.out.printf("Vehicle %d at (%d, %d) Should move forward.\n", vehicle.idNum, location.x, location.y);
+            } else {
+                System.out.printf("Vehicle %d at (%d, %d) had a problem turning.\n", vehicle.idNum, location.x, location.y);
+                System.out.println(nextIntersection.idNum);
+                System.out.println(nextLeg);
+                System.out.println(nextDirection);
+                nextDirective = Driver.Directive.STOP;
             }
         } else {
+            nextDirective = Driver.Directive.MOVE_FORWARD;
+        }
+        if (!pathAheadClear(ac, location, direction, speed) &&
+                nextDirective == Driver.Directive.MOVE_FORWARD) {
             nextDirective = Driver.Directive.STOP;
         }
     }
