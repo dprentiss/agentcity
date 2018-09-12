@@ -250,8 +250,28 @@ public class DriverAgent implements Steppable, Driver {
         return departureLegs[ac.random.nextInt(departureLegs.length)];
     }
 
-    Int2D setTurnCell() {
-        return new Int2D(0,0);
+    Int2D setTurnCell(AgentCity ac, Int2D leg, Int2D loc, Direction locDir) {
+        int cellX;
+        int cellY;
+        Direction legDir = Direction.byInt(ac.roadGrid.field[leg.x][leg.y]);
+        if (legDir == locDir) {
+            cellX = Math.abs(locDir.getXOffset()) * leg.x 
+                + Math.abs(legDir.getYOffset()) * loc.x;
+            cellY = Math.abs(locDir.getYOffset()) * leg.y
+                + Math.abs(legDir.getXOffset()) * loc.y;
+        } else {
+            cellX = Math.abs(locDir.getXOffset()) * leg.x 
+                + Math.abs(legDir.getXOffset()) * loc.x;
+            cellY = Math.abs(locDir.getYOffset()) * leg.y
+                + Math.abs(legDir.getYOffset()) * loc.y;
+        }
+        System.out.println();
+        System.out.println(leg);
+        System.out.println(legDir);
+        System.out.println(loc);
+        System.out.println(locDir);
+        System.out.println(new Int2D(cellX, cellY));
+        return new Int2D(cellX, cellY);
     }
 
     public void step(final SimState state)
@@ -282,7 +302,8 @@ public class DriverAgent implements Steppable, Driver {
         
         Intersection nextIntersection = getIntersectionAhead(ac, location);
         // Get random turn Direction for next intersection
-        Int2D nextWaypoint = getRandomDepartureLeg(ac, nextIntersection, direction);
+        Int2D nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+        Int2D nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
         /*
         System.out.println(vehicle.idNum);
         System.out.println(vehicle.getLocation(ac));
