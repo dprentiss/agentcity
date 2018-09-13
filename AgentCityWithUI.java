@@ -87,9 +87,10 @@ public class AgentCityWithUI extends GUIState {
     }
 
     public void init(Controller c) {
+        AgentCity ac = (AgentCity)state;
         super.init(c);
 
-        display = new Display2D(400,400,this);
+        display = new Display2D(800, 800, this);
         displayFrame = display.createFrame();
         c.registerFrame(displayFrame);
         displayFrame.setVisible(true);
