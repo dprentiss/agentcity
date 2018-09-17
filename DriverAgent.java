@@ -8,7 +8,7 @@ import sim.engine.*;
 import java.util.Arrays;
 
 /**
- * Generic agent for controlling {@link Vehicles}
+ * Generic agent for controlling {@link Vehicle} objects.
  */
 
 public class DriverAgent implements Steppable, Driver {
