@@ -55,8 +55,6 @@ public class AgentCity extends SimState {
     public IntersectionAgent[] intersectionAgents;
 
     /** Constructor default */
-
-    /** Constructor default */
     public AgentCity(long seed) {
         // Required by SimState
         super(seed);

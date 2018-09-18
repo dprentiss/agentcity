@@ -291,35 +291,44 @@ public class DriverAgent implements Steppable, Driver {
         Direction direction = vehicle.getDirection();
         int speed = vehicle.getSpeed();
 
+        // get a new destination if needed
         if (atNextLeg || nextIntersection == null) {
             nextIntersection = getIntersectionAhead(ac, location);
             nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
             nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
         }
+        // check if Vehicle is one cell before turn
         nearTurnCell = location.x + speed * direction.getXOffset() == nextTurnCell.x
             && location.y + speed * direction.getYOffset() == nextTurnCell.y;
-        atNextLeg = location.x == nextLeg.x && location.y == nextLeg.y;
+        // check if Vehicle is at destination 
+        atNextLeg = location.x == nextLeg.x & location.y == nextLeg.y;
+        // If one cell before turn cell
         if (nearTurnCell) {
+            // ...get direction to turn or go straight then...
             nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
             if (nextDirection == direction.onRight()) {
+                // ...turn right or
                 nextDirective = Driver.Directive.TURN_RIGHT;
-                //System.out.printf("Vehicle %d at (%d, %d) Should turn right.\n", vehicle.idNum, location.x, location.y);
             } else if (nextDirection == direction.onLeft()) {
+                // ...turn left or
                 nextDirective = Driver.Directive.TURN_LEFT;
-                //System.out.printf("Vehicle %d at (%d, %d) Should turn left.\n", vehicle.idNum, location.x, location.y);
             } else if (nextDirection == direction) {
+                // ...go straight or
                 nextDirective = Driver.Directive.MOVE_FORWARD;
-                //System.out.printf("Vehicle %d at (%d, %d) Should move forward.\n", vehicle.idNum, location.x, location.y);
             } else {
+                // ...report there was a problem and stop.
                 System.out.printf("Vehicle %d at (%d, %d) had a problem turning.\n", vehicle.idNum, location.x, location.y);
                 System.out.println(nextIntersection.idNum);
                 System.out.println(nextLeg);
                 System.out.println(nextDirection);
                 nextDirective = Driver.Directive.STOP;
             }
+        // If not one cell before turn cell keep moving forward.
         } else {
             nextDirective = Driver.Directive.MOVE_FORWARD;
         }
+
+        // If the directive is move forward and the way is not clear, stop.
         if (!pathAheadClear(ac, location, direction, speed) &&
                 nextDirective == Driver.Directive.MOVE_FORWARD) {
             nextDirective = Driver.Directive.STOP;
