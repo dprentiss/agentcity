@@ -206,7 +206,7 @@ public class AgentCity extends SimState {
         }
         for (int i = 1; i < numIntersections + 1; i++) {
             intersections[i] = new Intersection(i, minXs[i], maxXs[i], minYs[i], maxYs[i], this);
-            intersectionAgents[i] = new IntersectionAgent(i);
+            intersectionAgents[i] = new IntersectionAgent(i, intersections[i]);
         }
     }
 

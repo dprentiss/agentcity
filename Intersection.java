@@ -17,17 +17,16 @@ public class Intersection implements Steppable {
 
     // Properties
     public final int idNum;
+    public final int minX;
+    public final int maxX;
+    public final int minY;
+    public final int maxY;
 
     // Variables
-    private int minX;
-    private int maxX;
-    private int minY;
-    private int maxY;
     private Int2D[] approachLegs;
     private Int2D[] departureLegs;
 
     // Accessors
-    public int getID() { return idNum; }
     public Int2D[] getDepartureLegs() { return departureLegs; }
     public Int2D[] getApproachLegs() { return approachLegs; }
 
@@ -48,11 +47,6 @@ public class Intersection implements Steppable {
         this.maxX = maxX;
         this.minY = minY;
         this.maxY = maxY;
-    }
-
-    /** Constructor */
-    public Intersection(int id) {
-        this(id, 0, 0, 0, 0);
     }
 
     private void setLegs(AgentCity ac) {
