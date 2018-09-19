@@ -20,8 +20,8 @@ public class IntersectionAgent implements Steppable {
     Stoppable stopper;
 
     // Properties
-    public final int SCHEDULE_SIZE = 32;
     public final int idNum;
+    public int scheduleSize;
     public Intersection intersection;
 
     // Variables
@@ -40,9 +40,14 @@ public class IntersectionAgent implements Steppable {
      * @param intersection the Intersection object to be controlled by this 
      * IntersectionAgent.
      */
-    public void setIntersection(Intersection intesection) {
+    public void setIntersection(Intersection intersection) {
         this.intersection = intersection;
-        setCells();
+        int width = intersection.maxX - intersection.minX + 1;
+        int height = intersection.maxY - intersection.minY + 1;
+        scheduleSize = width + height + 3;
+        cells = new Int2D[width][height];
+        approachLegs = intersection.getApproachLegs();
+        schedule = new int[scheduleSize][width][height];
     }
 
     /** Creates and IntersectionAgent object with the provided ID number and
@@ -56,29 +61,8 @@ public class IntersectionAgent implements Steppable {
         setIntersection(intersection);
     }
 
-    /** Creates and IntersectionAgent object with the provided ID number.
-     * 
-     * @param id the ID number of this IntersectionAgent.
-     * This number should be unique but this is not enforced.
-     */
-    public IntersectionAgent(int id) {
-        this(id, null);
-    }
-
-    // Private methods
-    /** Sets the cells controlled by this IntersectionAgent to the dimensions
-     * of the controlled Intersection object.
-     */
-    private void setCells() {
-        int width = intersection.maxX - intersection.minX + 1;
-        int height = intersection.maxY - intersection.minY + 1;
-        cells = new Int2D[width][height];
-        approachLegs = intersection.getApproachLegs();
-        schedule = new int[SCHEDULE_SIZE][width][height];
-    }
-
     private int[][] getSchedule(int t) {
-        return schedule[t % SCHEDULE_SIZE];
+        return schedule[t % scheduleSize];
     } 
 
     public void step(final SimState state) {
