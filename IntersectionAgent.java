@@ -61,6 +61,14 @@ public class IntersectionAgent implements Steppable {
         setIntersection(intersection);
     }
 
+    /** Considers a request from an approaching Vehicle object and returns
+     * whether or not the the request is approved
+     */
+    public boolean requestReservation(Vehicle veh, int time, Int2D[] path) {
+        // return false always for testing
+        return false;
+    }
+
     private int[][] getSchedule(int t) {
         return schedule[t % scheduleSize];
     } 
