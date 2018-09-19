@@ -48,6 +48,7 @@ public class IntersectionAgent implements Steppable {
         cells = new Int2D[width][height];
         approachLegs = intersection.getApproachLegs();
         schedule = new int[scheduleSize][width][height];
+        intersection.setController(this);
     }
 
     /** Creates and IntersectionAgent object with the provided ID number and
@@ -64,9 +65,9 @@ public class IntersectionAgent implements Steppable {
     /** Considers a request from an approaching Vehicle object and returns
      * whether or not the the request is approved
      */
-    public boolean requestReservation(Vehicle veh, int time, Int2D[] path) {
-        // return false always for testing
-        return false;
+    public int requestReservation(Vehicle vehicle, int time, Int2D[] path) {
+        // return -1 (denied) always for testing
+        return -1;
     }
 
     private int[][] getSchedule(int t) {

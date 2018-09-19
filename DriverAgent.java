@@ -34,6 +34,8 @@ public class DriverAgent implements Steppable, Driver {
     public boolean hasReservation = false;
     public boolean nearTurnCell = false;
     public boolean atNextLeg = false;
+    public int reservationTime = -1;
+    public Int2D[] path;
 
     // Accessors
     public Vehicle getVehicle() { return vehicle; }
@@ -265,20 +267,6 @@ public class DriverAgent implements Steppable, Driver {
         Direction legDir;
         for (int i = 0; i < legs.length; i++) {
             legDir = Direction.byInt(ac.roadGrid.field[legs[i].x][legs[i].y]);
-            /*
-            System.out.println();
-            System.out.println(vehicle.idNum);
-            System.out.println(dir);
-            System.out.println(legDir);
-            System.out.println(loc.x);
-            System.out.println(loc.y);
-            System.out.println(legs[i].x);
-            System.out.println(legs[i].y);
-            System.out.println(dir == legDir);
-            System.out.println(loc.x == legs[i].x);
-            System.out.println(loc.y == legs[i].y);
-            System.out.println(loc.x == legs[i].x || loc.y == legs[i].y);
-            */
             if (dir == legDir && (loc.x == legs[i].x || loc.y == legs[i].y)) {
                 return legs[i];
             }
@@ -313,6 +301,56 @@ public class DriverAgent implements Steppable, Driver {
         return new Int2D(cellX, cellY);
     }
 
+    Int2D[] getPath(AgentCity ac, Int2D loc, Direction dir) {
+        Int2D[] tmpPath = new Int2D[16];
+        Int2D[] returnPath;
+        Int2D tmpCell = new Int2D();
+        int i = 0;
+        // start at current location
+        int cellX = loc.x;
+        int cellY = loc.y;
+        // advance to intersection
+        while (ac.roadGrid.field[cellX][cellY] != 9) {
+            tmpCell = getCellAhead(cellX, cellY, dir, 1);
+            cellX = tmpCell.x;
+            cellY = tmpCell.y;
+        }
+        // advance to turn cell and add cells to path
+        while (cellX != nextTurnCell.x || cellY != nextTurnCell.y) {
+            tmpPath[i] = new Int2D(cellX, cellY);
+            i++;
+            tmpCell = getCellAhead(cellX, cellY, dir, 1);
+            cellX = tmpCell.x;
+            cellY = tmpCell.y;
+        }
+        // advance out of intersection and add cells to path
+        while (ac.roadGrid.field[cellX][cellY] == 9) {
+            tmpPath[i] = new Int2D(cellX, cellY);
+            i++;
+            tmpCell = getCellAhead(cellX, cellY, nextDirection, 1);
+            cellX = tmpCell.x;
+            cellY = tmpCell.y;
+        }
+        returnPath = new Int2D[i-1];
+        for (int j = 0; j < returnPath.length; j++) {
+            returnPath[j] = tmpPath[j];
+        }
+        return returnPath;
+    }
+
+    int getMinReservationTime() {
+        return -1;
+    }
+
+    Int2D getCellAhead(int cellX, int cellY, Direction dir, int offset) {
+        return new Int2D(cellX + offset * dir.getXOffset(),
+               cellY + offset * dir.getYOffset());
+    }
+
+    Int2D getCellAhead(Int2D cell, Direction dir, int offset) {
+        return getCellAhead(cell.x, cell.y, dir, offset);
+    }
+
     public void step(final SimState state) {
         // World state
         AgentCity ac = (AgentCity)state;
@@ -327,6 +365,7 @@ public class DriverAgent implements Steppable, Driver {
             nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
             nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
             nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
+            nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
         }
 
         // check if Vehicle is near enough to an intersection to request a
@@ -354,6 +393,16 @@ public class DriverAgent implements Steppable, Driver {
         // Default state is move forward
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
+        // request a reservation if near intersetion and needed
+        if (speed == 1 && nearIntersection && !hasReservation) {
+            path = getPath(ac, location, direction);
+            reservationTime = nextIntersection.requestReservation(vehicle, 0, null);
+            if (reservationTime >= 0) hasReservation = true;
+        } else if (speed == 0 && location == nextApproachLeg) {
+            reservationTime = nextIntersection.requestReservation(vehicle, 0, null);
+            if (reservationTime >= 0) hasReservation = true;
+        }
+
         // check if Vehicle needs and has a reservation for its next turning movement
         if (nearApproachLeg && !hasReservation) {
             nextDirective = Driver.Directive.STOP;  
@@ -362,7 +411,6 @@ public class DriverAgent implements Steppable, Driver {
         // If one cell before turn cell
         if (nearTurnCell) {
             // ...get direction to turn or go straight then...
-            nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
             if (nextDirection == direction.onRight()) {
                 // ...turn right or
                 nextDirective = Driver.Directive.TURN_RIGHT;

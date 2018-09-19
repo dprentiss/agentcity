@@ -23,12 +23,19 @@ public class Intersection implements Steppable {
     public final int maxY;
 
     // Variables
+    private IntersectionAgent controller;
     private Int2D[] approachLegs;
     private Int2D[] departureLegs;
 
     // Accessors
     public Int2D[] getDepartureLegs() { return departureLegs; }
     public Int2D[] getApproachLegs() { return approachLegs; }
+    public void setController(IntersectionAgent controller) {
+        this.controller = controller;
+    }
+    public int requestReservation(Vehicle vehicle, int time, Int2D[] path) {
+        return controller.requestReservation(vehicle, time, path);
+    }
 
     /** Constructor */
     public Intersection(int id, int minX, int maxX, int minY, int maxY, AgentCity ac) {
