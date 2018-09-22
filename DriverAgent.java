@@ -331,6 +331,11 @@ public class DriverAgent implements Steppable, Driver {
             cellX = tmpCell.x;
             cellY = tmpCell.y;
         }
+        // add turning time to path if turning
+        if (dir != nextDirection) {
+            tmpPath[i] = new Int2D(cellX, cellY);
+            i++;
+        }
         // advance out of intersection and add cells to path
         while (ac.roadGrid.field[cellX][cellY] == 9) {
             //System.out.println("advance out of intersection");
@@ -428,13 +433,20 @@ public class DriverAgent implements Steppable, Driver {
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
         // request a reservation if near intersetion and needed
-
         if (speed == 1 && nearIntersection && !hasReservation) {
+            /*
             path = getPath(ac, location, direction);
-            reservationTime = nextIntersection.requestReservation(vehicle, 0, null);
+            reservationTime = nextIntersection.requestReservation(
+                    vehicle, ac.schedule.getSteps() + 2,
+                    getPath(ac, location, direction));
             if (reservationTime >= 0) hasReservation = true;
-        } else if (speed == 0 && location == nextApproachLeg) {
-            reservationTime = nextIntersection.requestReservation(vehicle, 0, null);
+            */
+        } else if (speed == 0 && atApproachLeg) {
+            System.out.println();
+            System.out.println();
+            reservationTime = nextIntersection.requestReservation(
+                    vehicle, ac.schedule.getSteps() + 2,
+                    getPath(ac, location, direction));
             if (reservationTime >= 0) hasReservation = true;
         }
 

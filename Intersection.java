@@ -7,7 +7,7 @@ import sim.util.*;
 import sim.engine.*;
 import java.util.Arrays;
 
-public class Intersection implements Steppable {
+public class Intersection {
 
     // Required for serialization
     private static final long serialVersionUID = 1;
@@ -33,7 +33,7 @@ public class Intersection implements Steppable {
     public void setController(IntersectionAgent controller) {
         this.controller = controller;
     }
-    public int requestReservation(Vehicle vehicle, int time, Int2D[] path) {
+    public int requestReservation(Vehicle vehicle, long time, Int2D[] path) {
         return controller.requestReservation(vehicle, time, path);
     }
 
@@ -175,8 +175,10 @@ public class Intersection implements Steppable {
         return legs;
     }
 
+/*
     public void step(final SimState state) {
         // World state
         AgentCity ac = (AgentCity)state;
     }
+*/
 }

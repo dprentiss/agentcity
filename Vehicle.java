@@ -98,6 +98,10 @@ public class Vehicle implements Steppable, Driveable {
      */
     public Int2D getLocation(AgentCity ac) { return ac.agentGrid.getObjectLocation(this); }
 
+    /** Gets the last known grid location of this Vehicle.*/
+    public Int2D getLocation() { return location; }
+
+
     /** Gets the current direction of this Vehicle. */
     public Direction getDirection() { return direction; }
 
