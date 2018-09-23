@@ -78,13 +78,16 @@ public class IntersectionAgent implements Steppable {
     /** Considers a request from an approaching Vehicle object and returns
      * whether or not the the request is approved
      */
-    public int requestReservation(Vehicle vehicle, long time, Int2D[] path) {
+    public boolean requestReservation(Vehicle vehicle, long time, Int2D[] path) {
         boolean vehicleAdded;
         // check path against schedule
         vehicleAdded = addVehicleToSchedule(vehicle, time, path);
-        System.out.print(toString(SCHEDULE));
-        // return -1 (denied) always for testing TODO
-        return -1;
+        // System.out.print(toString(SCHEDULE));
+        if (vehicleAdded) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public String toString(int option) {
@@ -93,7 +96,7 @@ public class IntersectionAgent implements Steppable {
         switch (option) {
             case SCHEDULE:
                 for (int i = 0; i < height; i++) {
-                    for (int j = 0; j < 7; j++) {
+                    for (int j = 0; j < scheduleSize; j++) {
                         for (int k = 0; k < width; k++) {
                             s += String.format("%4d", schedule[j][k][i]);
                         }
@@ -117,12 +120,22 @@ public class IntersectionAgent implements Steppable {
         System.out.println(vehicle.idNum);
         System.out.println(vehicle.getLocation());
         System.out.println(time);
-        System.out.println(scheduleSize);
         System.out.println(time % scheduleSize);
+        // check if Vehicles path is free
         for (int i = 0; i < path.length; i++) {
-            timeIndex = (int)(i % scheduleSize);
-            pathX = path[i].x % width;
-            pathY = path[i].y % height;
+            timeIndex = (int)((time + i) % scheduleSize);
+            pathX = path[i].x - intersection.minX;
+            pathY = path[i].y - intersection.minY;
+            if (schedule[timeIndex][pathX][pathY] != -1) {
+                return false;
+            }
+        }
+        // place vehicle on schedule
+        for (int i = 0; i < path.length; i++) {
+            timeIndex = (int)((time + i) % scheduleSize);
+            pathX = path[i].x - intersection.minX;
+            pathY = path[i].y - intersection.minY;
+            /*
             System.out.println();
             System.out.println(schedule.length);
             System.out.println((int)(time % scheduleSize));
@@ -130,15 +143,25 @@ public class IntersectionAgent implements Steppable {
             System.out.println(pathX);
             System.out.println(schedule[1].length);
             System.out.println(pathY);
-            if (schedule[timeIndex][pathX][pathY] == -1) {
-                schedule[timeIndex][pathX][pathY] = vehicle.idNum;
-            }
+            */
+            schedule[timeIndex][pathX][pathY] = vehicle.idNum;
         }
-        return false;
+        return true;
     }
 
     public void step(final SimState state) {
         // World state
         AgentCity ac = (AgentCity)state;
+        for (int j = 0; j < width; j++) {
+            for (int k = 0; k < height; k++) {
+                //schedule[(int)(ac.schedule.getSteps() % scheduleSize)][j][k] = -1;
+            }
+        }
+        if (intersection.idNum == 5) {
+            System.out.println();
+            System.out.println(ac.schedule.getSteps());
+            System.out.println(ac.schedule.getSteps() % scheduleSize);
+            System.out.print(toString(SCHEDULE));
+        }
     }
 }

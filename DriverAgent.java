@@ -210,10 +210,6 @@ public class DriverAgent implements Steppable, Driver {
                 break;
         }
         return true;
-        //System.out.printf("Vehicle %d stopped because Vehicle %d is in the way.\n",
-        //vehicle.idNum, V.idNum);
-        //System.out.printf("Vehicle %d stopped because %d, %d is out of bounds.\n",
-        //vehicle.idNum, x, y);
     }
 
     /*
@@ -251,15 +247,7 @@ public class DriverAgent implements Steppable, Driver {
     }
 
     Int2D getRandomDepartureLeg(AgentCity ac, Intersection in, Direction dir) {
-        /*
-        System.out.println();
-        System.out.println(vehicle.idNum);
-        System.out.println(vehicle.getLocation(ac));
-        System.out.println(in.idNum);
-        System.out.println(Arrays.toString(in.getDepartureLegs()));
-        */
         Int2D[] departureLegs = in.getDepartureLegs(ac, dir);
-        //System.out.println(Arrays.toString(departureLegs));
         return departureLegs[ac.random.nextInt(departureLegs.length)];
     }
 
@@ -291,14 +279,6 @@ public class DriverAgent implements Steppable, Driver {
             cellY = Math.abs(locDir.getYOffset()) * leg.y
                 + Math.abs(legDir.getYOffset()) * loc.y;
         }
-        /*
-        System.out.println();
-        System.out.println(leg);
-        System.out.println(legDir);
-        System.out.println(loc);
-        System.out.println(locDir);
-        System.out.println(new Int2D(cellX, cellY));
-        */
         return new Int2D(cellX, cellY);
     }
 
@@ -306,26 +286,19 @@ public class DriverAgent implements Steppable, Driver {
         Int2D[] tmpPath = new Int2D[16];
         Int2D[] returnPath;
         Int2D tmpCell = new Int2D();
-        //System.out.println();
-        //System.out.println(vehicle.idNum);
         int i = 0;
         // start at current location
         int cellX = loc.x;
         int cellY = loc.y;
         // advance to intersection
         while (ac.roadGrid.field[cellX][cellY] != 9) {
-            //System.out.println("advance to intersection");
-            //System.out.println(tmpCell);
             tmpCell = getCellAhead(cellX, cellY, dir, 1);
             cellX = tmpCell.x;
             cellY = tmpCell.y;
-            //System.out.println(tmpCell);
         }
         // advance to turn cell and add cells to path
         while (cellX != nextTurnCell.x || cellY != nextTurnCell.y) {
-            //System.out.println("advance to turn cell");
             tmpPath[i] = new Int2D(cellX, cellY);
-            //System.out.print(Arrays.toString(tmpPath));
             i++;
             tmpCell = getCellAhead(cellX, cellY, dir, 1);
             cellX = tmpCell.x;
@@ -338,7 +311,6 @@ public class DriverAgent implements Steppable, Driver {
         }
         // advance out of intersection and add cells to path
         while (ac.roadGrid.field[cellX][cellY] == 9) {
-            //System.out.println("advance out of intersection");
             tmpPath[i] = new Int2D(cellX, cellY);
             i++;
             tmpCell = getCellAhead(cellX, cellY, nextDirection, 1);
@@ -349,8 +321,6 @@ public class DriverAgent implements Steppable, Driver {
         for (int j = 0; j < returnPath.length; j++) {
             returnPath[j] = tmpPath[j];
         }
-        //System.out.println("return path");
-        //System.out.println(Arrays.toString(returnPath));
         return returnPath;
     }
 
@@ -380,14 +350,9 @@ public class DriverAgent implements Steppable, Driver {
             nextIntersection = getIntersectionAhead(ac, location);
             nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
             nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
-            /*
-            System.out.println();
-            System.out.println(vehicle.idNum);
-            System.out.println(location);
-            System.out.println(nextApproachLeg);
-            */
             nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
             nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+            hasReservation = false;
         }
 
         // check if Vehicle is near enough to an intersection to request a
@@ -416,19 +381,6 @@ public class DriverAgent implements Steppable, Driver {
         // check if Vehicle is at destination 
         atNextLeg = location.x == nextLeg.x & location.y == nextLeg.y;
 
-        /*
-        if (atApproachLeg) {
-            System.out.println();
-            System.out.println(vehicle.idNum);
-            System.out.println(location);
-            System.out.println(nextApproachLeg);
-            System.out.println(nearIntersection);
-            System.out.println(nearApproachLeg);
-            System.out.println(atApproachLeg);
-            System.out.println(nearTurnCell);
-        }
-        */
-
         // Default state is move forward
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
@@ -436,22 +388,18 @@ public class DriverAgent implements Steppable, Driver {
         if (speed == 1 && nearIntersection && !hasReservation) {
             /*
             path = getPath(ac, location, direction);
-            reservationTime = nextIntersection.requestReservation(
+            hasReservation = nextIntersection.requestReservation(
                     vehicle, ac.schedule.getSteps() + 2,
                     getPath(ac, location, direction));
-            if (reservationTime >= 0) hasReservation = true;
-            */
+                    */
         } else if (speed == 0 && atApproachLeg) {
-            System.out.println();
-            System.out.println();
-            reservationTime = nextIntersection.requestReservation(
-                    vehicle, ac.schedule.getSteps() + 2,
+            path = getPath(ac, location, direction);
+            hasReservation = nextIntersection.requestReservation(
+                    vehicle, ac.schedule.getSteps() + 1,
                     getPath(ac, location, direction));
-            if (reservationTime >= 0) hasReservation = true;
         }
 
         // check if Vehicle needs and has a reservation for its next turning movement
-        if (hasReservation) System.out.println("Who gave this fool a reservation?");
         if (nearApproachLeg && speed > 0 && !hasReservation) {
             nextDirective = Driver.Directive.STOP;  
         }
@@ -483,7 +431,8 @@ public class DriverAgent implements Steppable, Driver {
 
         // If the directive is move forward and the way is not clear, stop.
         if (!pathAheadClear(ac, location, direction, speed) &&
-                nextDirective == Driver.Directive.MOVE_FORWARD) {
+                nextDirective == Driver.Directive.MOVE_FORWARD &&
+                !hasReservation) {
             nextDirective = Driver.Directive.STOP;
         }
     }
