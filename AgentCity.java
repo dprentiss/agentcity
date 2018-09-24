@@ -106,7 +106,7 @@ public class AgentCity extends SimState {
 
 
         n = 4;
-        int vehicleDensity = 16;
+        int vehicleDensity = 256;
 
         final int NUM_VEHICLES = n * n * vehicleDensity;
         gridHeight = n * 38 + 2;
@@ -207,6 +207,7 @@ public class AgentCity extends SimState {
         for (int i = 1; i < numIntersections + 1; i++) {
             intersections[i] = new Intersection(i, minXs[i], maxXs[i], minYs[i], maxYs[i], this);
             intersectionAgents[i] = new IntersectionAgent(i, intersections[i]);
+            intersectionAgents[i].stopper = schedule.scheduleRepeating(intersectionAgents[i], 1, 1);
         }
     }
 

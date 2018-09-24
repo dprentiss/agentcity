@@ -98,6 +98,10 @@ public class Vehicle implements Steppable, Driveable {
      */
     public Int2D getLocation(AgentCity ac) { return ac.agentGrid.getObjectLocation(this); }
 
+    /** Gets the last known grid location of this Vehicle.*/
+    public Int2D getLocation() { return location; }
+
+
     /** Gets the current direction of this Vehicle. */
     public Direction getDirection() { return direction; }
 
@@ -177,9 +181,11 @@ public class Vehicle implements Steppable, Driveable {
             // Set this Vehicle at the new location
             ac.agentGrid.setObjectLocation(this, x, y);
             // Check if there has been a collsion
+            /*
             if (ac.agentGrid.numObjectsAtLocation(x, y) > 1) {
                 System.out.printf("Collision at %d, %d.\n", x, y);
             }
+            */
             // Update this Vehicle's location variable
             location = new Int2D(x, y);
         }
