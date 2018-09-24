@@ -116,11 +116,13 @@ public class IntersectionAgent implements Steppable {
         int pathX;
         int pathY;
         int timeIndex;
+        /*
         System.out.println();
         System.out.println(vehicle.idNum);
         System.out.println(vehicle.getLocation());
         System.out.println(time);
         System.out.println(time % scheduleSize);
+        */
         // check if Vehicles path is free
         for (int i = 0; i < path.length; i++) {
             timeIndex = (int)((time + i) % scheduleSize);
@@ -152,16 +154,19 @@ public class IntersectionAgent implements Steppable {
     public void step(final SimState state) {
         // World state
         AgentCity ac = (AgentCity)state;
+        long steps = ac.schedule.getSteps();
         for (int j = 0; j < width; j++) {
             for (int k = 0; k < height; k++) {
-                //schedule[(int)(ac.schedule.getSteps() % scheduleSize)][j][k] = -1;
+                schedule[(int)((steps) % scheduleSize)][j][k] = -1;
             }
         }
+        /*
         if (intersection.idNum == 5) {
             System.out.println();
             System.out.println(ac.schedule.getSteps());
             System.out.println(ac.schedule.getSteps() % scheduleSize);
             System.out.print(toString(SCHEDULE));
         }
+        */
     }
 }

@@ -252,6 +252,20 @@ public class DriverAgent implements Steppable, Driver {
     }
 
     Int2D getNextApproachLeg(AgentCity ac, Intersection in, Int2D loc, Direction dir) {
+        int cellX = loc.x;
+        int cellY = loc.y;
+        int nextX = cellX + dir.getXOffset();
+        int nextY = cellY + dir.getYOffset();
+        Direction cellDirection = Direction.byInt(ac.roadGrid.field[nextX][nextY]);
+        while (cellDirection != Direction.ALL) {
+            cellX += dir.getXOffset();
+            cellY += dir.getYOffset();
+            nextX = cellX + dir.getXOffset();
+            nextY = cellY + dir.getYOffset();
+            cellDirection = Direction.byInt(ac.roadGrid.field[nextX][nextY]);
+        }
+        return new Int2D(cellX, cellY);
+        /*
         Int2D[] legs = in.getApproachLegs();
         Direction legDir;
         for (int i = 0; i < legs.length; i++) {
@@ -261,6 +275,7 @@ public class DriverAgent implements Steppable, Driver {
             }
         }
         return null;
+        */
     }
 
     Int2D setTurnCell(AgentCity ac, Int2D leg, Int2D loc, Direction locDir) {
@@ -355,6 +370,16 @@ public class DriverAgent implements Steppable, Driver {
             hasReservation = false;
         }
 
+        //if (9 == ac.roadGrid.field[getCellAhead(location, direction, 1).x][getCellAhead(location, direction, 1).y]
+        /*
+        if (nextIntersection.idNum == 5) {
+            System.out.println("***");
+            System.out.println(vehicle.idNum);
+            System.out.println(location);
+            System.out.println(nextApproachLeg);
+        }
+        */
+
         // check if Vehicle is near enough to an intersection to request a
         // reservation
         nearIntersection =
@@ -379,25 +404,24 @@ public class DriverAgent implements Steppable, Driver {
                 && location.y + direction.getYOffset()
                     == nextTurnCell.y;
         // check if Vehicle is at destination 
-        atNextLeg = location.x == nextLeg.x & location.y == nextLeg.y;
+        atNextLeg = location.x == nextLeg.x && location.y == nextLeg.y;
 
         // Default state is move forward
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
         // request a reservation if near intersetion and needed
         if (speed == 1 && nearIntersection && !hasReservation) {
-            /*
             path = getPath(ac, location, direction);
             hasReservation = nextIntersection.requestReservation(
                     vehicle, ac.schedule.getSteps() + 2,
                     getPath(ac, location, direction));
-                    */
         } else if (speed == 0 && atApproachLeg) {
             path = getPath(ac, location, direction);
             hasReservation = nextIntersection.requestReservation(
                     vehicle, ac.schedule.getSteps() + 1,
                     getPath(ac, location, direction));
         }
+
 
         // check if Vehicle needs and has a reservation for its next turning movement
         if (nearApproachLeg && speed > 0 && !hasReservation) {
