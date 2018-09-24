@@ -281,5 +281,8 @@ public class Vehicle implements Steppable, Driveable {
                 setLocation(ac, xOffset, yOffset);
                 break;
         }
+        
+        // update location from state
+        location = ac.agentGrid.getObjectLocation(this);
     }
 }
