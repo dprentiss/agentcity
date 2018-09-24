@@ -427,7 +427,6 @@ public class DriverAgent implements Steppable, Driver {
                     getPath(ac, location, direction));
         }
 
-
         // check if Vehicle needs and has a reservation for its next turning movement
         if (nearApproachLeg && speed > 0 && !hasReservation) {
             nextDirective = Driver.Directive.STOP;  
@@ -459,9 +458,9 @@ public class DriverAgent implements Steppable, Driver {
         }
 
         // If the directive is move forward and the way is not clear, stop.
-        if (!pathAheadClear(ac, location, direction, speed) &&
-                nextDirective == Driver.Directive.MOVE_FORWARD &&
-                !hasReservation) {
+        if (!pathAheadClear(ac, location, direction, speed)
+                && nextDirective == Driver.Directive.MOVE_FORWARD
+                && !hasReservation) {
             nextDirective = Driver.Directive.STOP;
         }
     }

@@ -157,16 +157,14 @@ public class IntersectionAgent implements Steppable {
         long steps = ac.schedule.getSteps();
         for (int j = 0; j < width; j++) {
             for (int k = 0; k < height; k++) {
-                schedule[(int)((steps) % scheduleSize)][j][k] = -1;
+                schedule[(int)((scheduleSize + steps - 1) % scheduleSize)][j][k] = -1;
             }
         }
-        /*
         if (intersection.idNum == 5) {
             System.out.println();
             System.out.println(ac.schedule.getSteps());
             System.out.println(ac.schedule.getSteps() % scheduleSize);
             System.out.print(toString(SCHEDULE));
         }
-        */
     }
 }
