@@ -352,6 +352,11 @@ public class DriverAgent implements Steppable, Driver {
         return getCellAhead(cell.x, cell.y, dir, offset);
     }
 
+    boolean cellAheadEmpty() {
+        Int2D cell;
+        return false;
+    }
+
     public void step(final SimState state) {
         // World state
         AgentCity ac = (AgentCity)state;
@@ -410,7 +415,7 @@ public class DriverAgent implements Steppable, Driver {
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
         // request a reservation if near intersetion and needed
-        if (speed == 1 && nearIntersection && !hasReservation) {
+        if (speed == 1 && nearIntersection && cellAheadEmpty()) {
             path = getPath(ac, location, direction);
             hasReservation = nextIntersection.requestReservation(
                     vehicle, ac.schedule.getSteps() + 2,
