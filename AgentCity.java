@@ -87,12 +87,14 @@ public class AgentCity extends SimState {
                     if (b.numObjs > 1) {
                         System.out.printf("Collision at [%d, %d]\n", v.getLocation().x, v.getLocation().y);
                         System.out.print(v.toString());
+                        System.out.print(v.getDriver().toString());
+                        System.out.println();
                     }
                 }
             }
         };
 
-        schedule.scheduleRepeating(collisionCheck, 4, 1);
+        schedule.scheduleRepeating(collisionCheck, 0, 1);
 
     }
 

@@ -60,8 +60,6 @@ public class Vehicle implements Steppable, Driveable {
                 .append("direction: " + direction)
                 .append(", ")
                 .append("speed: " + speed)
-                .append(", ")
-                .append("driver: " + driver)
                 .append("}\n")
                 .toString();
     }

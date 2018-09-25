@@ -35,13 +35,48 @@ public class DriverAgent implements Steppable, Driver {
     public boolean hasReservation = false;
     public boolean nearTurnCell = false;
     public boolean atNextLeg = false;
-    public int reservationTime = -1;
+    //public int reservationTime = -1;
     public Int2D[] path;
 
     // Accessors
     public Vehicle getVehicle() { return vehicle; }
     public void setVehicle(Vehicle v) { vehicle = v; }
     public Driver.Directive getNextDirective() { return nextDirective; }
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append("DriverAgent: {")
+                .append("idNum: " + idNum)
+                .append(", ")
+                .append("destination: " + destination)
+                .append(", ")
+                .append("nextApproachLeg: " + nextApproachLeg)
+                .append(", ")
+                .append("nextTurnCell: " + nextTurnCell)
+                .append(", ")
+                .append("nextLeg: " + nextLeg)
+                .append(", ")
+                .append("nextDirection: " + nextDirection)
+                .append(", ")
+                .append("nextLeg: " + nextLeg)
+                .append(", ")
+                .append("nextDirective: " + nextDirective)
+                .append(", ")
+                .append("nearIntersection: " + nearIntersection)
+                .append(", ")
+                .append("nearApproachLeg: " + nearApproachLeg)
+                .append(", ")
+                .append("atApproachLeg: " + atApproachLeg)
+                .append(", ")
+                .append("nearTurnCell: " + nearTurnCell)
+                .append(", ")
+                .append("atNextLeg: " + atNextLeg)
+                .append(", ")
+                .append("hasReservation: " + hasReservation)
+                .append("}\n")
+                .toString();
+    }
 
     /** Constructor 
      *
