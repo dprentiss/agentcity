@@ -74,6 +74,28 @@ public class AgentCity extends SimState {
         if(isTest) {
             makeTestGrids();
         }
+
+        Steppable collisionCheck = new Steppable() {
+            public void step(final SimState state) {
+                AgentCity ac = (AgentCity)state;
+                SparseGrid2D grid = ac.agentGrid;
+                Vehicle v;
+                Bag b;
+                for (int i = 0; i < grid.allObjects.numObjs; i++) {
+                    v = (Vehicle)grid.allObjects.objs[i];
+                    b = grid.getObjectsAtLocationOfObject(v);
+                    if (b.numObjs > 1) {
+                        System.out.printf("Collision at [%d, %d]\n", v.getLocation().x, v.getLocation().y);
+                        System.out.print(v.toString());
+                        System.out.print(v.getDriver().toString());
+                        System.out.println();
+                    }
+                }
+            }
+        };
+
+        schedule.scheduleRepeating(collisionCheck, 0, 1);
+
     }
 
     // check the neighbors of each intersection cell for previous labels
@@ -105,7 +127,7 @@ public class AgentCity extends SimState {
     public void makeTestGrids() {
 
 
-        n = 4;
+        n = 1;
         int vehicleDensity = 256;
 
         final int NUM_VEHICLES = n * n * vehicleDensity;
@@ -115,8 +137,8 @@ public class AgentCity extends SimState {
         int numIntersections = 0;
 
         roadGrid = new IntGrid2D(gridWidth, gridHeight, Direction.NONE.toInt());
-        walkwayGrid = new IntGrid2D(gridWidth, gridHeight, 0);
-        parkingGrid = new IntGrid2D(gridWidth, gridHeight, 0);
+        //walkwayGrid = new IntGrid2D(gridWidth, gridHeight, 0);
+        //parkingGrid = new IntGrid2D(gridWidth, gridHeight, 0);
         intersectionGrid = new IntGrid2D(gridWidth, gridHeight, 0);
         blockGrid = new IntGrid2D(gridWidth, gridHeight, 1);
 

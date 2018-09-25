@@ -69,7 +69,7 @@ public class AgentCityWithUI extends GUIState {
             Color newColor = new Color(ac.random.nextInt(255),
                     ac.random.nextInt(255), ac.random.nextInt(255));
             agentPortrayal.setPortrayalForObject(vehicles.objs[i],
-                    new sim.portrayal.simple.RectanglePortrayal2D(newColor));
+                    new sim.portrayal.simple.OvalPortrayal2D(newColor));
         }
 
         display.reset();

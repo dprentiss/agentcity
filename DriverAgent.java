@@ -35,13 +35,48 @@ public class DriverAgent implements Steppable, Driver {
     public boolean hasReservation = false;
     public boolean nearTurnCell = false;
     public boolean atNextLeg = false;
-    public int reservationTime = -1;
+    //public int reservationTime = -1;
     public Int2D[] path;
 
     // Accessors
     public Vehicle getVehicle() { return vehicle; }
     public void setVehicle(Vehicle v) { vehicle = v; }
     public Driver.Directive getNextDirective() { return nextDirective; }
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append("DriverAgent: {")
+                .append("idNum: " + idNum)
+                .append(", ")
+                .append("destination: " + destination)
+                .append(", ")
+                .append("nextApproachLeg: " + nextApproachLeg)
+                .append(", ")
+                .append("nextTurnCell: " + nextTurnCell)
+                .append(", ")
+                .append("nextLeg: " + nextLeg)
+                .append(", ")
+                .append("nextDirection: " + nextDirection)
+                .append(", ")
+                .append("nextLeg: " + nextLeg)
+                .append(", ")
+                .append("nextDirective: " + nextDirective)
+                .append(", ")
+                .append("nearIntersection: " + nearIntersection)
+                .append(", ")
+                .append("nearApproachLeg: " + nearApproachLeg)
+                .append(", ")
+                .append("atApproachLeg: " + atApproachLeg)
+                .append(", ")
+                .append("nearTurnCell: " + nearTurnCell)
+                .append(", ")
+                .append("atNextLeg: " + atNextLeg)
+                .append(", ")
+                .append("hasReservation: " + hasReservation)
+                .append("}\n")
+                .toString();
+    }
 
     /** Constructor 
      *
@@ -352,6 +387,11 @@ public class DriverAgent implements Steppable, Driver {
         return getCellAhead(cell.x, cell.y, dir, offset);
     }
 
+    boolean cellAheadEmpty() {
+        Int2D cell;
+        return false;
+    }
+
     public void step(final SimState state) {
         // World state
         AgentCity ac = (AgentCity)state;
@@ -410,7 +450,7 @@ public class DriverAgent implements Steppable, Driver {
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
         // request a reservation if near intersetion and needed
-        if (speed == 1 && nearIntersection && !hasReservation) {
+        if (speed == 1 && nearIntersection && cellAheadEmpty()) {
             path = getPath(ac, location, direction);
             hasReservation = nextIntersection.requestReservation(
                     vehicle, ac.schedule.getSteps() + 2,
@@ -421,7 +461,6 @@ public class DriverAgent implements Steppable, Driver {
                     vehicle, ac.schedule.getSteps() + 1,
                     getPath(ac, location, direction));
         }
-
 
         // check if Vehicle needs and has a reservation for its next turning movement
         if (nearApproachLeg && speed > 0 && !hasReservation) {
@@ -454,9 +493,9 @@ public class DriverAgent implements Steppable, Driver {
         }
 
         // If the directive is move forward and the way is not clear, stop.
-        if (!pathAheadClear(ac, location, direction, speed) &&
-                nextDirective == Driver.Directive.MOVE_FORWARD &&
-                !hasReservation) {
+        if (!pathAheadClear(ac, location, direction, speed)
+                && nextDirective == Driver.Directive.MOVE_FORWARD
+                && !hasReservation) {
             nextDirective = Driver.Directive.STOP;
         }
     }
