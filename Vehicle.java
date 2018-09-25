@@ -28,7 +28,7 @@ public class Vehicle implements Steppable, Driveable {
      * Length must be one until larger vehicles are supported.
      */
     public final int length;
-    /** The of Passengers that may occupy this Vehicle.*/
+    /** The number of Passengers that may occupy this Vehicle.*/
     public final int passengerCap;
     /** The maximum speed in grid cells per step of this Vehicle.
      * Must be one until faster speeds are supported.
@@ -47,6 +47,24 @@ public class Vehicle implements Steppable, Driveable {
     private int speed;
 
     // Accessors
+    
+    /** Returns a string representation of this Vehicle */
+    @Override
+    public String toString() {
+        return new StringBuilder()
+                .append("Vehicle: {")
+                .append("idNum: " + idNum)
+                .append(", ")
+                .append("location: " + location)
+                .append(", ")
+                .append("direction: " + direction)
+                .append(", ")
+                .append("speed: " + speed)
+                .append(", ")
+                .append("driver: " + driver)
+                .append("}\n")
+                .toString();
+    }
 
     /** Gets the ID number of this Vehicle. */
     public int getIdNum() { return idNum; }
@@ -147,30 +165,6 @@ public class Vehicle implements Steppable, Driveable {
         manifest = new Person[passengerCap];
         direction = dir;
     }
-
-    /* 
-    private void moveStraightOneCell(AgentCity ac) {
-        // Check if Vehicle can move as desired
-        Int2D nextLocation = new Int2D(location.x + direction.getXOffset(),
-                location.y + direction.getYOffset());
-        // Check if cell is in the grid
-        if ((nextLocation.x >= 0) && (nextLocation.x < ac.gridWidth)
-                && (nextLocation.y >= 0) && (nextLocation.y < ac.gridHeight)) {
-            // Check if desired cell is a road, parking, or grid exit cell
-            boolean isRoad = ac.roadGrid.get(nextLocation.x, nextLocation.y) != 0;
-            //// Check for conflict with other vehicles
-            //// Check if Vehicle has pemission to occupy cell
-            // Update location of Vehicle in agentGrid
-            if (isRoad) {
-                setLocation(ac, nextLocation);
-            } else {
-                if (stopper != null) stopper.stop();
-                return;
-            }
-        }
-        // Update location of Driver and Passengers in agentGrid
-    }
-    */
 
     /** Set the location of this Vehicle on the grid in provided state at the
      * provided x and y coordinates.

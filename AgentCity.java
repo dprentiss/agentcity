@@ -86,6 +86,7 @@ public class AgentCity extends SimState {
                     b = grid.getObjectsAtLocationOfObject(v);
                     if (b.numObjs > 1) {
                         System.out.printf("Collision at [%d, %d]\n", v.getLocation().x, v.getLocation().y);
+                        System.out.print(v.toString());
                     }
                 }
             }
