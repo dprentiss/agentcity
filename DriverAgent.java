@@ -99,19 +99,21 @@ public class DriverAgent implements Steppable, Driver {
                 // one cell ahead
                 x = loc.x + dir.getXOffset();
                 y = loc.y + dir.getYOffset();
-                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                if (ac.checkBounds(x,y)) {
                     isRoad = ac.roadGrid.get(x, y) != 0;
-                    Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
+                    Bag b = ac.agentGrid.getObjectsAtLocation(x, y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getSpeed() != 0;
                     }
                     if (!isRoad || !isFree) { return false; }
-                } else { return false; }
+                } else {
+                    return false;
+                }
                 // two cells ahead
                 x = loc.x + 2 * dir.getXOffset();
                 y = loc.y + 2 * dir.getYOffset();
-                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                if (ac.checkBounds(x, y)) {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
@@ -122,12 +124,11 @@ public class DriverAgent implements Steppable, Driver {
                 //  one cell ahead and one cell right
                 x = loc.x + dir.getXOffset() + dir.onRight().getXOffset();
                 y = loc.y + dir.getYOffset() + dir.onRight().getYOffset();
-                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                if (ac.checkBounds(x, y)) {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
-                        isFree = v.getDirection() != dir.onLeft()
-                            /*|| v.getSpeed() == 0*/;
+                        isFree = v.getDirection() != dir.onLeft();
                         hasRightOfWay = v.getSpeed() == 0 
                             && v.idNum < vehicle.idNum;
                         if (!isFree && !hasRightOfWay) {
@@ -138,13 +139,13 @@ public class DriverAgent implements Steppable, Driver {
                 //  one cell ahead and one cell left
                 x = loc.x + dir.getXOffset() + dir.onLeft().getXOffset();
                 y = loc.y + dir.getYOffset() + dir.onLeft().getYOffset();
-                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                if (ac.checkBounds(x, y)) {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
-                        isFree = v.getDirection() != dir.onRight() 
-                            /*|| v.getSpeed() == 0*/;
-                        hasRightOfWay = v.getSpeed() == 0 && v.idNum < vehicle.idNum;
+                        isFree = v.getDirection() != dir.onRight();
+                        hasRightOfWay = v.getSpeed() == 0 
+                            && v.idNum < vehicle.idNum;
                         if (!isFree && !hasRightOfWay) {
                             return false;
                         }
@@ -155,7 +156,7 @@ public class DriverAgent implements Steppable, Driver {
                 // one cell ahead
                 x = loc.x + dir.getXOffset();
                 y = loc.y + dir.getYOffset();
-                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                if (ac.checkBounds(x, y)) {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
@@ -166,7 +167,7 @@ public class DriverAgent implements Steppable, Driver {
                 // two cells ahead
                 x = loc.x + 2 * dir.getXOffset();
                 y = loc.y + 2 * dir.getYOffset();
-                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                if (ac.checkBounds(x, y)) {
                     isRoad = ac.roadGrid.get(x, y) != 0;
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
@@ -174,11 +175,13 @@ public class DriverAgent implements Steppable, Driver {
                         isFree = v.getSpeed() != 0;
                     }
                     if (!isRoad || !isFree) { return false; }
-                } else { return false; }
+                } else {
+                    return false;
+                }
                 // three cells ahead
                 x = loc.x + 3 * dir.getXOffset();
                 y = loc.y + 3 * dir.getYOffset();
-                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                if (ac.checkBounds(x, y)) {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
@@ -189,7 +192,7 @@ public class DriverAgent implements Steppable, Driver {
                 //  two cells ahead and one cell right
                 x = loc.x + 2 * dir.getXOffset() + dir.onRight().getXOffset();
                 y = loc.y + 2 * dir.getYOffset() + dir.onRight().getYOffset();
-                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                if (ac.checkBounds(x, y)) {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
@@ -203,7 +206,7 @@ public class DriverAgent implements Steppable, Driver {
                 //  two cells ahead and one cell left
                 x = loc.x + 2 * dir.getXOffset() + dir.onLeft().getXOffset();
                 y = loc.y + 2 * dir.getYOffset() + dir.onLeft().getYOffset();
-                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                if (ac.checkBounds(x, y)) {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
@@ -217,7 +220,7 @@ public class DriverAgent implements Steppable, Driver {
                 //  two cells ahead and two cells right
                 x = loc.x + 2 * dir.getXOffset() + 2 * dir.onRight().getXOffset();
                 y = loc.y + 2 * dir.getYOffset() + 2 * dir.onRight().getYOffset();
-                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                if (ac.checkBounds(x, y)) {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
@@ -231,7 +234,7 @@ public class DriverAgent implements Steppable, Driver {
                 //  two cells ahead and two cells left
                 x = loc.x + 2 * dir.getXOffset() + 2 * dir.onLeft().getXOffset();
                 y = loc.y + 2 * dir.getYOffset() + 2 * dir.onLeft().getYOffset();
-                if (x >= 0 && x < ac.gridWidth && y >= 0 && y < ac.gridHeight) {
+                if (ac.checkBounds(x, y)) {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
@@ -247,20 +250,6 @@ public class DriverAgent implements Steppable, Driver {
         return true;
     }
 
-    /*
-    Intersection getLastIntersection(AgentCity ac, Int2D dest) {
-        int cellX = dest.x;
-        int cellY = dest.y;
-        Direction cellDirection = Direction.byInt(ac.roadGrid.get(cellX, cellY));
-        while (cellDirection != Direction.ALL) {
-            cellX += cellDirection.opposite().getXOffset();
-            cellY += cellDirection.opposite().getYOffset();
-            cellDirection = Direction.byInt(ac.roadGrid.get(cellX, cellY));
-        }
-        return ac.intersections[ac.intersectionGrid.get(cellX, cellY) - 1];
-    }
-    */
-    
     /**
      * Gets the intersection ahead of the {@link Vehicle}.
      *
@@ -399,6 +388,7 @@ public class DriverAgent implements Steppable, Driver {
         Int2D location = vehicle.getLocation(ac);
         Direction direction = vehicle.getDirection();
         int speed = vehicle.getSpeed();
+        hasReservation = vehicle.hasReservation;
 
         // get a new destination if needed
         if (atNextLeg || nextIntersection == null) {
@@ -407,6 +397,7 @@ public class DriverAgent implements Steppable, Driver {
             nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
             nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
             nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+            vehicle.hasReservation = false;
             hasReservation = false;
         }
 
@@ -455,11 +446,13 @@ public class DriverAgent implements Steppable, Driver {
             hasReservation = nextIntersection.requestReservation(
                     vehicle, ac.schedule.getSteps() + 2,
                     getPath(ac, location, direction));
+            vehicle.hasReservation = hasReservation;
         } else if (speed == 0 && atApproachLeg) {
             path = getPath(ac, location, direction);
             hasReservation = nextIntersection.requestReservation(
                     vehicle, ac.schedule.getSteps() + 1,
                     getPath(ac, location, direction));
+            vehicle.hasReservation = hasReservation;
         }
 
         // check if Vehicle needs and has a reservation for its next turning movement
@@ -494,8 +487,7 @@ public class DriverAgent implements Steppable, Driver {
 
         // If the directive is move forward and the way is not clear, stop.
         if (!pathAheadClear(ac, location, direction, speed)
-                && nextDirective == Driver.Directive.MOVE_FORWARD
-                && !hasReservation) {
+                && nextDirective == Driver.Directive.MOVE_FORWARD) {
             nextDirective = Driver.Directive.STOP;
         }
     }
