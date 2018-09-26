@@ -94,7 +94,7 @@ public class AgentCity extends SimState {
             }
         };
 
-        schedule.scheduleRepeating(collisionCheck, 0, 1);
+        schedule.scheduleRepeating(collisionCheck, 2, 1);
 
     }
 
@@ -229,7 +229,7 @@ public class AgentCity extends SimState {
         for (int i = 1; i < numIntersections + 1; i++) {
             intersections[i] = new Intersection(i, minXs[i], maxXs[i], minYs[i], maxYs[i], this);
             intersectionAgents[i] = new IntersectionAgent(i, intersections[i]);
-            intersectionAgents[i].stopper = schedule.scheduleRepeating(intersectionAgents[i], 1, 1);
+            intersectionAgents[i].stopper = schedule.scheduleRepeating(intersectionAgents[i], 0, 1);
         }
     }
 
