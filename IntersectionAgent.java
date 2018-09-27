@@ -5,6 +5,7 @@
 package sim.app.agentcity;
 import sim.util.*;
 import sim.engine.*;
+import java.util.Arrays;
 
 /** IntersectionAgent objects control traffic for a specific, contiguous
  * Intersection in the grid.
@@ -35,6 +36,7 @@ public class IntersectionAgent implements Steppable {
     private Int2D[] approachLegs;
     private int[][][] schedule;
     private Bag vehicles;
+    private boolean acceptingReservations;
 
     // Accessors
 
@@ -51,7 +53,7 @@ public class IntersectionAgent implements Steppable {
         this.intersection = intersection;
         this.width = intersection.maxX - intersection.minX + 1;
         this.height = intersection.maxY - intersection.minY + 1;
-        scheduleSize = width + height + 2;
+        scheduleSize = width + height + 4;
         vehicles = new Bag((width + 2) * (height + 2));
         approachLegs = intersection.getApproachLegs();
         schedule = new int[scheduleSize][width][height];
@@ -81,14 +83,8 @@ public class IntersectionAgent implements Steppable {
      * whether or not the the request is approved
      */
     public boolean requestReservation(Vehicle vehicle, long time, Int2D[] path) {
-        boolean vehicleAdded;
         // check path against schedule
-        vehicleAdded = addVehicleToSchedule(vehicle, time, path);
-        if (vehicleAdded) {
-            return true;
-        } else {
-            return false;
-        }
+        return addVehicleToSchedule(vehicle, time, path);
     }
 
     public String toString(int option) {
@@ -118,11 +114,18 @@ public class IntersectionAgent implements Steppable {
         int y;
         int timeIndex;
         // check if Vehicles path is free
+        if (!acceptingReservations && !vehicles.contains(vehicle)) return false;
         for (int i = 0; i < path.length; i++) {
             timeIndex = (int)((time + i) % scheduleSize);
             x = path[i].x - intersection.minX;
             y = path[i].y - intersection.minY;
             if (schedule[timeIndex][x][y] != -1) {
+        if (intersection.idNum == 5) {
+            System.out.print(vehicle.getDriver().toString());
+            System.out.print(Arrays.toString(path));
+            System.out.print(this.toString(SCHEDULE));
+            System.out.print("\n");
+        }
                 return false;
             }
         }
@@ -152,15 +155,35 @@ public class IntersectionAgent implements Steppable {
                 vehicle = (Vehicle)bag.objs[0];
                 if (schedule[(int)(steps % scheduleSize)][i][j] 
                         != vehicle.idNum) {
+                    acceptingReservations = false;
                     return false;
                 }
             }
         }
+        acceptingReservations = true;
         return true;
     }
 
     private void checkSchedule(AgentCity ac) {
+        int x;
+        int y;
+        Vehicle vehicle;
+        Bag bag;
+        long steps = ac.schedule.getSteps();
+        // If schedule is wrong revoke all reservations and clear schedule
         if (!scheduleValid(ac)) clearSchedule();
+        // Add Vehicles already in the intersection to schedule and bag
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                x = cells[i][j].x;
+                y = cells[i][j].y;
+                bag = ac.agentGrid.getObjectsAtLocation(x, y);  
+                if (bag == null) continue;
+                vehicle = (Vehicle)bag.objs[0];
+                schedule[(int)(steps % scheduleSize)][i][j] = vehicle.idNum;
+                vehicles.add(vehicle);
+            }
+        }
     }
 
     private void clearSchedule() {
@@ -192,6 +215,7 @@ public class IntersectionAgent implements Steppable {
         checkSchedule(ac);
         if (intersection.idNum == 5) {
             System.out.println();
+            System.out.printf("Step %d, schedule %d/%d\n", ac.schedule.getSteps(), ac.schedule.getSteps() % scheduleSize, scheduleSize);
             System.out.print(toString(SCHEDULE));
         }
     }
