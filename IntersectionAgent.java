@@ -120,12 +120,6 @@ public class IntersectionAgent implements Steppable {
             x = path[i].x - intersection.minX;
             y = path[i].y - intersection.minY;
             if (schedule[timeIndex][x][y] != -1) {
-        if (intersection.idNum == 5) {
-            System.out.print(vehicle.getDriver().toString());
-            System.out.print(Arrays.toString(path));
-            System.out.print(this.toString(SCHEDULE));
-            System.out.print("\n");
-        }
                 return false;
             }
         }
@@ -135,14 +129,15 @@ public class IntersectionAgent implements Steppable {
             x = path[i].x - intersection.minX;
             y = path[i].y - intersection.minY;
             schedule[timeIndex][x][y] = vehicle.idNum;
-            vehicles.add(vehicle);
         }
+        vehicles.add(vehicle);
         return true;
     }
 
     private boolean scheduleValid(AgentCity ac) {
         int x;
         int y;
+        int vehicleNum;
         Vehicle vehicle;
         Bag bag;
         long steps = ac.schedule.getSteps();
@@ -150,14 +145,18 @@ public class IntersectionAgent implements Steppable {
             for (int j = 0; j < height; j++) {
                 x = cells[i][j].x;
                 y = cells[i][j].y;
+                vehicleNum = schedule[(int)(steps % scheduleSize)][i][j];
                 bag = ac.agentGrid.getObjectsAtLocation(x, y);  
-                if (bag == null) continue;
-                vehicle = (Vehicle)bag.objs[0];
-                if (schedule[(int)(steps % scheduleSize)][i][j] 
-                        != vehicle.idNum) {
+                if (bag != null) {
+                    vehicle = (Vehicle)bag.objs[0];
+                    if (vehicleNum != vehicle.idNum) {
+                        acceptingReservations = false;
+                        return false;
+                    }
+                } else if (vehicleNum != -1) {
                     acceptingReservations = false;
                     return false;
-                }
+                } 
             }
         }
         acceptingReservations = true;
@@ -171,17 +170,19 @@ public class IntersectionAgent implements Steppable {
         Bag bag;
         long steps = ac.schedule.getSteps();
         // If schedule is wrong revoke all reservations and clear schedule
-        if (!scheduleValid(ac)) clearSchedule();
-        // Add Vehicles already in the intersection to schedule and bag
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                x = cells[i][j].x;
-                y = cells[i][j].y;
-                bag = ac.agentGrid.getObjectsAtLocation(x, y);  
-                if (bag == null) continue;
-                vehicle = (Vehicle)bag.objs[0];
-                schedule[(int)(steps % scheduleSize)][i][j] = vehicle.idNum;
-                vehicles.add(vehicle);
+        if (!scheduleValid(ac)) {
+            clearSchedule();
+            // Add Vehicles already in the intersection to schedule and bag
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    x = cells[i][j].x;
+                    y = cells[i][j].y;
+                    bag = ac.agentGrid.getObjectsAtLocation(x, y);  
+                    if (bag == null) continue;
+                    vehicle = (Vehicle)bag.objs[0];
+                    schedule[(int)(steps % scheduleSize)][i][j] = vehicle.idNum;
+                    vehicles.add(vehicle);
+                }
             }
         }
     }

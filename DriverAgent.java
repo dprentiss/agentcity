@@ -132,8 +132,8 @@ public class DriverAgent implements Steppable, Driver {
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.onLeft();
-                        hasRightOfWay = v.getSpeed() == 0 
-                            && v.idNum < vehicle.idNum;
+                        hasRightOfWay = v.getSpeed() == 0
+                            && (v.idNum < vehicle.idNum || hasReservation);
                         if (!isFree && !hasRightOfWay) {
                             return false;
                         }
@@ -147,8 +147,8 @@ public class DriverAgent implements Steppable, Driver {
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.onRight();
-                        hasRightOfWay = v.getSpeed() == 0 
-                            && v.idNum < vehicle.idNum;
+                        hasRightOfWay = v.getSpeed() == 0
+                            && (v.idNum < vehicle.idNum || hasReservation);
                         if (!isFree && !hasRightOfWay) {
                             return false;
                         }
@@ -199,9 +199,9 @@ public class DriverAgent implements Steppable, Driver {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
-                        isFree = v.getDirection() != dir.onLeft()
-                            /*|| v.getSpeed() == 0*/;
-                        if (!isFree) {
+                        isFree = v.getDirection() != dir.onLeft();
+                        hasRightOfWay = hasReservation;
+                        if (!isFree && !hasRightOfWay) {
                             return false;
                         }
                     }
@@ -213,9 +213,9 @@ public class DriverAgent implements Steppable, Driver {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
-                        isFree = v.getDirection() != dir.onRight() 
-                            /*|| v.getSpeed() == 0*/;
-                        if (!isFree) {
+                        isFree = v.getDirection() != dir.onRight();
+                        hasRightOfWay = hasReservation;
+                        if (!isFree && !hasRightOfWay) {
                             return false;
                         }
                     }
@@ -229,7 +229,8 @@ public class DriverAgent implements Steppable, Driver {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.onLeft()
                             || v.getSpeed() == 0;
-                        if (!isFree) {
+                        hasRightOfWay = hasReservation;
+                        if (!isFree && !hasReservation) {
                             return false;
                         }
                     }
@@ -409,7 +410,7 @@ public class DriverAgent implements Steppable, Driver {
         Int2D location = vehicle.getLocation(ac);
         Direction direction = vehicle.getDirection();
         int speed = vehicle.getSpeed();
-        hasReservation = vehicle.hasReservation;
+        //hasReservation = vehicle.hasReservation;
 
         // get a new destination if needed
         if (nextIntersection == null) {
@@ -482,11 +483,13 @@ public class DriverAgent implements Steppable, Driver {
                     getUpdatedPath(location));
             vehicle.hasReservation = hasReservation;
         } else if (speed == 1 && nearIntersection) {
+            /*
             path = getPath(ac, location, direction);
             hasReservation = nextIntersection.requestReservation(
                     vehicle, ac.schedule.getSteps() + 3,
                     getPath(ac, location, direction));
             vehicle.hasReservation = hasReservation;
+            */
         } else if (speed == 0 && atApproachLeg) {
             path = getPath(ac, location, direction);
             hasReservation = nextIntersection.requestReservation(
