@@ -76,6 +76,8 @@ public class DriverAgent implements Steppable, Driver {
                 .append(", ")
                 .append("nearTurnCell: " + nearTurnCell)
                 .append(", ")
+                .append("nearNextLeg: " + nearNextLeg)
+                .append(", ")
                 .append("atNextLeg: " + atNextLeg)
                 .append("}\n")
                 .toString();
@@ -96,7 +98,9 @@ public class DriverAgent implements Steppable, Driver {
         boolean isRoad = true;
         boolean isFree = true;
         boolean hasRightOfWay = true;
-
+        Driver.Directive directive;
+        //743508623
+    
         switch (speed) {
             case 0:
                 // one cell ahead
@@ -122,7 +126,8 @@ public class DriverAgent implements Steppable, Driver {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.opposite();
                     }
-                    if (!isFree) { return false; }
+                    hasRightOfWay = hasReservation;
+                    if (!isFree && !hasRightOfWay) { return false; }
                 }
                 //  one cell ahead and one cell right
                 x = loc.x + dir.getXOffset() + dir.onRight().getXOffset();
@@ -132,11 +137,12 @@ public class DriverAgent implements Steppable, Driver {
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.onLeft();
-                        hasRightOfWay = v.getSpeed() == 0
-                            && (v.idNum < vehicle.idNum || hasReservation);
-                        if (!isFree && !hasRightOfWay) {
-                            return false;
-                        }
+                        hasRightOfWay = 
+                            v.getSpeed() == 0 && v.idNum < vehicle.idNum;
+                    }
+                    hasRightOfWay = hasRightOfWay || hasReservation;
+                    if (!isFree && !hasRightOfWay) {
+                        return false;
                     }
                 }
                 //  one cell ahead and one cell left
@@ -147,11 +153,12 @@ public class DriverAgent implements Steppable, Driver {
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.onRight();
-                        hasRightOfWay = v.getSpeed() == 0
-                            && (v.idNum < vehicle.idNum || hasReservation);
-                        if (!isFree && !hasRightOfWay) {
-                            return false;
-                        }
+                        hasRightOfWay = 
+                            v.getSpeed() == 0 && v.idNum < vehicle.idNum;
+                    }
+                    hasRightOfWay = hasRightOfWay || hasReservation;
+                    if (!isFree && !hasRightOfWay) {
+                        return false;
                     }
                 }
                 break;
@@ -164,8 +171,10 @@ public class DriverAgent implements Steppable, Driver {
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir;
+                        hasRightOfWay = v.hasReservation;
                     }
-                    if (!isFree) { return false; }
+                    hasRightOfWay = hasRightOfWay && hasReservation;
+                    if (!isFree && !hasRightOfWay) { return false; }
                 }
                 // two cells ahead
                 x = loc.x + 2 * dir.getXOffset();
@@ -176,8 +185,12 @@ public class DriverAgent implements Steppable, Driver {
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getSpeed() != 0;
+                        hasRightOfWay = v.hasReservation;
                     }
-                    if (!isRoad || !isFree) { return false; }
+                    hasRightOfWay = hasRightOfWay && hasReservation;
+                    if (!isRoad || (!isFree && !hasRightOfWay)) {
+                        return false;
+                    }
                 } else {
                     return false;
                 }
@@ -190,7 +203,8 @@ public class DriverAgent implements Steppable, Driver {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.opposite();
                     }
-                    if (!isFree) { return false; }
+                    hasRightOfWay = hasReservation;
+                    if (!isFree && !hasRightOfWay) { return false; }
                 }
                 //  two cells ahead and one cell right
                 x = loc.x + 2 * dir.getXOffset() + dir.onRight().getXOffset();
@@ -199,12 +213,19 @@ public class DriverAgent implements Steppable, Driver {
                     Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
-                        isFree = v.getDirection() != dir.onLeft();
-                        hasRightOfWay = hasReservation;
-                        if (!isFree && !hasRightOfWay) {
-                            return false;
+                        directive = v.getDriver().getNextDirective();
+                        isFree = v.getDirection() != dir.onLeft()
+                            || (v.getSpeed() == 0
+                                    && directive != Directive.MOVE_FORWARD)
+                            || (v.getSpeed() == 1
+                                    && directive != Directive.STOP);
+                        if (vehicle.idNum == 163) {
+                            System.out.print(this.toString());
+                            System.out.print(((DriverAgent)v.getDriver()).toString());
                         }
+
                     }
+                    if (!isFree) { return false; }
                 }
                 //  two cells ahead and one cell left
                 x = loc.x + 2 * dir.getXOffset() + dir.onLeft().getXOffset();
@@ -214,11 +235,9 @@ public class DriverAgent implements Steppable, Driver {
                     if (b != null) {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.onRight();
-                        hasRightOfWay = hasReservation;
-                        if (!isFree && !hasRightOfWay) {
-                            return false;
-                        }
                     }
+                    hasRightOfWay = hasReservation;
+                    if (!isFree && !hasRightOfWay) { return false; }
                 }
                 //  two cells ahead and two cells right
                 x = loc.x + 2 * dir.getXOffset() + 2 * dir.onRight().getXOffset();
@@ -229,10 +248,10 @@ public class DriverAgent implements Steppable, Driver {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.onLeft()
                             || v.getSpeed() == 0;
-                        hasRightOfWay = hasReservation;
-                        if (!isFree && !hasReservation) {
-                            return false;
-                        }
+                    }
+                    hasRightOfWay = hasReservation;
+                    if (!isFree && !hasRightOfWay) {
+                        return false;
                     }
                 }
                 //  two cells ahead and two cells left
@@ -244,9 +263,10 @@ public class DriverAgent implements Steppable, Driver {
                         Vehicle v = (Vehicle)b.objs[0];
                         isFree = v.getDirection() != dir.onRight() 
                             || v.getSpeed() == 0;
-                        if (!isFree) {
-                            return false;
-                        }
+                    }
+                    hasRightOfWay = hasReservation;
+                    if (!isFree && !hasRightOfWay) {
+                        return false;
                     }
                 }
                 break;
@@ -410,7 +430,7 @@ public class DriverAgent implements Steppable, Driver {
         Int2D location = vehicle.getLocation(ac);
         Direction direction = vehicle.getDirection();
         int speed = vehicle.getSpeed();
-        //hasReservation = vehicle.hasReservation;
+        hasReservation = vehicle.hasReservation;
 
         // get a new destination if needed
         if (nextIntersection == null) {
@@ -419,8 +439,6 @@ public class DriverAgent implements Steppable, Driver {
             nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
             nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
             nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
-            vehicle.hasReservation = false;
-            hasReservation = false;
         }
 
         // check if Vehicle is near enough to an intersection to request a
@@ -457,13 +475,6 @@ public class DriverAgent implements Steppable, Driver {
         // check if Vehicle is at destination 
         atNextLeg = location.x == nextLeg.x && location.y == nextLeg.y;
 
-        // if about to leave intersection cancel reservation
-        if (nearNextLeg) {
-            // cancelReservation(vehicle);
-            vehicle.hasReservation = false;
-            hasReservation = false;
-        }
-        
         // get a new destination if needed
         if (atNextLeg) {
             nextIntersection = getIntersectionAhead(ac, location);
@@ -471,6 +482,8 @@ public class DriverAgent implements Steppable, Driver {
             nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
             nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
             nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+            vehicle.hasReservation = false;
+            hasReservation = false;
         }
 
         // Default state is move forward
@@ -479,7 +492,7 @@ public class DriverAgent implements Steppable, Driver {
         // request a reservation if needed
         if (inIntersection && !hasReservation) {
             hasReservation = nextIntersection.requestReservation(
-                    vehicle, ac.schedule.getSteps() + 2 + speed,
+                    vehicle, ac.schedule.getSteps() + 1 + speed,
                     getUpdatedPath(location));
             vehicle.hasReservation = hasReservation;
         } else if (speed == 1 && nearIntersection) {

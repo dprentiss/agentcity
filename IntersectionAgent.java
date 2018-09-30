@@ -188,6 +188,7 @@ public class IntersectionAgent implements Steppable {
     }
 
     private void clearSchedule() {
+        Vehicle v;
         for (int i = 0; i < scheduleSize; i++) {
             for (int j = 0; j < width; j++) {
                 for (int k = 0; k < height; k++) {
@@ -196,7 +197,9 @@ public class IntersectionAgent implements Steppable {
             }
         }
         while (vehicles.numObjs > 0) {
-            ((Vehicle)vehicles.pop()).hasReservation = false;
+            v = (Vehicle)vehicles.pop();
+            v.hasReservation = false;
+            ((DriverAgent)v.getDriver()).hasReservation = false;
         }
     }
 
