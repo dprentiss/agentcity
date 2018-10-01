@@ -166,7 +166,9 @@ public class IntersectionAgent implements Steppable {
     private void checkSchedule(AgentCity ac) {
         int x;
         int y;
+        boolean vehicleStopping;
         Vehicle vehicle;
+        Driver driver;
         Bag bag;
         long steps = ac.schedule.getSteps();
         // If schedule is wrong revoke all reservations and clear schedule
@@ -182,6 +184,25 @@ public class IntersectionAgent implements Steppable {
                     vehicle = (Vehicle)bag.objs[0];
                     schedule[(int)(steps % scheduleSize)][i][j] = vehicle.idNum;
                     vehicles.add(vehicle);
+                }
+            }
+        }
+        for (int k = 0; k < vehicles.numObjs; k++) {
+            vehicle = (Vehicle)vehicles.objs[k];
+            driver = (Driver)vehicle.getDriver();
+            if (driver.getNextDirective() == Driver.Directive.STOP) {
+                clearSchedule();
+                for (int i = 0; i < width; i++) {
+                    for (int j = 0; j < height; j++) {
+                        x = cells[i][j].x;
+                        y = cells[i][j].y;
+                        bag = ac.agentGrid.getObjectsAtLocation(x, y);  
+                        if (bag == null) continue;
+                        vehicle = (Vehicle)bag.objs[0];
+                        schedule[(int)(steps % scheduleSize)][i][j] 
+                            = vehicle.idNum;        
+                        vehicles.add(vehicle);
+                    }
                 }
             }
         }
@@ -204,11 +225,20 @@ public class IntersectionAgent implements Steppable {
     }
 
     private void trimSchedule(AgentCity ac) {
+        Vehicle v;
         long steps = ac.schedule.getSteps();
         for (int j = 0; j < width; j++) {
             for (int k = 0; k < height; k++) {
                 schedule[(int)((scheduleSize + steps - 1) % scheduleSize)][j][k] = -1;
             }
+        }
+        // remove vehicles without reservations from Bag
+        for (int i = 0; i < vehicles.numObjs; i++) {
+            v = (Vehicle)vehicles.objs[i];
+            if (!v.hasReservation) {
+                vehicles.removeNondestructively(i);
+            }
+            vehicles.shrink(0);
         }
     }
 
