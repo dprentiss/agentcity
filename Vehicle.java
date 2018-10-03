@@ -41,6 +41,9 @@ public class Vehicle implements Steppable, Driveable {
     /** An array of Person objects that comprises this Vehicle's passengers. */
     private Person manifest[];
 
+    // Variables
+    public boolean hasReservation = false;
+
     // Physical Variables
     private Int2D location;
     private Direction direction;

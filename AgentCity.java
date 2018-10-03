@@ -94,7 +94,7 @@ public class AgentCity extends SimState {
             }
         };
 
-        schedule.scheduleRepeating(collisionCheck, 0, 1);
+        schedule.scheduleRepeating(collisionCheck, 3, 1);
 
     }
 
@@ -196,13 +196,13 @@ public class AgentCity extends SimState {
             Vehicle testCar = new Vehicle(i, newDir);
             agentGrid.setObjectLocation(testCar, newLocation);
             // Add Vehicle to Schedule
-            testCar.stopper = schedule.scheduleRepeating(testCar, 1, 1);
+            testCar.stopper = schedule.scheduleRepeating(testCar, 0, 1);
             // DriverAgent for Vehicle
             DriverAgent newDriver = new DriverAgent(i);
             testCar.setDriver(newDriver);
             newDriver.setVehicle(testCar);
             // add Driver to Schedule
-            newDriver.stopper = schedule.scheduleRepeating(newDriver, 0, 1);
+            newDriver.stopper = schedule.scheduleRepeating(newDriver, 2, 1);
         }
 
         // Make some Intersections and IntersectionAgents

@@ -5,6 +5,7 @@
 package sim.app.agentcity;
 import sim.util.*;
 import sim.engine.*;
+import java.util.Arrays;
 
 /** IntersectionAgent objects control traffic for a specific, contiguous
  * Intersection in the grid.
@@ -25,15 +26,17 @@ public class IntersectionAgent implements Steppable {
 
     // Properties
     public final int idNum;
-    public int scheduleSize;
+    public Intersection intersection;
     public int width;
     public int height;
-    public Intersection intersection;
+    public int scheduleSize;
 
     // Variables
-    private Int2D[] approachLegs;
     private Int2D[][] cells;
+    private Int2D[] approachLegs;
     private int[][][] schedule;
+    private Bag vehicles;
+    private boolean acceptingReservations;
 
     // Accessors
 
@@ -50,18 +53,19 @@ public class IntersectionAgent implements Steppable {
         this.intersection = intersection;
         this.width = intersection.maxX - intersection.minX + 1;
         this.height = intersection.maxY - intersection.minY + 1;
-        scheduleSize = width + height + 3;
-        cells = new Int2D[width][height];
+        scheduleSize = width + height + 4;
+        vehicles = new Bag((width + 2) * (height + 2));
         approachLegs = intersection.getApproachLegs();
         schedule = new int[scheduleSize][width][height];
-        for (int i = 0; i < scheduleSize; i++) {
-            for (int j = 0; j < width; j++) {
-                for (int k = 0; k < height; k++) {
-                    schedule[i][j][k] = -1;
-                }
+        cells = new Int2D[width][height];
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                cells[i][j] = new Int2D(intersection.minX + i,
+                        intersection.minY + j);
             }
         }
         intersection.setController(this);
+        clearSchedule();
     }
 
     /** Creates and IntersectionAgent object with the provided ID number and
@@ -79,15 +83,8 @@ public class IntersectionAgent implements Steppable {
      * whether or not the the request is approved
      */
     public boolean requestReservation(Vehicle vehicle, long time, Int2D[] path) {
-        boolean vehicleAdded;
         // check path against schedule
-        vehicleAdded = addVehicleToSchedule(vehicle, time, path);
-        // System.out.print(toString(SCHEDULE));
-        if (vehicleAdded) {
-            return true;
-        } else {
-            return false;
-        }
+        return addVehicleToSchedule(vehicle, time, path);
     }
 
     public String toString(int option) {
@@ -113,57 +110,146 @@ public class IntersectionAgent implements Steppable {
     }   
 
     private boolean addVehicleToSchedule(Vehicle vehicle, long time, Int2D[] path) {
-        int pathX;
-        int pathY;
+        int x;
+        int y;
         int timeIndex;
-        /*
-        System.out.println();
-        System.out.println(vehicle.idNum);
-        System.out.println(vehicle.getLocation());
-        System.out.println(time);
-        System.out.println(time % scheduleSize);
-        */
         // check if Vehicles path is free
+        if (!acceptingReservations && !vehicles.contains(vehicle)) return false;
         for (int i = 0; i < path.length; i++) {
             timeIndex = (int)((time + i) % scheduleSize);
-            pathX = path[i].x - intersection.minX;
-            pathY = path[i].y - intersection.minY;
-            if (schedule[timeIndex][pathX][pathY] != -1) {
+            x = path[i].x - intersection.minX;
+            y = path[i].y - intersection.minY;
+            if (schedule[timeIndex][x][y] != -1) {
                 return false;
             }
         }
         // place vehicle on schedule
         for (int i = 0; i < path.length; i++) {
             timeIndex = (int)((time + i) % scheduleSize);
-            pathX = path[i].x - intersection.minX;
-            pathY = path[i].y - intersection.minY;
-            /*
-            System.out.println();
-            System.out.println(schedule.length);
-            System.out.println((int)(time % scheduleSize));
-            System.out.println(schedule[0].length);
-            System.out.println(pathX);
-            System.out.println(schedule[1].length);
-            System.out.println(pathY);
-            */
-            schedule[timeIndex][pathX][pathY] = vehicle.idNum;
+            x = path[i].x - intersection.minX;
+            y = path[i].y - intersection.minY;
+            schedule[timeIndex][x][y] = vehicle.idNum;
         }
+        vehicles.add(vehicle);
         return true;
     }
 
-    public void step(final SimState state) {
-        // World state
-        AgentCity ac = (AgentCity)state;
+    private boolean scheduleValid(AgentCity ac) {
+        int x;
+        int y;
+        int vehicleNum;
+        Vehicle vehicle;
+        Bag bag;
+        long steps = ac.schedule.getSteps();
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                x = cells[i][j].x;
+                y = cells[i][j].y;
+                vehicleNum = schedule[(int)(steps % scheduleSize)][i][j];
+                bag = ac.agentGrid.getObjectsAtLocation(x, y);  
+                if (bag != null) {
+                    vehicle = (Vehicle)bag.objs[0];
+                    if (vehicleNum != vehicle.idNum) {
+                        acceptingReservations = false;
+                        return false;
+                    }
+                } else if (vehicleNum != -1) {
+                    acceptingReservations = false;
+                    return false;
+                } 
+            }
+        }
+        acceptingReservations = true;
+        return true;
+    }
+
+    private void checkSchedule(AgentCity ac) {
+        int x;
+        int y;
+        boolean vehicleStopping;
+        Vehicle vehicle;
+        Driver driver;
+        Bag bag;
+        long steps = ac.schedule.getSteps();
+        // If schedule is wrong revoke all reservations and clear schedule
+        if (!scheduleValid(ac)) {
+            clearSchedule();
+            // Add Vehicles already in the intersection to schedule and bag
+            for (int i = 0; i < width; i++) {
+                for (int j = 0; j < height; j++) {
+                    x = cells[i][j].x;
+                    y = cells[i][j].y;
+                    bag = ac.agentGrid.getObjectsAtLocation(x, y);  
+                    if (bag == null) continue;
+                    vehicle = (Vehicle)bag.objs[0];
+                    schedule[(int)(steps % scheduleSize)][i][j] = vehicle.idNum;
+                    vehicles.add(vehicle);
+                }
+            }
+        }
+        for (int k = 0; k < vehicles.numObjs; k++) {
+            vehicle = (Vehicle)vehicles.objs[k];
+            driver = (Driver)vehicle.getDriver();
+            if (driver.getNextDirective() == Driver.Directive.STOP) {
+                clearSchedule();
+                for (int i = 0; i < width; i++) {
+                    for (int j = 0; j < height; j++) {
+                        x = cells[i][j].x;
+                        y = cells[i][j].y;
+                        bag = ac.agentGrid.getObjectsAtLocation(x, y);  
+                        if (bag == null) continue;
+                        vehicle = (Vehicle)bag.objs[0];
+                        schedule[(int)(steps % scheduleSize)][i][j] 
+                            = vehicle.idNum;        
+                        vehicles.add(vehicle);
+                    }
+                }
+            }
+        }
+    }
+
+    private void clearSchedule() {
+        Vehicle v;
+        for (int i = 0; i < scheduleSize; i++) {
+            for (int j = 0; j < width; j++) {
+                for (int k = 0; k < height; k++) {
+                    schedule[i][j][k] = -1;
+                }
+            }
+        }
+        while (vehicles.numObjs > 0) {
+            v = (Vehicle)vehicles.pop();
+            v.hasReservation = false;
+            ((DriverAgent)v.getDriver()).hasReservation = false;
+        }
+    }
+
+    private void trimSchedule(AgentCity ac) {
+        Vehicle v;
         long steps = ac.schedule.getSteps();
         for (int j = 0; j < width; j++) {
             for (int k = 0; k < height; k++) {
                 schedule[(int)((scheduleSize + steps - 1) % scheduleSize)][j][k] = -1;
             }
         }
+        // remove vehicles without reservations from Bag
+        for (int i = 0; i < vehicles.numObjs; i++) {
+            v = (Vehicle)vehicles.objs[i];
+            if (!v.hasReservation) {
+                vehicles.removeNondestructively(i);
+            }
+            vehicles.shrink(0);
+        }
+    }
+
+    public void step(final SimState state) {
+        // World state
+        AgentCity ac = (AgentCity)state;
+        trimSchedule(ac);
+        checkSchedule(ac);
         if (intersection.idNum == 5) {
             System.out.println();
-            System.out.println(ac.schedule.getSteps());
-            System.out.println(ac.schedule.getSteps() % scheduleSize);
+            System.out.printf("Step %d, schedule %d/%d\n", ac.schedule.getSteps(), ac.schedule.getSteps() % scheduleSize, scheduleSize);
             System.out.print(toString(SCHEDULE));
         }
     }
