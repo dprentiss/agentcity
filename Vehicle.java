@@ -15,7 +15,7 @@ public class Vehicle implements Steppable, Driveable {
      * Required for serialization
      */
     private static final long serialVersionUID = 1;
-    
+
     // Stopper
     Stoppable stopper;
 
@@ -50,7 +50,7 @@ public class Vehicle implements Steppable, Driveable {
     private int speed;
 
     // Accessors
-    
+
     /** Returns a string representation of this Vehicle */
     @Override
     public String toString() {
@@ -115,7 +115,9 @@ public class Vehicle implements Steppable, Driveable {
      * 
      * @param ac the AgentCity state instance containg this Vehicle.
      */
-    public Int2D getLocation(AgentCity ac) { return ac.agentGrid.getObjectLocation(this); }
+    public Int2D getLocation(AgentCity ac) {
+        return ac.agentGrid.getObjectLocation(this);
+    }
 
     /** Gets the last known grid location of this Vehicle.*/
     public Int2D getLocation() { return location; }
@@ -154,8 +156,8 @@ public class Vehicle implements Steppable, Driveable {
         this(id, 1, cap, dir);
     }
 
-    /** Creates a Vehicle object with the given ID number, length, size, passenger
-     * capacity and initial direction.
+    /** Creates a Vehicle object with the given ID number, length, size,
+     * passenger capacity and initial direction.
      * The ID number should be unique but this is not enforced.
      * Length must be one until larger vehicles are supported.
      */
@@ -175,13 +177,6 @@ public class Vehicle implements Steppable, Driveable {
         if (ac.checkBounds(x, y)) {
             // Set this Vehicle at the new location
             ac.agentGrid.setObjectLocation(this, x, y);
-            // Check if there has been a collsion
-            /*
-            if (ac.agentGrid.numObjectsAtLocation(x, y) > 1) {
-                System.out.printf("Collision at %d, %d.\n", x, y);
-            }
-            */
-            // Update this Vehicle's location variable
             location = new Int2D(x, y);
         }
     }
@@ -192,7 +187,7 @@ public class Vehicle implements Steppable, Driveable {
     private void setLocation(AgentCity ac, Int2D loc) {
         setLocation(ac, loc.x, loc.y);
     }
-    
+
     /** Set the direction of this Vehicle. */
     private void setDirection(Direction dir) {
         direction = dir;
@@ -208,7 +203,7 @@ public class Vehicle implements Steppable, Driveable {
      * <p> On each step, this Vehicle should update is location and get the next
      * Directive from its Driver agent. Afterward, it should exectute that
      * Directive.
-     * 
+     *
      * @param state The (AgentCity) SimState object
      */
     public void step(final SimState state) {
@@ -232,14 +227,16 @@ public class Vehicle implements Steppable, Driveable {
                 if (speed == 0) {
                     setSpeed(MAX_SPEED);
                 } else {
-                    Int2D nextLocation = new Int2D(location.x + direction.getXOffset(),
+                    Int2D nextLocation
+                        = new Int2D(location.x + direction.getXOffset(),
                             location.y + direction.getYOffset());
                     setLocation(ac, nextLocation);
                 }
                 break;
             case STOP:
                 if (speed > 0) {
-                    Int2D nextLocation = new Int2D(location.x + direction.getXOffset(),
+                    Int2D nextLocation
+                        = new Int2D(location.x + direction.getXOffset(),
                             location.y + direction.getYOffset());
                     setLocation(ac, nextLocation);
                     setSpeed(0);
@@ -266,13 +263,17 @@ public class Vehicle implements Steppable, Driveable {
                 }
                 break;
             case MERGE_RIGHT:
-                xOffset = location.x + direction.getXOffset() + direction.onRight().getXOffset();
-                yOffset = location.y + direction.getYOffset() + direction.onRight().getYOffset();
+                xOffset = location.x + direction.getXOffset()
+                    + direction.onRight().getXOffset();
+                yOffset = location.y + direction.getYOffset()
+                    + direction.onRight().getYOffset();
                 setLocation(ac, xOffset, yOffset);
                 break;
             case MERGE_LEFT:
-                xOffset = location.x + direction.getXOffset() + direction.onLeft().getXOffset();
-                yOffset = location.y + direction.getYOffset() + direction.onLeft().getYOffset();
+                xOffset = location.x + direction.getXOffset()
+                    + direction.onLeft().getXOffset();
+                yOffset = location.y + direction.getYOffset()
+                    + direction.onLeft().getYOffset();
                 setLocation(ac, xOffset, yOffset);
                 break;
         }
