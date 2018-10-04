@@ -115,7 +115,7 @@ public class IntersectionAgent implements Steppable {
         int x;
         int y;
         int timeIndex;
-        // check if Vehicles path is free
+        // Check if Vehicles desired path is free
         if (!acceptingReservations && !vehicles.contains(vehicle)) return false;
         for (int i = 0; i < path.length; i++) {
             timeIndex = (int)((time + i) % scheduleSize);
@@ -125,7 +125,7 @@ public class IntersectionAgent implements Steppable {
                 return false;
             }
         }
-        // place vehicle on schedule
+        // Place vehicle on schedule
         for (int i = 0; i < path.length; i++) {
             timeIndex = (int)((time + i) % scheduleSize);
             x = path[i].x - intersection.minX;
@@ -143,52 +143,68 @@ public class IntersectionAgent implements Steppable {
         Vehicle vehicle;
         Bag bag;
         long steps = ac.schedule.getSteps();
+        int step = (int)(steps % scheduleSize);
+        // Loop over locations in intersection and check if vehicles match
+        // schedule
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 x = cells[i][j].x;
                 y = cells[i][j].y;
-                vehicleNum = schedule[(int)(steps % scheduleSize)][i][j];
+                vehicleNum = schedule[step][i][j];
                 bag = ac.agentGrid.getObjectsAtLocation(x, y);
                 if (bag != null) {
                     vehicle = (Vehicle)bag.objs[0];
                     if (vehicleNum != vehicle.idNum) {
-                        acceptingReservations = false;
                         return false;
                     }
                 } else if (vehicleNum != -1) {
-                    acceptingReservations = false;
                     return false;
-                } 
+                }
             }
         }
-        acceptingReservations = true;
         return true;
+    }
+
+    private void allowPriorityReservations(AgentCity ac) {
+        int x;
+        int y;
+        Vehicle vehicle;
+        Bag bag;
+        long steps = ac.schedule.getSteps();
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                x = cells[i][j].x;
+                y = cells[i][j].y;
+                bag = ac.agentGrid.getObjectsAtLocation(x, y);
+                if (bag == null) continue;
+                vehicle = (Vehicle)bag.objs[0];
+                schedule[(int)(steps % scheduleSize)][i][j] = vehicle.idNum;
+                vehicles.add(vehicle);
+                if (intersection.idNum == 5) {
+                    System.out.println(vehicles.numObjs);
+                    System.out.println(vehicle);
+                }
+            }
+        }
     }
 
     private void checkSchedule(AgentCity ac) {
         int x;
         int y;
-        boolean vehicleStopping;
         Vehicle vehicle;
         Driver driver;
         Bag bag;
         long steps = ac.schedule.getSteps();
         // If schedule is wrong revoke all reservations and clear schedule
         if (!scheduleValid(ac)) {
+            acceptingReservations = false;
             clearSchedule();
             // Add Vehicles already in the intersection to schedule and bag
-            for (int i = 0; i < width; i++) {
-                for (int j = 0; j < height; j++) {
-                    x = cells[i][j].x;
-                    y = cells[i][j].y;
-                    bag = ac.agentGrid.getObjectsAtLocation(x, y);
-                    if (bag == null) continue;
-                    vehicle = (Vehicle)bag.objs[0];
-                    schedule[(int)(steps % scheduleSize)][i][j] = vehicle.idNum;
-                    vehicles.add(vehicle);
-                }
-            }
+            allowPriorityReservations(ac);
+        } else {
+            acceptingReservations = true;
         }
+        /*
         for (int k = 0; k < vehicles.numObjs; k++) {
             vehicle = (Vehicle)vehicles.objs[k];
             driver = (Driver)vehicle.getDriver();
@@ -207,7 +223,7 @@ public class IntersectionAgent implements Steppable {
                     }
                 }
             }
-        }
+        */
     }
 
     private void clearSchedule() {
