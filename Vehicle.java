@@ -6,7 +6,7 @@ package sim.app.agentcity;
 import sim.util.*;
 import sim.engine.*;
 
-/** 
+/**
  * @author David Prentiss
  */
 public class Vehicle implements Steppable, Driveable {
@@ -110,9 +110,9 @@ public class Vehicle implements Steppable, Driveable {
     public void removePassenger(Person passenger) { /*TODO*/ }
 
     // Physical
- 
+
     /** Gets the current grid location of this Vehicle.
-     * 
+     *
      * @param ac the AgentCity state instance containg this Vehicle.
      */
     public Int2D getLocation(AgentCity ac) {
@@ -277,7 +277,7 @@ public class Vehicle implements Steppable, Driveable {
                 setLocation(ac, xOffset, yOffset);
                 break;
         }
-        
+
         // update location from state
         location = ac.agentGrid.getObjectLocation(this);
     }
