@@ -28,6 +28,8 @@ public class DriverAgent implements Steppable, Driver {
     // Variables
     public Vehicle vehicle = null;
     public Driver.Directive nextDirective = Driver.Directive.NONE;
+    public int desiredSpeed;
+    public int maxSpeed;
     public Int2D destination = null;
     public boolean nearIntersection = false;
     public boolean nearApproachLeg = false;
@@ -38,11 +40,18 @@ public class DriverAgent implements Steppable, Driver {
     public boolean nearNextLeg = false;
     public boolean atNextLeg = false;
     public Int2D[] path;
+    public Int2D location;
+    public Direction direction;
+    public int speed;
 
     // Accessors
     public Vehicle getVehicle() { return vehicle; }
-    public void setVehicle(Vehicle v) { vehicle = v; }
+    public void setVehicle(Vehicle v) {
+        vehicle = v;
+        maxSpeed = v.MAX_SPEED;
+    }
     public Driver.Directive getNextDirective() { return nextDirective; }
+    public int getDesiredSpeed() { return desiredSpeed; }
 
     @Override
     public String toString() {
@@ -72,6 +81,7 @@ public class DriverAgent implements Steppable, Driver {
                 .append(", ")
                 .append("atApproachLeg: " + atApproachLeg)
                 .append(", ")
+
                 .append("inIntersection: " + inIntersection)
                 .append(", ")
                 .append("nearTurnCell: " + nearTurnCell)
@@ -100,7 +110,7 @@ public class DriverAgent implements Steppable, Driver {
         boolean hasRightOfWay = true;
         Driver.Directive directive;
         //743508623
-    
+
         switch (speed) {
             case 0:
                 // one cell ahead
@@ -349,6 +359,8 @@ public class DriverAgent implements Steppable, Driver {
         Int2D[] tmpPath = new Int2D[16];
         Int2D[] returnPath;
         Int2D tmpCell = new Int2D();
+        int speed = 2;
+        int desiredSpeed = 2;
         int i = 0;
         // start at current location
         int cellX = loc.x;
@@ -401,12 +413,6 @@ public class DriverAgent implements Steppable, Driver {
         return updatedPath;
     }
 
-    /*
-    int getMinReservationTime() {
-        return -1;
-    }
-    */
-
     Int2D getCellAhead(int cellX, int cellY, Direction dir, int offset) {
         return new Int2D(cellX + offset * dir.getXOffset(),
                cellY + offset * dir.getYOffset());
@@ -416,20 +422,38 @@ public class DriverAgent implements Steppable, Driver {
         return getCellAhead(cell.x, cell.y, dir, offset);
     }
 
-    /*
-    boolean cellAheadEmpty() {
-        Int2D cell;
-        return false;
+    int getGapToCell(Int2D cell) {
+        return getGapToCell(cell, location, direction);
     }
-    */
+
+    int getGapToCell(Int2D cell, Int2D loc, Direction dir) {
+        return Math.abs((cell.x - loc.x) * dir.getXOffset()
+                        + (cell.y - loc.y) * dir.getYOffset()
+                        - 1);
+    }
+
+    int getStepsToCell(int gap, int currentSpeed, int desiredSpeed) {
+        int dist = gap + 1;
+        int steps;
+        if (currentSpeed >= desiredSpeed) {
+            steps = dist / currentSpeed + dist % currentSpeed;
+        } else if (dist + 1 <= currentSpeed) {
+            steps = 1;
+        } else {
+            steps = getStepsToCell(dist - currentSpeed,
+                                   currentSpeed + 1,
+                                   desiredSpeed);
+        }
+        return steps;
+    }
 
     public void step(final SimState state) {
-        // World state
         AgentCity ac = (AgentCity)state;
+
         // Current Vehicle position and velocity; 
-        Int2D location = vehicle.getLocation(ac);
-        Direction direction = vehicle.getDirection();
-        int speed = vehicle.getSpeed();
+        location = vehicle.getLocation(ac);
+        direction = vehicle.getDirection();
+        speed = vehicle.getSpeed();
         hasReservation = vehicle.hasReservation;
 
         // get a new destination if needed
@@ -460,7 +484,7 @@ public class DriverAgent implements Steppable, Driver {
                 && location.y == nextApproachLeg.y;
         // check if Vehicle is in intersection
         inIntersection = ac.roadGrid.field[location.x][location.y] == 9;
-        // check if Vehicle is one cell before turn
+        // check if Vehicle is within one step of a turn cell
         nearTurnCell =
                 location.x + direction.getXOffset()
                     == nextTurnCell.x
@@ -486,7 +510,8 @@ public class DriverAgent implements Steppable, Driver {
             hasReservation = false;
         }
 
-        // Default state is move forward
+        // Default state is move forward at max speed
+        desiredSpeed = maxSpeed;
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
         // request a reservation if needed
@@ -525,25 +550,30 @@ public class DriverAgent implements Steppable, Driver {
                 nextDirective = Driver.Directive.MOVE_FORWARD;
             } else {
                 // ...report there was a problem and stop.
-                System.out.printf("Vehicle %d at (%d, %d) had a problem turning.\n", vehicle.idNum, location.x, location.y);
+                System.out.printf("Vehicle %d at (%d, %d) had a problem turning.\n",
+                                  vehicle.idNum, location.x, location.y);
                 System.out.println(nextIntersection.idNum);
                 System.out.println(nextLeg);
                 System.out.println(nextDirection);
+                desiredSpeed = 0;
                 nextDirective = Driver.Directive.STOP;
             }
         }
 
         // check if Vehicle needs and has a reservation for its next turning movement
         if (nearApproachLeg && speed > 0 && !hasReservation) {
-            nextDirective = Driver.Directive.STOP;  
+            desiredSpeed = maxSpeed;
+            nextDirective = Driver.Directive.STOP;
         }
         if (atApproachLeg && !hasReservation) {
-            nextDirective = Driver.Directive.STOP;  
+            desiredSpeed = 0;
+            nextDirective = Driver.Directive.STOP;
         }
 
         // If the directive is move forward and the way is not clear, stop.
         if (!pathAheadClear(ac, location, direction, speed)
                 && nextDirective == Driver.Directive.MOVE_FORWARD) {
+            desiredSpeed = 0;
             nextDirective = Driver.Directive.STOP;
         }
     }

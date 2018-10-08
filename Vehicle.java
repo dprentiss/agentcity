@@ -33,7 +33,7 @@ public class Vehicle implements Steppable, Driveable {
     /** The maximum speed in grid cells per step of this Vehicle.
      * Must be one until faster speeds are supported.
      */
-    public final int MAX_SPEED = 1;
+    public final int MAX_SPEED = 2;
 
     // Agents
     /** The agent responsible for driving this Vehicle. */
@@ -42,7 +42,14 @@ public class Vehicle implements Steppable, Driveable {
     private Person manifest[];
 
     // Variables
+    /** True indicates that this Vehicle is clear to enter the relevant
+     * intersection.
+     */
     public boolean hasReservation = false;
+    /** The next Driver.Directive for the Driver of this Vehicle. */
+    private Driver.Directive nextDirective;
+    /** The speed desired by this Vehicle's Driver. */
+    private int desiredSpeed;
 
     // Physical Variables
     private Int2D location;
@@ -210,75 +217,78 @@ public class Vehicle implements Steppable, Driveable {
         // The current simulation state
         AgentCity ac = (AgentCity)state;
 
-        // temporary x, y location variables for executing the MERGE_RIGHT and
-        // MERGE_LEFT Directives
-        int xOffset = 0;
-        int yOffset = 0;
-
         // Get location from state
         location = ac.agentGrid.getObjectLocation(this);
 
         // Get next directive from Driver
         Driver.Directive nextDirective = driver.getNextDirective();
+        // Get desired Speed from Driver
+        int desiredSpeed = driver.getDesiredSpeed();
 
         // Execute Directive from Driver
         switch (nextDirective) {
-            case MOVE_FORWARD:
-                if (speed == 0) {
-                    setSpeed(MAX_SPEED);
-                } else {
-                    Int2D nextLocation
-                        = new Int2D(location.x + direction.getXOffset(),
-                            location.y + direction.getYOffset());
-                    setLocation(ac, nextLocation);
-                }
-                break;
-            case STOP:
-                if (speed > 0) {
-                    Int2D nextLocation
-                        = new Int2D(location.x + direction.getXOffset(),
-                            location.y + direction.getYOffset());
-                    setLocation(ac, nextLocation);
-                    setSpeed(0);
-                }
-                break;
-            case TURN_RIGHT:
-                if (speed == 0) {
-                    setDirection(direction.onRight());
-                } else {
-                    setLocation(ac, location.x + direction.getXOffset(),
-                            location.y + direction.getYOffset());
-                    setSpeed(0);
-                    setDirection(direction.onRight());
-                }
-                break;
-            case TURN_LEFT:
-                if (speed == 0) {
-                    setDirection(direction.onLeft());
-                } else {
-                    setLocation(ac, location.x + direction.getXOffset(),
-                            location.y + direction.getYOffset());
-                    setSpeed(0);
-                    setDirection(direction.onLeft());
-                }
-                break;
-            case MERGE_RIGHT:
-                xOffset = location.x + direction.getXOffset()
-                    + direction.onRight().getXOffset();
-                yOffset = location.y + direction.getYOffset()
-                    + direction.onRight().getYOffset();
-                setLocation(ac, xOffset, yOffset);
-                break;
-            case MERGE_LEFT:
-                xOffset = location.x + direction.getXOffset()
-                    + direction.onLeft().getXOffset();
-                yOffset = location.y + direction.getYOffset()
-                    + direction.onLeft().getYOffset();
-                setLocation(ac, xOffset, yOffset);
-                break;
+        case MOVE_FORWARD:
+            if (speed < MAX_SPEED && speed < desiredSpeed) {
+                setSpeed(speed + 1);
+            } else if (speed > desiredSpeed) {
+                setSpeed(desiredSpeed);
+            }
+            if (speed > 0) {
+                setLocation(ac,
+                            location.x + speed * direction.getXOffset(),
+                            location.y + speed * direction.getYOffset()
+                            );
+            }
+            break;
+        case STOP:
+            if (desiredSpeed > 0) {
+                setLocation(ac,
+                            location.x + desiredSpeed * direction.getXOffset(),
+                            location.y + desiredSpeed * direction.getYOffset()
+                            );
+            }
+            setSpeed(0);
+            break;
+        case TURN_RIGHT:
+            if (desiredSpeed > 0) {
+                setLocation(ac,
+                            location.x + desiredSpeed * direction.getXOffset(),
+                            location.y + desiredSpeed * direction.getYOffset()
+                            );
+            }
+            setDirection(direction.onRight());
+            setSpeed(0);
+            break;
+        case TURN_LEFT:
+            if (desiredSpeed > 0) {
+                setLocation(ac,
+                            location.x + desiredSpeed * direction.getXOffset(),
+                            location.y + desiredSpeed * direction.getYOffset()
+                            );
+            }
+            setDirection(direction.onLeft());
+            setSpeed(0);
+            break;
+        case MERGE_RIGHT:
+            setLocation(ac,
+                        location.x
+                        + desiredSpeed * direction.getXOffset()
+                        + direction.onRight().getXOffset(),
+                        location.y
+                        + desiredSpeed * direction.getYOffset()
+                        + direction.onRight().getYOffset()
+                        );
+            break;
+        case MERGE_LEFT:
+            setLocation(ac,
+                        location.x
+                        + desiredSpeed * direction.getXOffset()
+                        + direction.onLeft().getXOffset(),
+                        location.y
+                        + desiredSpeed * direction.getYOffset()
+                        + direction.onLeft().getYOffset()
+                        );
+            break;
         }
-
-        // update location from state
-        location = ac.agentGrid.getObjectLocation(this);
     }
 }
