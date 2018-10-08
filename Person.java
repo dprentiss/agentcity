@@ -27,7 +27,11 @@ public class Person implements Steppable, VehicleClient, Driver {
     }
 
     public Driver.Directive getNextDirective() {
-        return Driver.Directive.MOVE_FORWARD;
+        return Driver.Directive.STOP;
+    }
+
+    public int getDesiredSpeed() {
+        return 0;
     }
 
     /** Choose trip */
