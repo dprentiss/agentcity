@@ -65,25 +65,20 @@ public class DriverAgent implements Steppable, Driver {
             //.append(", ")
             //.append("hasReservation: " + hasReservation)
             //.append(", ")
-            //.append("nextApproachLeg: " + nextApproachLeg)
-            //.append(", ")
+            .append("nextApproachLeg: " + nextApproachLeg)
+            .append(", ")
             .append("nextTurnCell: " + nextTurnCell)
             .append(", ")
-            //.append("nextLeg: " + nextLeg)
-            //.append(", ")
-            .append("nextDirection: " + nextDirection)
+            .append("nextLeg: " + nextLeg)
             .append(", ")
-            //.append("nextLeg: " + nextLeg)
-            //.append(", ")
-            .append("nextDirective: " + nextDirective)
+            .append("nextDirection: " + nextDirection)
             .append(", ")
             //.append("nearIntersection: " + nearIntersection)
             //.append(", ")
-            //.append("nearApproachLeg: " + nearApproachLeg)
-            //.append(", ")
-            //.append("atApproachLeg: " + atApproachLeg)
-            //.append(", ")
-
+            .append("nearApproachLeg: " + nearApproachLeg)
+            .append(", ")
+            .append("atApproachLeg: " + atApproachLeg)
+            .append(", ")
             .append("inIntersection: " + inIntersection)
             .append(", ")
             .append("nearTurnCell: " + nearTurnCell)
@@ -149,7 +144,7 @@ public class DriverAgent implements Steppable, Driver {
                 if (b != null) {
                     Vehicle v = (Vehicle)b.objs[0];
                     isFree = v.getDirection() != dir.onLeft();
-                    hasRightOfWay = 
+                    hasRightOfWay =
                         v.getSpeed() == 0 && v.idNum < vehicle.idNum;
                 }
                 hasRightOfWay = hasRightOfWay || hasReservation;
@@ -357,6 +352,60 @@ public class DriverAgent implements Steppable, Driver {
         return new Int2D(cellX, cellY);
     }
 
+    Int2D[] getPathToCell(Int2D cell,
+                          Int2D loc,
+                          Direction dir,
+                          int currentSpeed,
+                          int desiredSpeed,
+                          boolean stopAtCell) {
+
+        final int TMP_LEN = 16;
+        Int2D[] tmp = new Int2D[TMP_LEN];
+        int speed = currentSpeed;
+        int x = loc.x;
+        int y = loc.y;
+        int i = 1;
+        Int2D[] path;
+
+        tmp[0] = loc;
+        int dist = getGapToCell(cell, loc, dir) + 1;
+        if (dist < 0) {
+            throw new IllegalArgumentException("Cell is not ahead of Vehicle.");
+        }
+        while (dist > 0) {
+            if (speed < desiredSpeed) speed++;
+            speed = (dist < speed && stopAtCell) ? dist : speed;
+            tmp[i] = getCellAhead(x, y, dir, speed);
+            x = tmp[i].x;
+            y = tmp[i].y;
+            dist -= speed;
+            i++;
+        }
+        path = new Int2D[i];
+        for (int j = 0; j < path.length; j++) {
+            path[j] = tmp[j];
+        }
+        return path;
+    }
+
+    Int2D[] getPathToCell(Int2D cell) {
+        return getPathToCell(cell,
+                             location,
+                             direction,
+                             speed,
+                             maxSpeed,
+                             true);
+    }
+
+    Int2D[] getPathToCell(Int2D cell, boolean stopAtCell) {
+        return getPathToCell(cell,
+                             location,
+                             direction,
+                             speed,
+                             maxSpeed,
+                             stopAtCell);
+    }
+
     Int2D[] getPath(AgentCity ac, Int2D loc, Direction dir) {
         Int2D[] tmpPath = new Int2D[16];
         Int2D[] returnPath;
@@ -424,17 +473,19 @@ public class DriverAgent implements Steppable, Driver {
         return getCellAhead(cell.x, cell.y, dir, offset);
     }
 
-    int getGapToCell(Int2D cell) {
-        return getGapToCell(cell, location, direction);
-    }
-
     int getGapToCell(Int2D cell, Int2D loc, Direction dir) {
         int x = cell.x - loc.x;
         int y = cell.y - loc.y;
+        /*
         if (x != 0 && y != 0) {
             throw new IllegalArgumentException("Cell is not ahead of Vehicle.");
         }
+        */
         return x * dir.getXOffset() + y * dir.getYOffset() - 1;
+    }
+
+    int getGapToCell(Int2D cell) {
+        return getGapToCell(cell, location, direction);
     }
 
     int getStepsToCell(int gap, int currentSpeed, int desiredSpeed) {
@@ -464,7 +515,7 @@ public class DriverAgent implements Steppable, Driver {
     public void step(final SimState state) {
         AgentCity ac = (AgentCity)state;
 
-        // Current Vehicle position and velocity; 
+        // Current Vehicle position and velocity;
         location = vehicle.getLocation(ac);
         direction = vehicle.getDirection();
         speed = vehicle.getSpeed();
@@ -483,25 +534,15 @@ public class DriverAgent implements Steppable, Driver {
         // reservation
         nearIntersection =
             location.x + 2 * direction.getXOffset()
-            == nextApproachLeg.x 
+            == nextApproachLeg.x
             && location.y + 2 * direction.getYOffset()
             == nextApproachLeg.y;
-        // check if Vehicle is one cell before approach leg
-        nearApproachLeg =
-            location.x + direction.getXOffset()
-            == nextApproachLeg.x
-            && location.y + direction.getYOffset()
-            == nextApproachLeg.y;
+        nearApproachLeg = getStepsToCell(nextApproachLeg) == 1;
         // check if Vehicle is at approach leg
-        atApproachLeg =
-            location.x == nextApproachLeg.x
-            && location.y == nextApproachLeg.y;
+        atApproachLeg = getStepsToCell(nextApproachLeg) < 1;
         // check if Vehicle is in intersection
         inIntersection = ac.roadGrid.field[location.x][location.y] == 9;
-        // check if Vehicle is within one step of a turn cell
-        try {
-            nearTurnCell = getStepsToCell(nextTurnCell) == 1;
-        } catch (IllegalArgumentException ex) {}
+        nearTurnCell = getStepsToCell(nextTurnCell) == 1;
 
         // check if Vehicle is one cell before destination
         nearNextLeg =
@@ -509,8 +550,8 @@ public class DriverAgent implements Steppable, Driver {
             == nextLeg.x
             && location.y + direction.getYOffset()
             == nextLeg.y;
-        // check if Vehicle is at destination 
-        atNextLeg = location.x == nextLeg.x && location.y == nextLeg.y;
+        // check if Vehicle is at destination
+        atNextLeg = getStepsToCell(nextLeg) < 1;
 
         // get a new destination if needed
         if (atNextLeg) {
@@ -549,7 +590,7 @@ public class DriverAgent implements Steppable, Driver {
           }
         */
 
-        // If one cell before turn cell
+        // If if near cell
         if (nearTurnCell) {
             desiredSpeed = getGapToCell(nextTurnCell) + 1;
             // ...get direction to turn or go straight then...
@@ -574,16 +615,17 @@ public class DriverAgent implements Steppable, Driver {
             }
         }
 
-        // check if Vehicle needs and has a reservation for its next turning movement
+        // check if Vehicle needs and has a reservation for its next turning
+        // movement
         /*
-          if (nearApproachLeg && speed > 0 && !hasReservation) {
-          desiredSpeed = maxSpeed;
-          nextDirective = Driver.Directive.STOP;
-          }
-          if (atApproachLeg && !hasReservation) {
-          desiredSpeed = 0;
-          nextDirective = Driver.Directive.STOP;
-          }
+        if (nearApproachLeg && !hasReservation) {
+            desiredSpeed = getGapToCell(nextApproachLeg) + 1;
+            nextDirective = Driver.Directive.STOP;
+        }
+        if (atApproachLeg && !hasReservation) {
+            desiredSpeed = 0;
+            nextDirective = Driver.Directive.STOP;
+        }
         */
 
         // If the directive is move forward and the way is not clear, stop.
@@ -593,8 +635,7 @@ public class DriverAgent implements Steppable, Driver {
             nextDirective = Driver.Directive.STOP;
         }
         System.out.print(this.toString());
+        System.out.println(Arrays.toString(getPathToCell(nextTurnCell)));
         System.out.print(this.vehicle.toString());
-        System.out.println(getGapToCell(nextTurnCell));
-        System.out.println(getStepsToCell(nextTurnCell));
     }
 }
