@@ -92,7 +92,7 @@ public class DriverAgent implements Steppable, Driver {
 
     /** Constructor
      *
-     * @param id (required) int label for this class. Should be unique but 
+     * @param id (required) int label for this class. Should be unique but
      * uniqueness is not checked.
      */
     public DriverAgent(int id) {
@@ -160,7 +160,7 @@ public class DriverAgent implements Steppable, Driver {
                 if (b != null) {
                     Vehicle v = (Vehicle)b.objs[0];
                     isFree = v.getDirection() != dir.onRight();
-                    hasRightOfWay = 
+                    hasRightOfWay =
                         v.getSpeed() == 0 && v.idNum < vehicle.idNum;
                 }
                 hasRightOfWay = hasRightOfWay || hasReservation;
@@ -268,7 +268,7 @@ public class DriverAgent implements Steppable, Driver {
                 Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
                 if (b != null) {
                     Vehicle v = (Vehicle)b.objs[0];
-                    isFree = v.getDirection() != dir.onRight() 
+                    isFree = v.getDirection() != dir.onRight()
                         || v.getSpeed() == 0;
                 }
                 hasRightOfWay = hasReservation;
@@ -338,13 +338,13 @@ public class DriverAgent implements Steppable, Driver {
         int cellY;
         Direction legDir = Direction.byInt(ac.roadGrid.field[leg.x][leg.y]);
         if (legDir == locDir) {
-            cellX = Math.abs(locDir.getXOffset()) * leg.x 
+            cellX = Math.abs(locDir.getXOffset()) * leg.x
                 + Math.abs(legDir.getYOffset()) * loc.x;
             cellY = Math.abs(locDir.getYOffset()) * leg.y
                 + Math.abs(legDir.getXOffset()) * loc.y;
             nextLeg = new Int2D(cellX, cellY);
         } else {
-            cellX = Math.abs(locDir.getXOffset()) * leg.x 
+            cellX = Math.abs(locDir.getXOffset()) * leg.x
                 + Math.abs(legDir.getXOffset()) * loc.x;
             cellY = Math.abs(locDir.getYOffset()) * leg.y
                 + Math.abs(legDir.getYOffset()) * loc.y;
@@ -516,7 +516,7 @@ public class DriverAgent implements Steppable, Driver {
         AgentCity ac = (AgentCity)state;
 
         // Current Vehicle position and velocity;
-        location = vehicle.getLocation(ac);
+        location = ac.agentGrid.getObjectLocation(vehicle);
         direction = vehicle.getDirection();
         speed = vehicle.getSpeed();
         hasReservation = vehicle.hasReservation;
