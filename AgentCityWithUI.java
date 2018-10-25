@@ -26,7 +26,10 @@ public class AgentCityWithUI extends GUIState {
         new AgentCityWithUI().createController();
     }
 
-    public AgentCityWithUI() { super(new AgentCity(System.currentTimeMillis())); }
+    public AgentCityWithUI() {
+        super(new AgentCity(System.currentTimeMillis()));
+    }
+
     public AgentCityWithUI(SimState state) { super(state); }
 
     public Object getSimulationInspectedObject() { return state; }
@@ -43,7 +46,7 @@ public class AgentCityWithUI extends GUIState {
         for (int i = 1; i < numDir; i++) {
             roadColors[i] = new Color(111,110,99);
         }
-        roadPortrayal.setField(ac.roadGrid); 
+        roadPortrayal.setField(ac.roadGrid);
         roadPortrayal.setMap(new sim.util.gui.SimpleColorMap(roadColors));
 
         // Block colors
@@ -62,7 +65,7 @@ public class AgentCityWithUI extends GUIState {
 
         // Agent Colors
         agentPortrayal.setField(ac.agentGrid);
-        agentPortrayal.setPortrayalForClass(Vehicle.class, 
+        agentPortrayal.setPortrayalForClass(Vehicle.class,
                 new sim.portrayal.simple.OvalPortrayal2D(Color.red));
         Bag vehicles = ac.agentGrid.getAllObjects();
         for (int i = 0; i < vehicles.numObjs; i++) {
