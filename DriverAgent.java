@@ -19,18 +19,22 @@ public class DriverAgent implements Steppable, Driver {
 
     // Properties
     public final int idNum;
-    public Intersection nextIntersection;
-    public Int2D nextLeg;
-    public Int2D nextApproachLeg;
-    public Int2D nextTurnCell;
-    public Direction nextDirection;
 
     // Variables
+    public Waypoint nextWaypoint;
+    public boolean atWaypoint = false;
+    public boolean nearWaypoint = false;
+
     public Vehicle vehicle = null;
     public Driver.Directive nextDirective = Driver.Directive.NONE;
     public int desiredSpeed;
     public int maxSpeed;
     public Int2D destination = null;
+    public Intersection nextIntersection;
+    public Int2D nextLeg;
+    public Int2D nextApproachLeg;
+    public Int2D nextTurnCell;
+    public Direction nextDirection;
     public boolean nearIntersection = false;
     public boolean nearApproachLeg = false;
     public boolean atApproachLeg = false;
@@ -476,11 +480,6 @@ public class DriverAgent implements Steppable, Driver {
     int getGapToCell(Int2D cell, Int2D loc, Direction dir) {
         int x = cell.x - loc.x;
         int y = cell.y - loc.y;
-        /*
-        if (x != 0 && y != 0) {
-            throw new IllegalArgumentException("Cell is not ahead of Vehicle.");
-        }
-        */
         return x * dir.getXOffset() + y * dir.getYOffset() - 1;
     }
 
@@ -512,6 +511,17 @@ public class DriverAgent implements Steppable, Driver {
         return getStepsToCell(getGapToCell(cell), speed, maxSpeed);
     }
 
+    Driver.Directive getTurnDirective(Direction dir) {
+        if (dir == this.direction) {
+            return Driver.Directive.MOVE_FORWARD;
+        } else if (dir == this.direction.onRight()) {
+            return Driver.Directive.TURN_RIGHT;
+        } else if (dir == this.direction.onLeft()) {
+            return Driver.Directive.TURN_LEFT;
+        }
+        return Driver.Directive.STOP;
+    }
+
     public void step(final SimState state) {
         AgentCity ac = (AgentCity)state;
 
@@ -528,6 +538,8 @@ public class DriverAgent implements Steppable, Driver {
             nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
             nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
             nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+            nextWaypoint= new Waypoint(nextTurnCell,
+                                       getTurnDirective(nextDirection));
         }
 
         // check if Vehicle is near enough to an intersection to request a
@@ -543,6 +555,7 @@ public class DriverAgent implements Steppable, Driver {
         // check if Vehicle is in intersection
         inIntersection = ac.roadGrid.field[location.x][location.y] == 9;
         nearTurnCell = getStepsToCell(nextTurnCell) == 1;
+        nearWaypoint = getStepsToCell(nextWaypoint.cell) == 1;
 
         // check if Vehicle is one cell before destination
         nearNextLeg =
@@ -562,6 +575,8 @@ public class DriverAgent implements Steppable, Driver {
             nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
             vehicle.hasReservation = false;
             hasReservation = false;
+            nextWaypoint = new Waypoint(nextTurnCell,
+                                        getTurnDirective(nextDirection));
         }
 
         // Default state is move forward at max speed
@@ -590,28 +605,12 @@ public class DriverAgent implements Steppable, Driver {
           }
         */
 
-        // If if near cell
-        if (nearTurnCell) {
-            desiredSpeed = getGapToCell(nextTurnCell) + 1;
-            // ...get direction to turn or go straight then...
-            if (nextDirection == direction.onRight()) {
-                // ...turn right or
-                nextDirective = Driver.Directive.TURN_RIGHT;
-            } else if (nextDirection == direction.onLeft()) {
-                // ...turn left or
-                nextDirective = Driver.Directive.TURN_LEFT;
-            } else if (nextDirection == direction) {
-                // ...go straight or
-                nextDirective = Driver.Directive.MOVE_FORWARD;
-            } else {
-                // ...report there was a problem and stop.
-                System.out.printf("Vehicle %d at (%d, %d) had a problem turning.\n",
-                                  vehicle.idNum, location.x, location.y);
-                System.out.println(nextIntersection.idNum);
-                System.out.println(nextLeg);
-                System.out.println(nextDirection);
-                desiredSpeed = 0;
-                nextDirective = Driver.Directive.STOP;
+        // prepare to take appropriate action at Waypoint
+        if (nearWaypoint) {
+            nextDirective = nextWaypoint.directive;
+            // slow down if not moving forward
+            if (nextDirective != Driver.Directive.MOVE_FORWARD) {
+                desiredSpeed = getGapToCell(nextWaypoint.cell) + 1;
             }
         }
 
@@ -634,8 +633,8 @@ public class DriverAgent implements Steppable, Driver {
             desiredSpeed = 0;
             nextDirective = Driver.Directive.STOP;
         }
-        System.out.print(this.toString());
-        System.out.println(Arrays.toString(getPathToCell(nextTurnCell)));
-        System.out.print(this.vehicle.toString());
+        //System.out.print(this.toString());
+        //System.out.println(Arrays.toString(getPathToCell(nextTurnCell)));
+        //System.out.print(this.vehicle.toString());
     }
 }

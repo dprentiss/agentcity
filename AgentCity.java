@@ -61,13 +61,13 @@ public class AgentCity extends SimState {
 
         isTest = true;
     }
-    
+
     /** Constructor */
     public AgentCity(long seed, int height, int width) {
         // Required by SimState
         super(seed);
     }
-    
+
     public void start() {
         super.start();
 
@@ -122,13 +122,13 @@ public class AgentCity extends SimState {
         if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
             return true;
         return false;
-    }   
+    }
 
     public void makeTestGrids() {
 
 
         n = 1;
-        int vehicleDensity = 256;
+        int vehicleDensity = 16;
 
         final int NUM_VEHICLES = n * n * vehicleDensity;
         gridHeight = n * 38 + 2;
@@ -145,8 +145,8 @@ public class AgentCity extends SimState {
         agentGrid = new SparseGrid2D(gridWidth, gridHeight);
 
         // Make some roads and blocks
-        for (int x = 0; x < gridWidth; x++) { 
-            for (int y = 0; y < gridHeight; y++) { 
+        for (int x = 0; x < gridWidth; x++) {
+            for (int y = 0; y < gridHeight; y++) {
                 if (x == 0 || (x-2)%38 == 16 || (x-2)%38 == 17 || (x-2)%38 == 36) {
                     if (roadGrid.field[x][y] != 0) {
                         numIntersections += labelIntersection(x, y, numIntersections);
@@ -215,9 +215,9 @@ public class AgentCity extends SimState {
         intersections = new Intersection[numIntersections + 1];
         intersectionAgents = new IntersectionAgent[numIntersections + 1];
         int inter;
-        for (int x = 0; x < gridWidth; x++) { 
-            for (int y = 0; y < gridHeight; y++) { 
-                inter = intersectionGrid.field[x][y];   
+        for (int x = 0; x < gridWidth; x++) {
+            for (int y = 0; y < gridHeight; y++) {
+                inter = intersectionGrid.field[x][y];
                 if (inter != 0) {
                     maxXs[inter] = (x > maxXs[inter]) ? x : maxXs[inter];
                     minXs[inter] = (x < minXs[inter]) ? x : minXs[inter];
