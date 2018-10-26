@@ -85,7 +85,8 @@ public class AgentCity extends SimState {
                     v = (Vehicle)grid.allObjects.objs[i];
                     b = grid.getObjectsAtLocationOfObject(v);
                     if (b.numObjs > 1) {
-                        System.out.printf("Collision at [%d, %d]\n", v.getLocation().x, v.getLocation().y);
+                        System.out.printf("Collision at [%d, %d]\n",
+                                          v.getLocation().x, v.getLocation().y);
                         System.out.print(v.toString());
                         System.out.print(v.getDriver().toString());
                         System.out.println();
@@ -128,7 +129,7 @@ public class AgentCity extends SimState {
 
 
         n = 1;
-        int vehicleDensity = 16;
+        int vehicleDensity = 32;
 
         final int NUM_VEHICLES = n * n * vehicleDensity;
         gridHeight = n * 38 + 2;

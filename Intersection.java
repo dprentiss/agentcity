@@ -137,18 +137,6 @@ public class Intersection {
                 index++;
             }
         }
-        /*
-        // testing
-        System.out.printf("id: %d, minX: %d, maxX: %d, minY: %d, maxY: %d\n", idNum, minX, maxX, minY, maxY);
-        System.out.printf("Intesection %d, width %d, height %d\n", idNum, width, height);
-        System.out.println("Departure legs:");
-        System.out.println(departureLegs.length);
-        System.out.println(Arrays.toString(departureLegs));
-        System.out.println("Approach legs:");
-        System.out.println(approachLegs.length);
-        System.out.println(Arrays.toString(approachLegs));
-        System.out.println(" ");
-        */
     }
 
     // Get all departure legs execpt Direction dir
@@ -157,7 +145,7 @@ public class Intersection {
         Int2D[] legs; // array to return
         // Count relevant departure legs
         for (int i = 0; i < departureLegs.length; i++) {
-            if (ac.roadGrid.get(departureLegs[i].x, departureLegs[i].y) 
+            if (ac.roadGrid.get(departureLegs[i].x, departureLegs[i].y)
                     != dir.opposite().toInt()) {
                 numLegs++;
             }
@@ -166,7 +154,7 @@ public class Intersection {
         legs = new Int2D[numLegs];
         int nextIndex = 0;
         for (int i = 0; i < departureLegs.length; i++) {
-            if (ac.roadGrid.get(departureLegs[i].x, departureLegs[i].y) 
+            if (ac.roadGrid.get(departureLegs[i].x, departureLegs[i].y)
                     != dir.opposite().toInt()) {
                 legs[nextIndex] = departureLegs[i];
                 nextIndex++;

@@ -29,6 +29,7 @@ public class DriverAgent implements Steppable, Driver {
     public Driver.Directive nextDirective = Driver.Directive.NONE;
     public int desiredSpeed;
     public int maxSpeed;
+    public int maxSafeSpeed = maxSpeed;
     public Int2D destination = null;
     public Intersection nextIntersection;
     public Int2D nextLeg;
@@ -40,7 +41,6 @@ public class DriverAgent implements Steppable, Driver {
     public boolean atApproachLeg = false;
     public boolean hasReservation = false;
     public boolean inIntersection = false;
-    public boolean nearTurnCell = false;
     public boolean nearNextLeg = false;
     public boolean atNextLeg = false;
     public Int2D[] path;
@@ -85,7 +85,7 @@ public class DriverAgent implements Steppable, Driver {
             .append(", ")
             .append("inIntersection: " + inIntersection)
             .append(", ")
-            .append("nearTurnCell: " + nearTurnCell)
+            .append("nearWaypoint: " + nearWaypoint)
             .append(", ")
             //.append("nearNextLeg: " + nearNextLeg)
             //.append(", ")
@@ -103,6 +103,29 @@ public class DriverAgent implements Steppable, Driver {
         idNum = id;
     }
 
+    int getSafeSpeed(AgentCity ac, Int2D loc, Direction dir) {
+        Int2D cell;
+        boolean isRoad = true;
+        boolean isFree = true;
+        boolean hasRightOfWay = true;
+
+        for (int i = 0; i < maxSpeed; i++) {
+            cell = getCellAhead(loc, dir, i + 1);
+            if (ac.checkBounds(cell.x, cell.y)) {
+                isRoad = ac.roadGrid.get(cell.x, cell.y) != 0;
+                Bag b = ac.agentGrid.getObjectsAtLocation(cell.x, cell.y);
+                if (b != null) {
+                    if (b.numObjs > 0) isFree = false;
+                }
+                if (!isRoad || !isFree) return i;
+            } else {
+                return i;
+            }
+        }
+        return maxSpeed;
+    }
+
+    /*
     boolean pathAheadClear(AgentCity ac, Int2D loc, Direction dir, int speed) {
         int x;
         int y;
@@ -230,11 +253,6 @@ public class DriverAgent implements Steppable, Driver {
                             && directive != Directive.MOVE_FORWARD)
                         || (v.getSpeed() == 1
                             && directive != Directive.STOP);
-                    if (vehicle.idNum == 163) {
-                        System.out.print(this.toString());
-                        System.out.print(((DriverAgent)v.getDriver()).toString());
-                    }
-
                 }
                 if (!isFree) { return false; }
             }
@@ -284,6 +302,7 @@ public class DriverAgent implements Steppable, Driver {
         }
         return true;
     }
+    */
 
     /**
      * Gets the intersection ahead of the {@link Vehicle}.
@@ -491,7 +510,6 @@ public class DriverAgent implements Steppable, Driver {
         int dist = gap + 1;
         int steps = 0;
         if (dist < 0) {
-            //throw new IllegalArgumentException("Cell is not ahead of Vehicle.");
         } else if (dist == 0) {
             steps = 0;
         } else if (currentSpeed >= desiredSpeed) {
@@ -554,15 +572,10 @@ public class DriverAgent implements Steppable, Driver {
         atApproachLeg = getStepsToCell(nextApproachLeg) < 1;
         // check if Vehicle is in intersection
         inIntersection = ac.roadGrid.field[location.x][location.y] == 9;
-        nearTurnCell = getStepsToCell(nextTurnCell) == 1;
         nearWaypoint = getStepsToCell(nextWaypoint.cell) == 1;
 
         // check if Vehicle is one cell before destination
-        nearNextLeg =
-            location.x + direction.getXOffset()
-            == nextLeg.x
-            && location.y + direction.getYOffset()
-            == nextLeg.y;
+        nearNextLeg = getStepsToCell(nextLeg) == 1;
         // check if Vehicle is at destination
         atNextLeg = getStepsToCell(nextLeg) < 1;
 
@@ -584,8 +597,7 @@ public class DriverAgent implements Steppable, Driver {
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
         // request a reservation if needed
-        /*
-          if (inIntersection && !hasReservation) {
+        if (inIntersection && !hasReservation) {
           hasReservation = nextIntersection.requestReservation(
           vehicle, ac.schedule.getSteps() + 1 + speed,
           getUpdatedPath(location));
@@ -603,7 +615,6 @@ public class DriverAgent implements Steppable, Driver {
           getPath(ac, location, direction));
           vehicle.hasReservation = hasReservation;
           }
-        */
 
         // prepare to take appropriate action at Waypoint
         if (nearWaypoint) {
@@ -616,7 +627,6 @@ public class DriverAgent implements Steppable, Driver {
 
         // check if Vehicle needs and has a reservation for its next turning
         // movement
-        /*
         if (nearApproachLeg && !hasReservation) {
             desiredSpeed = getGapToCell(nextApproachLeg) + 1;
             nextDirective = Driver.Directive.STOP;
@@ -625,14 +635,11 @@ public class DriverAgent implements Steppable, Driver {
             desiredSpeed = 0;
             nextDirective = Driver.Directive.STOP;
         }
-        */
 
         // If the directive is move forward and the way is not clear, stop.
-        if (!pathAheadClear(ac, location, direction, speed)
-            && nextDirective == Driver.Directive.MOVE_FORWARD) {
-            desiredSpeed = 0;
-            nextDirective = Driver.Directive.STOP;
-        }
+        maxSafeSpeed = getSafeSpeed(ac, location, direction);
+        if (maxSafeSpeed < desiredSpeed) desiredSpeed = maxSafeSpeed;
+
         //System.out.print(this.toString());
         //System.out.println(Arrays.toString(getPathToCell(nextTurnCell)));
         //System.out.print(this.vehicle.toString());

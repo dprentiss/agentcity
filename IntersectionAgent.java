@@ -180,10 +180,12 @@ public class IntersectionAgent implements Steppable {
                 vehicle = (Vehicle)bag.objs[0];
                 schedule[(int)(steps % scheduleSize)][i][j] = vehicle.idNum;
                 vehicles.add(vehicle);
+                /*
                 if (intersection.idNum == 5) {
                     System.out.println(vehicles.numObjs);
                     System.out.println(vehicle);
                 }
+                */
             }
         }
     }
