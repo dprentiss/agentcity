@@ -13,7 +13,9 @@ public class AgentCity extends SimState {
     // Required for serialization
     private static final long serialVersionUID = 1;
 
-    private boolean isTest = false;
+    // Utility
+    private final boolean checkForCollisions;
+    private final boolean isTest;
 
     // Grid dimensions
     public int gridHeight;
@@ -60,12 +62,15 @@ public class AgentCity extends SimState {
         super(seed);
 
         isTest = true;
+        checkForCollisions = true;
     }
 
     /** Constructor */
     public AgentCity(long seed, int height, int width) {
         // Required by SimState
         super(seed);
+        isTest = true;
+        checkForCollisions = true;
     }
 
     public void start() {
@@ -95,7 +100,9 @@ public class AgentCity extends SimState {
             }
         };
 
-        schedule.scheduleRepeating(collisionCheck, 3, 1);
+        if (checkForCollisions) {
+            schedule.scheduleRepeating(collisionCheck, 3, 1);
+        }
 
     }
 
@@ -186,14 +193,18 @@ public class AgentCity extends SimState {
         // Make some Vehicle and Driver agents
         for (int i = 0; i < NUM_VEHICLES; i++) {
             // Get random location on road
-            Int2D newLocation = new Int2D(random.nextInt(gridWidth), random.nextInt(gridHeight));
+            Int2D newLocation = new Int2D(random.nextInt(gridWidth),
+                                          random.nextInt(gridHeight));
             while (roadGrid.get(newLocation.x, newLocation.y) == 0
                     || roadGrid.get(newLocation.x, newLocation.y) == 9
-                    || agentGrid.getObjectsAtLocation(newLocation.x, newLocation.y) != null) {
-                newLocation = new Int2D(random.nextInt(gridWidth), random.nextInt(gridHeight));
+                    || agentGrid.getObjectsAtLocation(newLocation.x,
+                                                      newLocation.y) != null) {
+                newLocation = new Int2D(random.nextInt(gridWidth),
+                                        random.nextInt(gridHeight));
                     }
             // One Vehicle on a road cell in the correct direction
-            Direction newDir = Direction.byInt(roadGrid.get(newLocation.x, newLocation.y));
+            Direction newDir = Direction.byInt(roadGrid.get(newLocation.x,
+                                                            newLocation.y));
             Vehicle testCar = new Vehicle(i, newDir);
             agentGrid.setObjectLocation(testCar, newLocation);
             // Add Vehicle to Schedule
