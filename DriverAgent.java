@@ -21,9 +21,10 @@ public class DriverAgent implements Steppable, Driver {
     public final int idNum;
 
     // Variables
+    public Waypoint nextWaypoint;
+    public Waypoint[] waypoints;
     public Vehicle vehicle = null;
     public Driver.Directive nextDirective = Driver.Directive.NONE;
-    public Waypoint nextWaypoint;
     public boolean atWaypoint = false;
     public boolean nearWaypoint = false;
     public int stepsToWaypoint;
@@ -82,6 +83,8 @@ public class DriverAgent implements Steppable, Driver {
             .append("nearApproachLeg: " + nearApproachLeg)
             .append(", ")
             .append("atApproachLeg: " + atApproachLeg)
+            .append(", ")
+            .append("nearIntersection: " + nearIntersection)
             .append(", ")
             .append("inIntersection: " + inIntersection)
             .append(", ")
@@ -410,7 +413,9 @@ public class DriverAgent implements Steppable, Driver {
         tmp[0] = loc;
         int dist = getGapToCell(cell, loc, dir) + 1;
         if (dist < 0) {
-            throw new IllegalArgumentException("Cell is not ahead of Vehicle.");
+            String errorString =
+                String.format("Cell %s is not ahead of Vehicle %d.", cell, vehicle.idNum);
+            throw new IllegalArgumentException(errorString);
         }
         while (dist > 0) {
             if (speed < desiredSpeed) speed++;
@@ -580,15 +585,18 @@ public class DriverAgent implements Steppable, Driver {
 
         // check if Vehicle is near enough to an intersection to request a
         // reservation
-        nearIntersection =
-            location.x + 2 * direction.getXOffset()
-            == nextApproachLeg.x
-            && location.y + 2 * direction.getYOffset()
-            == nextApproachLeg.y;
+        //nearIntersection = getGapToCell(nextApproachLeg) <= 2;
+        /*
+          location.x + 2 * direction.getXOffset()
+          == nextApproachLeg.x
+          && location.y + 2 * direction.getYOffset()
+          == nextApproachLeg.y;
+        */
         nearApproachLeg = getStepsToCell(nextApproachLeg) == 1;
         // check if Vehicle is at approach leg
         atApproachLeg = location.equals(nextApproachLeg);
         // check if Vehicle is in intersection
+        nearIntersection = nearApproachLeg || atApproachLeg;
         inIntersection = ac.roadGrid.field[location.x][location.y] == 9;
 
         // check if Vehicle is one cell before destination
@@ -617,23 +625,32 @@ public class DriverAgent implements Steppable, Driver {
 
         // request a reservation if needed
         if (inIntersection && !hasReservation) {
-          hasReservation = nextIntersection.requestReservation(
-          vehicle, ac.schedule.getSteps() + 1 + speed,
-          getUpdatedPath(location));
-          vehicle.hasReservation = hasReservation;
+            hasReservation = nextIntersection.requestReservation(
+                                                                 vehicle, ac.schedule.getSteps() + 1 + speed,
+                                                                 getUpdatedPath(location));
+            vehicle.hasReservation = hasReservation;
+        } else if (nearIntersection && !hasReservation) {
+            path = getPath(ac, location, direction);
+            hasReservation = nextIntersection.requestReservation(
+                                                                 vehicle, ac.schedule.getSteps() + 2,
+                                                                 getPath(ac, location, direction));
+            vehicle.hasReservation = hasReservation;
+        }
+          /*
           } else if (speed == 1 && nearIntersection) {
-          path = getPath(ac, location, direction);
-          hasReservation = nextIntersection.requestReservation(
-          vehicle, ac.schedule.getSteps() + 3,
-          getPath(ac, location, direction));
-          vehicle.hasReservation = hasReservation;
-          } else if (speed == 0 && atApproachLeg) {
           path = getPath(ac, location, direction);
           hasReservation = nextIntersection.requestReservation(
           vehicle, ac.schedule.getSteps() + 2,
           getPath(ac, location, direction));
           vehicle.hasReservation = hasReservation;
+          } else if (speed == 0 && atApproachLeg) {
+          path = getPath(ac, location, direction);
+          hasReservation = nextIntersection.requestReservation(
+          vehicle, ac.schedule.getSteps() + 1,
+          getPath(ac, location, direction));
+          vehicle.hasReservation = hasReservation;
           }
+          */
 
         // If the directive is move forward and the way is not clear, stop.
         maxSafeSpeed = getSafeSpeed(ac, location, direction);
@@ -665,8 +682,10 @@ public class DriverAgent implements Steppable, Driver {
         // If the directive is move forward and the way is not clear, stop.
         if (maxSafeSpeed < desiredSpeed) desiredSpeed = maxSafeSpeed;
 
-        //System.out.print(this.toString());
-        //System.out.println(Arrays.toString(getPathToCell(nextTurnCell)));
-        //System.out.print(this.vehicle.toString());
+        if (nextIntersection.idNum == 5 && hasReservation) {
+            System.out.print(this.toString());
+            //System.out.println(Arrays.toString(getPathToCell(nextTurnCell)));
+            System.out.print(this.vehicle.toString());
+        }
     }
 }
