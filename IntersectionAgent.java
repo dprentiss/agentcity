@@ -109,14 +109,21 @@ public class IntersectionAgent implements Steppable {
         return toString(NONE);
     }
 
+    /** Handles reservation requests for the Intersection controlled by this
+     * intersection agent.
+     *
+     * @param vehicle Vehicle requesting reservation
+     * @param time
+     */
     private boolean addVehicleToSchedule(Vehicle vehicle,
                                          long time,
                                          Int2D[] path) {
         int x;
         int y;
         int timeIndex;
-        // Check if Vehicles desired path is free
+        // check if accepting reservations
         if (!acceptingReservations && !vehicles.contains(vehicle)) return false;
+        // Check if Vehicles desired path is free
         for (int i = 0; i < path.length; i++) {
             timeIndex = (int)((time + i) % scheduleSize);
             x = path[i].x - intersection.minX;
@@ -136,6 +143,13 @@ public class IntersectionAgent implements Steppable {
         return true;
     }
 
+    /** Checks the schedule against a tally of vehicles actually present in the
+     * intersection.
+     *
+     * @param ac Current state of the simulation
+     *
+     * @return True if vehicles present match schedule
+     */
     private boolean scheduleValid(AgentCity ac) {
         int x;
         int y;

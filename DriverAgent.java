@@ -21,12 +21,11 @@ public class DriverAgent implements Steppable, Driver {
     public final int idNum;
 
     // Variables
+    public Vehicle vehicle = null;
+    public Driver.Directive nextDirective = Driver.Directive.NONE;
     public Waypoint nextWaypoint;
     public boolean atWaypoint = false;
     public boolean nearWaypoint = false;
-
-    public Vehicle vehicle = null;
-    public Driver.Directive nextDirective = Driver.Directive.NONE;
     public int stepsToWaypoint;
     public int desiredSpeed;
     public int maxSpeed;
@@ -106,13 +105,24 @@ public class DriverAgent implements Steppable, Driver {
         idNum = id;
     }
 
+    /**
+     * Gets the get the maximum safe speed for the {@link Vehicle} on the next
+     * step.
+     *
+     * @param ac the current state of the simulation.
+     * @param loc currrent location of {@link Vehicle}.
+     * @param dir currrent location of {@link Vehicle}.
+     *
+     * @return the maximum safe speed.
+     */
     int getSafeSpeed(AgentCity ac, Int2D loc, Direction dir) {
         Int2D cell;
         boolean isRoad = true;
         boolean isFree = true;
-        boolean hasRightOfWay = true;
+        // boolean hasRightOfWay = true;
 
-        for (int i = 0; i < maxSpeed; i++) {
+        // For each cell ahead of vehicle, check for obstacles and boundaries.
+        for (int i = 0; i < maxSpeed; i++) { // Check cells out to maxSpeed
             cell = getCellAhead(loc, dir, i + 1);
             if (ac.checkBounds(cell.x, cell.y)) {
                 isRoad = ac.roadGrid.get(cell.x, cell.y) != 0;
@@ -120,11 +130,14 @@ public class DriverAgent implements Steppable, Driver {
                 if (b != null) {
                     if (b.numObjs > 0) isFree = false;
                 }
+                // return cell before obstacle
                 if (!isRoad || !isFree) return i;
             } else {
+                // return cell before boundary
                 return i;
             }
         }
+        // return maxSpeed since no obstacles or boundaries found
         return maxSpeed;
     }
 
@@ -561,7 +574,7 @@ public class DriverAgent implements Steppable, Driver {
             nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
             nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
             nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
-            nextWaypoint= new Waypoint(nextTurnCell,
+            nextWaypoint = new Waypoint(nextTurnCell,
                                        getTurnDirective(nextDirection));
         }
 
