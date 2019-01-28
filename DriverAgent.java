@@ -443,12 +443,49 @@ public class DriverAgent implements Steppable, Driver {
     }
 
     Int2D[] getPathToCell(Int2D cell, boolean stopAtCell) {
-        return getPathToCell(cell,
-                             location,
-                             direction,
-                             speed,
-                             maxSpeed,
+        return getPathToCell(cell, location, direction, speed, maxSpeed,
                              stopAtCell);
+    }
+
+    Int2D[] getPathToWaypoint(Waypoint waypoint,
+                              Int2D loc,
+                              Direction dir,
+                              int currentSpeed,
+                              int desiredSpeed) {
+
+        boolean stopAtCell =
+            waypoint.directive != Driver.Directive.MOVE_FORWARD;
+
+        return getPathToCell(waypoint.cell, loc, dir, currentSpeed,
+                             desiredSpeed, stopAtCell);
+    }
+
+    Int2D[]getPath(Waypoint[] waypoints, Int2D loc, Direction dir,
+                   int currentSpeed, int desiredSpeed) {
+        Int2D[] path;
+        Int2D[] pathToWaypoint;
+        Int2D[] tmpPath = new Int2D[16];
+        Int2D tmpLoc = loc;
+        Direction tmpDir = dir;
+        int tmpSpeed = currentSpeed;
+
+        // check that first waypoint is ahead
+        // loop over waypoints and add to path
+        for (int i = 0; i < waypoints.length; i++) {
+            pathToWaypoint =
+                getPathToWaypoint(waypoints[i], tmpLoc, tmpDir, tmpSpeed,
+                                  desiredSpeed).clone();
+            for (int j = 0; j < pathToWaypoint.length; j++) {
+                tmpPath[i+j] = waypoints[i].cell;
+                tmpSpeed = getGapToCell(tmpPath[i+j], tmpPath[i+j-1], tmpDir);
+            }
+        }
+
+        return tmpPath;
+    }
+
+    Int2D[]getPath(Waypoint[] waypoints) {
+        return getPath(waypoints, location, direction, speed, maxSpeed);
     }
 
     Int2D[] getPath(AgentCity ac, Int2D loc, Direction dir) {
