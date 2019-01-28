@@ -518,6 +518,10 @@ public class DriverAgent implements Steppable, Driver {
         return getCellAhead(cell.x, cell.y, dir, offset);
     }
 
+    Int2D getCellAhead(Int2D cell, int offset) {
+        return getCellAhead(cell.x, cell.y, direction, offset);
+    }
+
     int getGapToCell(Int2D cell, Int2D loc, Direction dir) {
         int x = cell.x - loc.x;
         int y = cell.y - loc.y;
@@ -625,15 +629,20 @@ public class DriverAgent implements Steppable, Driver {
 
         // request a reservation if needed
         if (inIntersection && !hasReservation) {
-            hasReservation = nextIntersection.requestReservation(
-                                                                 vehicle, ac.schedule.getSteps() + 1 + speed,
-                                                                 getUpdatedPath(location));
+            hasReservation =
+                nextIntersection.requestReservation(
+                                                    vehicle,
+                                                    ac.schedule.getSteps() + 1 + speed,
+                                                    getUpdatedPath(location));
             vehicle.hasReservation = hasReservation;
         } else if (nearIntersection && !hasReservation) {
+            long time = ac.schedule.getSteps()
+                + getStepsToCell(getCellAhead(nextApproachLeg, 1));
             path = getPath(ac, location, direction);
-            hasReservation = nextIntersection.requestReservation(
-                                                                 vehicle, ac.schedule.getSteps() + 2,
-                                                                 getPath(ac, location, direction));
+            hasReservation =
+                nextIntersection.requestReservation(vehicle,
+                                                    time,
+                                                    getPath(ac, location, direction));
             vehicle.hasReservation = hasReservation;
         }
           /*
