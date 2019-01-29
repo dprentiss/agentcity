@@ -477,10 +477,12 @@ public class DriverAgent implements Steppable, Driver {
                                   desiredSpeed).clone();
             for (int j = 0; j < pathToWaypoint.length; j++) {
                 tmpPath[i+j] = waypoints[i].cell;
-                tmpSpeed = getGapToCell(tmpPath[i+j], tmpPath[i+j-1], tmpDir);
+                //tmpSpeed = getGapToCell(tmpPath[i+j], tmpPath[i+j-1], tmpDir);
             }
+            tmpSpeed = getGapToCell(pathToWaypoint[-1],
+                                    pathToWaypoint[-2],
+                                    tmpDir) + 1;
         }
-
         return tmpPath;
     }
 
@@ -622,6 +624,14 @@ public class DriverAgent implements Steppable, Driver {
             nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
             nextWaypoint = new Waypoint(nextTurnCell,
                                        getTurnDirective(nextDirection));
+            waypoints = new Waypoint[] {
+                new Waypoint(getCellAhead(nextApproachLeg, direction, 1),
+                             Driver.Directive.MOVE_FORWARD),
+                new Waypoint(nextTurnCell,
+                             getTurnDirective(nextDirection)),
+                new Waypoint(getCellAhead(nextLeg, nextDirection.opposite(), 1),
+                             Driver.Directive.MOVE_FORWARD)
+            };
         }
 
         // check if Vehicle is near enough to an intersection to request a
@@ -730,7 +740,8 @@ public class DriverAgent implements Steppable, Driver {
 
         if (nextIntersection.idNum == 5 && hasReservation) {
             System.out.print(this.toString());
-            //System.out.println(Arrays.toString(getPathToCell(nextTurnCell)));
+            System.out.println(Arrays.toString(waypoints));
+            System.out.println(Arrays.toString(getPath(waypoints)));
             System.out.print(this.vehicle.toString());
         }
     }

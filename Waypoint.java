@@ -13,4 +13,12 @@ public class Waypoint {
         this.cell = cell;
         this.directive = directive;
     }
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+            .append(cell)
+            .append(directive)
+            .toString();
+    }
 }
