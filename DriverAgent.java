@@ -144,185 +144,6 @@ public class DriverAgent implements Steppable, Driver {
         return maxSpeed;
     }
 
-    /*
-    boolean pathAheadClear(AgentCity ac, Int2D loc, Direction dir, int speed) {
-        int x;
-        int y;
-        boolean isRoad = true;
-        boolean isFree = true;
-        boolean hasRightOfWay = true;
-        Driver.Directive directive;
-        //743508623
-
-        switch (speed) {
-        case 0:
-            // one cell ahead
-            x = loc.x + dir.getXOffset();
-            y = loc.y + dir.getYOffset();
-            if (ac.checkBounds(x,y)) {
-                isRoad = ac.roadGrid.get(x, y) != 0;
-                Bag b = ac.agentGrid.getObjectsAtLocation(x, y);
-                if (b != null) {
-                    Vehicle v = (Vehicle)b.objs[0];
-                    isFree = v.getSpeed() != 0;
-                }
-                if (!isRoad || !isFree) { return false; }
-            } else {
-                return false;
-            }
-            // two cells ahead
-            x = loc.x + 2 * dir.getXOffset();
-            y = loc.y + 2 * dir.getYOffset();
-            if (ac.checkBounds(x, y)) {
-                Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
-                if (b != null) {
-                    Vehicle v = (Vehicle)b.objs[0];
-                    isFree = v.getDirection() != dir.opposite();
-                }
-                hasRightOfWay = hasReservation;
-                if (!isFree && !hasRightOfWay) { return false; }
-            }
-            //  one cell ahead and one cell right
-            x = loc.x + dir.getXOffset() + dir.onRight().getXOffset();
-            y = loc.y + dir.getYOffset() + dir.onRight().getYOffset();
-            if (ac.checkBounds(x, y)) {
-                Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
-                if (b != null) {
-                    Vehicle v = (Vehicle)b.objs[0];
-                    isFree = v.getDirection() != dir.onLeft();
-                    hasRightOfWay =
-                        v.getSpeed() == 0 && v.idNum < vehicle.idNum;
-                }
-                hasRightOfWay = hasRightOfWay || hasReservation;
-                if (!isFree && !hasRightOfWay) {
-                    return false;
-                }
-            }
-            //  one cell ahead and one cell left
-            x = loc.x + dir.getXOffset() + dir.onLeft().getXOffset();
-            y = loc.y + dir.getYOffset() + dir.onLeft().getYOffset();
-            if (ac.checkBounds(x, y)) {
-                Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
-                if (b != null) {
-                    Vehicle v = (Vehicle)b.objs[0];
-                    isFree = v.getDirection() != dir.onRight();
-                    hasRightOfWay =
-                        v.getSpeed() == 0 && v.idNum < vehicle.idNum;
-                }
-                hasRightOfWay = hasRightOfWay || hasReservation;
-                if (!isFree && !hasRightOfWay) {
-                    return false;
-                }
-            }
-            break;
-        case 1:
-            // one cell ahead
-            x = loc.x + dir.getXOffset();
-            y = loc.y + dir.getYOffset();
-            if (ac.checkBounds(x, y)) {
-                Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
-                if (b != null) {
-                    Vehicle v = (Vehicle)b.objs[0];
-                    isFree = v.getDirection() != dir;
-                    hasRightOfWay = v.hasReservation;
-                }
-                hasRightOfWay = hasRightOfWay && hasReservation;
-                if (!isFree && !hasRightOfWay) { return false; }
-            }
-            // two cells ahead
-            x = loc.x + 2 * dir.getXOffset();
-            y = loc.y + 2 * dir.getYOffset();
-            if (ac.checkBounds(x, y)) {
-                isRoad = ac.roadGrid.get(x, y) != 0;
-                Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
-                if (b != null) {
-                    Vehicle v = (Vehicle)b.objs[0];
-                    isFree = v.getSpeed() != 0;
-                    hasRightOfWay = v.hasReservation;
-                }
-                hasRightOfWay = hasRightOfWay && hasReservation;
-                if (!isRoad || (!isFree && !hasRightOfWay)) {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-            // three cells ahead
-            x = loc.x + 3 * dir.getXOffset();
-            y = loc.y + 3 * dir.getYOffset();
-            if (ac.checkBounds(x, y)) {
-                Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
-                if (b != null) {
-                    Vehicle v = (Vehicle)b.objs[0];
-                    isFree = v.getDirection() != dir.opposite();
-                }
-                hasRightOfWay = hasReservation;
-                if (!isFree && !hasRightOfWay) { return false; }
-            }
-            //  two cells ahead and one cell right
-            x = loc.x + 2 * dir.getXOffset() + dir.onRight().getXOffset();
-            y = loc.y + 2 * dir.getYOffset() + dir.onRight().getYOffset();
-            if (ac.checkBounds(x, y)) {
-                Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
-                if (b != null) {
-                    Vehicle v = (Vehicle)b.objs[0];
-                    directive = v.getDriver().getNextDirective();
-                    isFree = v.getDirection() != dir.onLeft()
-                        || (v.getSpeed() == 0
-                            && directive != Directive.MOVE_FORWARD)
-                        || (v.getSpeed() == 1
-                            && directive != Directive.STOP);
-                }
-                if (!isFree) { return false; }
-            }
-            //  two cells ahead and one cell left
-            x = loc.x + 2 * dir.getXOffset() + dir.onLeft().getXOffset();
-            y = loc.y + 2 * dir.getYOffset() + dir.onLeft().getYOffset();
-            if (ac.checkBounds(x, y)) {
-                Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
-                if (b != null) {
-                    Vehicle v = (Vehicle)b.objs[0];
-                    isFree = v.getDirection() != dir.onRight();
-                }
-                hasRightOfWay = hasReservation;
-                if (!isFree && !hasRightOfWay) { return false; }
-            }
-            //  two cells ahead and two cells right
-            x = loc.x + 2 * dir.getXOffset() + 2 * dir.onRight().getXOffset();
-            y = loc.y + 2 * dir.getYOffset() + 2 * dir.onRight().getYOffset();
-            if (ac.checkBounds(x, y)) {
-                Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
-                if (b != null) {
-                    Vehicle v = (Vehicle)b.objs[0];
-                    isFree = v.getDirection() != dir.onLeft()
-                        || v.getSpeed() == 0;
-                }
-                hasRightOfWay = hasReservation;
-                if (!isFree && !hasRightOfWay) {
-                    return false;
-                }
-            }
-            //  two cells ahead and two cells left
-            x = loc.x + 2 * dir.getXOffset() + 2 * dir.onLeft().getXOffset();
-            y = loc.y + 2 * dir.getYOffset() + 2 * dir.onLeft().getYOffset();
-            if (ac.checkBounds(x, y)) {
-                Bag b = ac.agentGrid.getObjectsAtLocation(x,y);
-                if (b != null) {
-                    Vehicle v = (Vehicle)b.objs[0];
-                    isFree = v.getDirection() != dir.onRight()
-                        || v.getSpeed() == 0;
-                }
-                hasRightOfWay = hasReservation;
-                if (!isFree && !hasRightOfWay) {
-                    return false;
-                }
-            }
-            break;
-        }
-        return true;
-    }
-    */
-
     /**
      * Gets the intersection ahead of the {@link Vehicle}.
      *
@@ -407,10 +228,11 @@ public class DriverAgent implements Steppable, Driver {
         int speed = currentSpeed;
         int x = loc.x;
         int y = loc.y;
-        int i = 1;
+        //int i = 1;
+        int i = 0;
         Int2D[] path;
 
-        tmp[0] = loc;
+        //tmp[0] = loc;
         int dist = getGapToCell(cell, loc, dir) + 1;
         if (dist < 0) {
             String errorString =
@@ -468,20 +290,29 @@ public class DriverAgent implements Steppable, Driver {
         Int2D tmpLoc = loc;
         Direction tmpDir = dir;
         int tmpSpeed = currentSpeed;
+        int k = 0;
 
-        // check that first waypoint is ahead
         // loop over waypoints and add to path
         for (int i = 0; i < waypoints.length; i++) {
             pathToWaypoint =
                 getPathToWaypoint(waypoints[i], tmpLoc, tmpDir, tmpSpeed,
                                   desiredSpeed).clone();
             for (int j = 0; j < pathToWaypoint.length; j++) {
-                tmpPath[i+j] = waypoints[i].cell;
-                //tmpSpeed = getGapToCell(tmpPath[i+j], tmpPath[i+j-1], tmpDir);
+                tmpPath[k] = pathToWaypoint[j];
+                if (waypoints[i].directive == Driver.Directive.MOVE_FORWARD) {
+                    tmpSpeed = getGapToCell(tmpPath[k], tmpLoc, tmpDir) + 1;
+                } else {
+                    tmpSpeed = 0;
+                }
+                tmpLoc = tmpPath[k];
+                k++;
             }
-            tmpSpeed = getGapToCell(pathToWaypoint[-1],
-                                    pathToWaypoint[-2],
+            /*
+            tmpSpeed = getGapToCell(pathToWaypoint[pathToWaypoint.length - 1],
+                                    pathToWaypoint[pathToWaypoint.length - 2],
                                     tmpDir) + 1;
+            */
+            tmpDir = tmpDir.byDirective(waypoints[i].directive);
         }
         return tmpPath;
     }

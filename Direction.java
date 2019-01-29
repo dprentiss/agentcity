@@ -41,8 +41,19 @@ enum Direction {
         return map.get(dirNum);
     }
 
+    public Direction byDirective(Driver.Directive directive) {
+        switch (directive) {
+        case TURN_LEFT:
+            return this.onLeft();
+        case TURN_RIGHT:
+            return this.onRight();
+        default:
+            return this;
+        }
+    }
+
     public Direction onRight() {
-        if (dirNum > 0 && dirNum < 9) { 
+        if (dirNum > 0 && dirNum < 9) {
             return this.byInt((dirNum + 2) % 8);
         } else {
             return this;
@@ -50,7 +61,7 @@ enum Direction {
     }
 
     public Direction onLeft() {
-        if (dirNum > 0 && dirNum < 9) { 
+        if (dirNum > 0 && dirNum < 9) {
             return this.byInt((dirNum + 6) % 8);
         } else {
             return this;
@@ -58,11 +69,10 @@ enum Direction {
     }
 
     public Direction opposite() {
-        if (dirNum > 0 && dirNum < 9) { 
+        if (dirNum > 0 && dirNum < 9) {
             return this.byInt((dirNum + 4) % 8);
         } else {
             return this;
         }
     }
 }
-
