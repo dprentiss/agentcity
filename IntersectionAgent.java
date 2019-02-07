@@ -147,6 +147,49 @@ public class IntersectionAgent implements Steppable {
         return true;
     }
 
+    /** Handles reservation requests for the Intersection controlled by this
+     * intersection agent.
+     *
+     * @param vehicle Vehicle requesting reservation
+     * @param time
+     */
+    private boolean addVehicleToSchedule(Vehicle vehicle,
+                                         long time,
+                                         Int2D[][] path) {
+        int x;
+        int y;
+        int timeIndex;
+        // check if accepting reservations
+        if (!acceptingReservations && !vehicles.contains(vehicle)) return false;
+        // check if Vehicles desired path is free
+        for (int i = 0; i < path.length; i++) {
+            timeIndex = (int)((time + i) % scheduleSize);
+            for (int j = 0; j < path[i].length; j++) {
+                x = path[i][j].x - intersection.minX;
+                y = path[i][j].y - intersection.minY;
+                if (schedule[timeIndex][x][y] != -1) {
+                    return false;
+                }
+            }
+        }
+        // place vehicle on schedule
+        for (int i = 0; i < path.length; i++) {
+            timeIndex = (int)((time + i) % scheduleSize);
+            for (int j = 0; j < path[i].length; j++) {
+                x = path[i][j].x - intersection.minX;
+                y = path[i][j].y - intersection.minY;
+                schedule[timeIndex][x][y] = vehicle.idNum;
+            }
+        }
+        // add Vehicle to Bag
+        vehicles.add(vehicle);
+        if (intersection.idNum == 5) {
+            System.out.println();
+            System.out.print(toString(SCHEDULE));
+        }
+        return true;
+    }
+
     /** Checks the schedule against a tally of vehicles actually present in the
      * intersection.
      *

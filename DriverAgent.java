@@ -282,7 +282,39 @@ public class DriverAgent implements Steppable, Driver {
                              desiredSpeed, stopAtCell);
     }
 
-    Int2D[]getPath(Waypoint[] waypoints, Int2D loc, Direction dir,
+    /*
+    Int2D[][] getResevationPath(Waypoint[] waypoints, Int2D loc, Direction dir,
+                   int currentSpeed, int desiredSpeed) {
+        Int2D[] path;
+        Int2D[] pathToWaypoint;
+        Int2D[][] tmpPath = new Int2D[16][maxSpeed];
+        Int2D tmpLoc = loc;
+        Direction tmpDir = dir;
+        int tmpSpeed = currentSpeed;
+        int k = 0;
+
+        // loop over waypoints and add to path
+        for (int i = 0; i < waypoints.length; i++) {
+            pathToWaypoint =
+                getPathToWaypoint(waypoints[i], tmpLoc, tmpDir, tmpSpeed,
+                                  desiredSpeed).clone();
+            for (int j = 0; j < pathToWaypoint.length; j++) {
+                tmpPath[k] = pathToWaypoint[j];
+                if (waypoints[i].directive == Driver.Directive.MOVE_FORWARD) {
+                    tmpSpeed = getGapToCell(tmpPath[k], tmpLoc, tmpDir) + 1;
+                } else {
+                    tmpSpeed = 0;
+                }
+                tmpLoc = tmpPath[k];
+                k++;
+            }
+            tmpDir = tmpDir.byDirective(waypoints[i].directive);
+        }
+        return tmpPath;
+    }
+    */
+
+    Int2D[] getPath(Waypoint[] waypoints, Int2D loc, Direction dir,
                    int currentSpeed, int desiredSpeed) {
         Int2D[] path;
         Int2D[] pathToWaypoint;
