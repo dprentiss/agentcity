@@ -604,7 +604,7 @@ public class DriverAgent implements Steppable, Driver {
         if (nextIntersection.idNum == 5 && hasReservation) {
             System.out.print(this.toString());
             System.out.println(Arrays.toString(waypoints));
-            System.out.println(Arrays.toString(getPath(waypoints)));
+           //System.out.println(Arrays.toString(getPath(waypoints)));
             System.out.print(this.vehicle.toString());
         }
     }
