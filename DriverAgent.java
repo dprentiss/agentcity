@@ -235,8 +235,16 @@ public class DriverAgent implements Steppable, Driver {
         //tmp[0] = loc;
         int dist = getGapToCell(cell, loc, dir) + 1;
         if (dist < 0) {
-            String errorString =
-                String.format("Cell %s is not ahead of Vehicle %d.", cell, vehicle.idNum);
+            String errorString = new StringBuilder()
+                .append(String.format("Cell %s is not ahead of cell %s headed %s.\n",
+                                      cell, loc, dir))
+                .append(this.vehicle.toString())
+                .append(this.toString())
+                .append(Arrays.toString(waypoints))
+                //.append(Arrays.deepToString(getPath(waypoints)))
+                //.append(Arrays.deepToString(getReservationPath(waypoints)))
+                .append(vehicle.toString())
+                .toString();
             throw new IllegalArgumentException(errorString);
         }
         while (dist > 0) {
@@ -289,9 +297,9 @@ public class DriverAgent implements Steppable, Driver {
 
     Int2D[][] getReservationPath(Waypoint[] waypoints, Int2D loc, Direction dir,
                    int currentSpeed, int desiredSpeed) {
-        Int2D[] path;
         Int2D[] pathToWaypoint;
         Int2D[][] tmpPath = new Int2D[16][maxSpeed];
+        Int2D[][] path;
         Int2D tmpLoc = loc;
         Direction tmpDir = dir;
         int tmpSpeed = currentSpeed;
@@ -304,9 +312,8 @@ public class DriverAgent implements Steppable, Driver {
                 getPathToWaypoint(waypoints[i], tmpLoc, tmpDir, tmpSpeed,
                                   desiredSpeed).clone();
             for (int j = 0; j < pathToWaypoint.length; j++) {
-                tmpPath[k][0] = pathToWaypoint[j];
-                dist = getGapToCell(tmpPath[k][0], tmpLoc, tmpDir) + 1;
-                for(int l = 0; l < dist - 1; l++) {
+                dist = getGapToCell(pathToWaypoint[j], tmpLoc, tmpDir) + 1;
+                for(int l = 0; l < dist; l++) {
                     tmpPath[k][l] = getCellAhead(tmpLoc, tmpDir, 1);
                     tmpLoc = tmpPath[k][l];
                 }
@@ -319,7 +326,23 @@ public class DriverAgent implements Steppable, Driver {
             }
             tmpDir = tmpDir.byDirective(waypoints[i].directive);
         }
-        return tmpPath;
+        // copy tmpPath to trimmed path
+        /*
+        int m = getStepsToCell(waypoints[0].cell);
+        path = new Int2D[k - m][maxSpeed];
+        for (int i = 0; i < k - m ; i++) {
+            for (int j = 0; j < maxSpeed; j++) {
+                path[i][j] = tmpPath[i + m][j];
+            }
+        }
+        */
+        path = new Int2D[k][maxSpeed];
+        for (int i = 0; i < k; i++) {
+            for (int j = 0; j < maxSpeed; j++) {
+                path[i][j] = tmpPath[i][j];
+            }
+        }
+        return path;
     }
 
     Int2D[] getPath(Waypoint[] waypoints, Int2D loc, Direction dir,
@@ -347,17 +370,17 @@ public class DriverAgent implements Steppable, Driver {
                 tmpLoc = tmpPath[k];
                 k++;
             }
-            /*
-            tmpSpeed = getGapToCell(pathToWaypoint[pathToWaypoint.length - 1],
-                                    pathToWaypoint[pathToWaypoint.length - 2],
-                                    tmpDir) + 1;
-            */
             tmpDir = tmpDir.byDirective(waypoints[i].directive);
         }
-        return tmpPath;
+        // copy tmpPath to trimmed path
+        path = new Int2D[k];
+        for (int i = 0; i < k; i++) {
+            path[i] = tmpPath[i];
+        }
+        return path;
     }
 
-    Int2D[]getPath(Waypoint[] waypoints) {
+    Int2D[] getPath(Waypoint[] waypoints) {
         return getPath(waypoints, location, direction, speed, maxSpeed);
     }
 
@@ -496,12 +519,9 @@ public class DriverAgent implements Steppable, Driver {
             nextWaypoint = new Waypoint(nextTurnCell,
                                        getTurnDirective(nextDirection));
             waypoints = new Waypoint[] {
-                new Waypoint(getCellAhead(nextApproachLeg, direction, 1),
-                             Driver.Directive.MOVE_FORWARD),
-                new Waypoint(nextTurnCell,
-                             getTurnDirective(nextDirection)),
-                new Waypoint(getCellAhead(nextLeg, nextDirection.opposite(), 1),
-                             Driver.Directive.MOVE_FORWARD)
+                new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
+                new Waypoint(nextTurnCell, getTurnDirective(nextDirection)),
+                new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
             };
         }
 
@@ -560,7 +580,7 @@ public class DriverAgent implements Steppable, Driver {
             hasReservation =
                 nextIntersection.requestReservation(vehicle,
                                                     time,
-                                                    getPath(ac, location, direction));
+                                                    getReservationPath(waypoints));
             vehicle.hasReservation = hasReservation;
         }
           /*
@@ -609,11 +629,14 @@ public class DriverAgent implements Steppable, Driver {
         // If the directive is move forward and the way is not clear, stop.
         if (maxSafeSpeed < desiredSpeed) desiredSpeed = maxSafeSpeed;
 
+        /*
         if (nextIntersection.idNum == 5 && hasReservation) {
             System.out.print(this.toString());
             System.out.println(Arrays.toString(waypoints));
-           System.out.println(Arrays.deepToString(getReservationPath(waypoints)));
+            System.out.println(Arrays.deepToString(getPath(waypoints)));
+            System.out.println(Arrays.deepToString(getReservationPath(waypoints)));
             System.out.print(this.vehicle.toString());
         }
+        */
     }
 }

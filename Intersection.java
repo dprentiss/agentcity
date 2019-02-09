@@ -36,6 +36,9 @@ public class Intersection {
     public boolean requestReservation(Vehicle vehicle, long time, Int2D[] path) {
         return controller.requestReservation(vehicle, time, path);
     }
+    public boolean requestReservation(Vehicle vehicle, long time, Int2D[][] path) {
+        return controller.requestReservation(vehicle, time, path);
+    }
 
     /** Constructor */
     public Intersection(int id, int minX, int maxX, int minY, int maxY, AgentCity ac) {
@@ -54,6 +57,16 @@ public class Intersection {
         this.maxX = maxX;
         this.minY = minY;
         this.maxY = maxY;
+    }
+
+    public boolean inIntersection(int x, int y) {
+        return x <= maxX
+            && x >= minX
+            && y <= maxY
+            && y >= minY;
+    }
+    public boolean inIntersection(Int2D cell) {
+        return inIntersection(cell.x, cell.y);
     }
 
     private void setLegs(AgentCity ac) {
