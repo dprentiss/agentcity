@@ -518,11 +518,18 @@ public class DriverAgent implements Steppable, Driver {
             nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
             nextWaypoint = new Waypoint(nextTurnCell,
                                        getTurnDirective(nextDirection));
-            waypoints = new Waypoint[] {
-                new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
-                new Waypoint(nextTurnCell, getTurnDirective(nextDirection)),
-                new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
-            };
+            if (direction == nextDirection) {
+                waypoints = new Waypoint[] {
+                    new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
+                    new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+                };
+            } else {
+                waypoints = new Waypoint[] {
+                    new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
+                    new Waypoint(nextTurnCell, getTurnDirective(nextDirection)),
+                    new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+                };
+            }
         }
 
         // check if Vehicle is near enough to an intersection to request a
@@ -559,6 +566,18 @@ public class DriverAgent implements Steppable, Driver {
             hasReservation = false;
             nextWaypoint = new Waypoint(nextTurnCell,
                                         getTurnDirective(nextDirection));
+            if (direction == nextDirection) {
+                waypoints = new Waypoint[] {
+                    new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
+                    new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+                };
+            } else {
+                waypoints = new Waypoint[] {
+                    new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
+                    new Waypoint(nextTurnCell, getTurnDirective(nextDirection)),
+                    new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+                };
+            }
         }
 
         // Default state is move forward at max speed
