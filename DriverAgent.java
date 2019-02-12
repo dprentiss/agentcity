@@ -327,21 +327,21 @@ public class DriverAgent implements Steppable, Driver {
             tmpDir = tmpDir.byDirective(waypoints[i].directive);
         }
         // copy tmpPath to trimmed path
-        /*
-        int m = getStepsToCell(waypoints[0].cell);
-        path = new Int2D[k - m][maxSpeed];
-        for (int i = 0; i < k - m ; i++) {
+        int m = getStepsToCell(getCellAhead(waypoints[0].cell, 1));
+        path = new Int2D[k - m + 1][maxSpeed];
+        for (int i = 0; i < k - m + 1; i++) {
             for (int j = 0; j < maxSpeed; j++) {
-                path[i][j] = tmpPath[i + m][j];
+                path[i][j] = tmpPath[i + m - 1][j];
             }
         }
-        */
+        /*
         path = new Int2D[k][maxSpeed];
         for (int i = 0; i < k; i++) {
             for (int j = 0; j < maxSpeed; j++) {
                 path[i][j] = tmpPath[i][j];
             }
         }
+        */
         return path;
     }
 
@@ -655,6 +655,8 @@ public class DriverAgent implements Steppable, Driver {
             System.out.println(Arrays.deepToString(getPath(waypoints)));
             System.out.println(Arrays.deepToString(getReservationPath(waypoints)));
             System.out.print(this.vehicle.toString());
+            System.out.print(ac.schedule.getSteps());
+            System.out.print(getStepsToCell(getCellAhead(nextApproachLeg, 1)));
         }
         */
     }

@@ -83,7 +83,8 @@ public class IntersectionAgent implements Steppable {
     /** Considers a request from an approaching Vehicle object and returns
      * whether or not the the request is approved
      */
-    public boolean requestReservation(Vehicle vehicle, long time, Int2D[] path) {
+    public boolean requestReservation(Vehicle vehicle, long time,
+                                      Int2D[] path) {
         // check path against schedule
         return addVehicleToSchedule(vehicle, time, path);
     }
@@ -91,7 +92,8 @@ public class IntersectionAgent implements Steppable {
     /** Considers a request from an approaching Vehicle object and returns
      * whether or not the the request is approved
      */
-    public boolean requestReservation(Vehicle vehicle, long time, Int2D[][] path) {
+    public boolean requestReservation(Vehicle vehicle, long time,
+                                      Int2D[][] path) {
         // check path against schedule
         return addVehicleToSchedule(vehicle, time, path);
     }
