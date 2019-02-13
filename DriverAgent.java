@@ -13,7 +13,7 @@ import java.util.Arrays;
 
 public class DriverAgent implements Steppable, Driver {
 
-    // Required for serialization
+    // MASON
     private static final long serialVersionUID = 1;
     Stoppable stopper;
 
@@ -21,16 +21,21 @@ public class DriverAgent implements Steppable, Driver {
     public final int idNum;
 
     // Variables
-    public Waypoint nextWaypoint;
-    public Waypoint[] waypoints;
     public Vehicle vehicle = null;
+    public Int2D location;
+    public Direction direction;
+    public int speed;
+    public int maxSpeed;
+
     public Driver.Directive nextDirective = Driver.Directive.NONE;
+    public int desiredSpeed = maxSpeed;
+    public int maxSafeSpeed = maxSpeed;
+    public Int2D[] path;
+    public Waypoint[] waypoints;
+    public Waypoint nextWaypoint;
     public boolean atWaypoint = false;
     public boolean nearWaypoint = false;
     public int stepsToWaypoint;
-    public int desiredSpeed;
-    public int maxSpeed;
-    public int maxSafeSpeed = maxSpeed;
     public Int2D destination = null;
     public Intersection nextIntersection;
     public Int2D nextLeg;
@@ -44,10 +49,6 @@ public class DriverAgent implements Steppable, Driver {
     public boolean inIntersection = false;
     public boolean nearNextLeg = false;
     public boolean atNextLeg = false;
-    public Int2D[] path;
-    public Int2D location;
-    public Direction direction;
-    public int speed;
 
     // Accessors
     public Vehicle getVehicle() { return vehicle; }
@@ -118,7 +119,8 @@ public class DriverAgent implements Steppable, Driver {
      *
      * @return the maximum safe speed.
      */
-    int getSafeSpeed(AgentCity ac, Int2D loc, Direction dir) {
+    int getSafeSpeed(AgentCity ac, Int2D loc, Direction dir,
+                     boolean hasReservation) {
         Int2D cell;
         boolean isRoad = true;
         boolean isFree = true;
@@ -142,6 +144,10 @@ public class DriverAgent implements Steppable, Driver {
         }
         // return maxSpeed since no obstacles or boundaries found
         return maxSpeed;
+    }
+
+    int getSafeSpeed(AgentCity ac) {
+        return getSafeSpeed(ac, location, direction, false);
     }
 
     /**
@@ -175,7 +181,6 @@ public class DriverAgent implements Steppable, Driver {
         int nextX = cellX + dir.getXOffset();
         int nextY = cellY + dir.getYOffset();
         Direction cellDirection = Direction.byInt(ac.roadGrid.field[nextX][nextY]);
-        //2083397621
         while (cellDirection != Direction.ALL) {
             cellX += dir.getXOffset();
             cellY += dir.getYOffset();
@@ -184,17 +189,6 @@ public class DriverAgent implements Steppable, Driver {
             cellDirection = Direction.byInt(ac.roadGrid.field[nextX][nextY]);
         }
         return new Int2D(cellX, cellY);
-        /*
-          Int2D[] legs = in.getApproachLegs();
-          Direction legDir;
-          for (int i = 0; i < legs.length; i++) {
-          legDir = Direction.byInt(ac.roadGrid.field[legs[i].x][legs[i].y]);
-          if (dir == legDir && (loc.x == legs[i].x || loc.y == legs[i].y)) {
-          return legs[i];
-          }
-          }
-          return null;
-        */
     }
 
     Int2D setTurnCell(AgentCity ac, Int2D leg, Int2D loc, Direction locDir) {
@@ -228,11 +222,9 @@ public class DriverAgent implements Steppable, Driver {
         int speed = currentSpeed;
         int x = loc.x;
         int y = loc.y;
-        //int i = 1;
         int i = 0;
         Int2D[] path;
 
-        //tmp[0] = loc;
         int dist = getGapToCell(cell, loc, dir) + 1;
         if (dist < 0) {
             String errorString = new StringBuilder()
@@ -241,8 +233,6 @@ public class DriverAgent implements Steppable, Driver {
                 .append(this.vehicle.toString())
                 .append(this.toString())
                 .append(Arrays.toString(waypoints))
-                //.append(Arrays.deepToString(getPath(waypoints)))
-                //.append(Arrays.deepToString(getReservationPath(waypoints)))
                 .append(vehicle.toString())
                 .toString();
             throw new IllegalArgumentException(errorString);
@@ -256,6 +246,7 @@ public class DriverAgent implements Steppable, Driver {
             dist -= speed;
             i++;
         }
+        // trim tmp and copy to path
         path = new Int2D[i];
         for (int j = 0; j < path.length; j++) {
             path[j] = tmp[j];
@@ -516,8 +507,6 @@ public class DriverAgent implements Steppable, Driver {
             nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
             nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
             nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
-            nextWaypoint = new Waypoint(nextTurnCell,
-                                       getTurnDirective(nextDirection));
             if (direction == nextDirection) {
                 waypoints = new Waypoint[] {
                     new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
@@ -530,17 +519,10 @@ public class DriverAgent implements Steppable, Driver {
                     new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
                 };
             }
+            nextWaypoint = new Waypoint(nextTurnCell,
+                                        getTurnDirective(nextDirection));
         }
 
-        // check if Vehicle is near enough to an intersection to request a
-        // reservation
-        //nearIntersection = getGapToCell(nextApproachLeg) <= 2;
-        /*
-          location.x + 2 * direction.getXOffset()
-          == nextApproachLeg.x
-          && location.y + 2 * direction.getYOffset()
-          == nextApproachLeg.y;
-        */
         nearApproachLeg = getStepsToCell(nextApproachLeg) == 1;
         // check if Vehicle is at approach leg
         atApproachLeg = location.equals(nextApproachLeg);
@@ -586,11 +568,20 @@ public class DriverAgent implements Steppable, Driver {
 
         // request a reservation if needed
         if (inIntersection && !hasReservation) {
+            if (direction == nextDirection) {
+                waypoints = new Waypoint[] {
+                    new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+                };
+            } else {
+                waypoints = new Waypoint[] {
+                    new Waypoint(nextTurnCell, getTurnDirective(nextDirection)),
+                    new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+                };
+            }
             hasReservation =
-                nextIntersection.requestReservation(
-                                                    vehicle,
-                                                    ac.schedule.getSteps() + 1 + speed,
-                                                    getUpdatedPath(location));
+                nextIntersection.requestReservation(vehicle,
+                                                    0,
+                                                    getReservationPath(waypoints));
             vehicle.hasReservation = hasReservation;
         } else if (nearIntersection && !hasReservation) {
             long time = ac.schedule.getSteps()
@@ -602,25 +593,13 @@ public class DriverAgent implements Steppable, Driver {
                                                     getReservationPath(waypoints));
             vehicle.hasReservation = hasReservation;
         }
-          /*
-          } else if (speed == 1 && nearIntersection) {
-          path = getPath(ac, location, direction);
-          hasReservation = nextIntersection.requestReservation(
-          vehicle, ac.schedule.getSteps() + 2,
-          getPath(ac, location, direction));
-          vehicle.hasReservation = hasReservation;
-          } else if (speed == 0 && atApproachLeg) {
-          path = getPath(ac, location, direction);
-          hasReservation = nextIntersection.requestReservation(
-          vehicle, ac.schedule.getSteps() + 1,
-          getPath(ac, location, direction));
-          vehicle.hasReservation = hasReservation;
-          }
-          */
 
         // If the directive is move forward and the way is not clear, stop.
-        maxSafeSpeed = getSafeSpeed(ac, location, direction);
-        if (maxSafeSpeed < desiredSpeed) desiredSpeed = maxSafeSpeed;
+        maxSafeSpeed = getSafeSpeed(ac);
+        if (maxSafeSpeed < desiredSpeed
+            && (!hasReservation || !inIntersection)) {
+            desiredSpeed = maxSafeSpeed;
+        }
 
         // prepare to take appropriate action at Waypoint
         nearWaypoint = getStepsToCell(nextWaypoint.cell) == 1
@@ -646,7 +625,10 @@ public class DriverAgent implements Steppable, Driver {
         }
 
         // If the directive is move forward and the way is not clear, stop.
-        if (maxSafeSpeed < desiredSpeed) desiredSpeed = maxSafeSpeed;
+        if (maxSafeSpeed < desiredSpeed
+            && (!hasReservation || !inIntersection)) {
+            desiredSpeed = maxSafeSpeed;
+        }
 
         /*
         if (nextIntersection.idNum == 5 && hasReservation) {

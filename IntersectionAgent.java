@@ -37,6 +37,7 @@ public class IntersectionAgent implements Steppable {
     private int[][][] schedule;
     private Bag vehicles;
     private boolean acceptingReservations;
+    private long step;
 
     // Accessors
 
@@ -53,7 +54,7 @@ public class IntersectionAgent implements Steppable {
         this.intersection = intersection;
         this.width = intersection.maxX - intersection.minX + 1;
         this.height = intersection.maxY - intersection.minY + 1;
-        scheduleSize = width + height + 4;
+        scheduleSize = width + height;
         vehicles = new Bag((width + 2) * (height + 2));
         approachLegs = intersection.getApproachLegs();
         schedule = new int[scheduleSize][width][height];
@@ -99,21 +100,36 @@ public class IntersectionAgent implements Steppable {
     }
 
     public String toString(int option) {
-        String s = "";
-        s += String.format("IntersectionAgent[%d]\n", idNum);
+        int digits = 4;
+        StringBuilder s = new StringBuilder();
+        s.append(String.format("IntersectionAgent[%d]", idNum));
+        s.append(String.format(" step[%d] schedule[%d/%d]",
+                               step, step % scheduleSize, scheduleSize - 1));
+        s.append("\n");
         switch (option) {
         case SCHEDULE:
             for (int i = 0; i < height; i++) {
+                if (step % scheduleSize == 0) {
+                    s.append("\u2551");
+                } else {
+                    s.append("|");
+                }
                 for (int j = 0; j < scheduleSize; j++) {
                     for (int k = 0; k < width; k++) {
-                        s += String.format("%4d", schedule[j][k][i]);
+                        s.append(String.format("%"+digits+"d",
+                                               schedule[j][k][i]));
                     }
-                    s += "|";
+                    if (j == step % scheduleSize
+                        || j == step % scheduleSize - 1) {
+                        s.append("\u2551");
+                    } else {
+                        s.append("|");
+                    }
                 }
-                s += "\n";
+                s.append("\n");
             }
         }
-        return s;
+        return s.toString();
     }
 
     public String toString() {
@@ -283,7 +299,9 @@ public class IntersectionAgent implements Steppable {
         long steps = ac.schedule.getSteps();
         // If schedule is wrong revoke all reservations and clear schedule
         if (!scheduleValid(ac)) {
-            //System.out.println("Schedule not valid.");
+            System.out.printf("*** Schedule not valid at intersection %d\n",
+                              this.idNum);
+            System.out.print(this.toString(SCHEDULE));
             acceptingReservations = false;
             clearSchedule();
             // Add Vehicles already in the intersection to schedule and bag
@@ -351,13 +369,14 @@ public class IntersectionAgent implements Steppable {
     public void step(final SimState state) {
         // World state
         AgentCity ac = (AgentCity)state;
+        step = ac.schedule.getSteps();
         trimSchedule(ac);
         checkSchedule(ac);
         if (intersection.idNum == 5) {
             System.out.println();
             System.out.printf("Step %d, schedule %d/%d\n",
-                              ac.schedule.getSteps(),
-                              ac.schedule.getSteps() % scheduleSize,
+                              step,
+                              step % scheduleSize,
                               scheduleSize);
             System.out.print(toString(SCHEDULE));
         }
