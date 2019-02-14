@@ -99,6 +99,10 @@ public class IntersectionAgent implements Steppable {
         return addVehicleToSchedule(vehicle, time, path);
     }
 
+    public boolean cancelReservation(Vehicle vehicle) {
+        return removeVehicleFromSchedule(vehicle);
+    }
+
     public String toString(int option) {
         int digits = 4;
         StringBuilder s = new StringBuilder();
@@ -166,6 +170,7 @@ public class IntersectionAgent implements Steppable {
             y = path[i].y - intersection.minY;
             schedule[timeIndex][x][y] = vehicle.idNum;
         }
+        // add Vehicle to Bag
         vehicles.add(vehicle);
         if (intersection.idNum == 5) {
             System.out.println();
@@ -194,17 +199,8 @@ public class IntersectionAgent implements Steppable {
             for (int j = 0; j < path[i].length; j++) {
                 if (path[i][j] != null
                     && intersection.inIntersection(path[i][j])) {
-                    /*
-                    System.out.println("***");
-                    System.out.println(path[i][j]);
-                    */
                     x = path[i][j].x - intersection.minX;
                     y = path[i][j].y - intersection.minY;
-                    /*
-                    System.out.println(timeIndex);
-                    System.out.println(x);
-                    System.out.println(y);
-                    */
                     if (schedule[timeIndex][x][y] != -1) {
                         return false;
                     }
@@ -229,6 +225,22 @@ public class IntersectionAgent implements Steppable {
             System.out.print(toString(SCHEDULE));
         }
         return true;
+    }
+
+    boolean removeVehicleFromSchedule(Vehicle vehicle) {
+        boolean removed = vehicles.remove(vehicle);
+        if (removed) {
+            for (int i = 0; i < scheduleSize; i++) {
+                for (int j = 0; j < width; j++) {
+                    for (int k = 0; k < height; k++) {
+                        if (schedule[i][j][k] == vehicle.idNum) {
+                            schedule[i][j][k] = -1;
+                        }
+                    }
+                }
+            }
+        }
+        return removed;
     }
 
     /** Checks the schedule against a tally of vehicles actually present in the
