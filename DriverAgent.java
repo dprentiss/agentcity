@@ -131,7 +131,6 @@ public class DriverAgent implements Steppable, Driver {
         boolean isRoad = true;
         boolean isFree = true;
         Vehicle otherVehicle;
-        // boolean hasRightOfWay = true;
 
         // For each cell ahead of vehicle, check for obstacles and boundaries.
         for (int i = 0; i < maxSpeed; i++) { // Check cells out to maxSpeed
@@ -141,8 +140,10 @@ public class DriverAgent implements Steppable, Driver {
                 Bag b = ac.agentGrid.getObjectsAtLocation(cell.x, cell.y);
                 if (b != null) {
                     otherVehicle = (Vehicle)b.objs[0];
+                    isFree = otherVehicle.hasReservation
+                        && otherVehicle.getDesiredSpeed() > 0;
                     //if (!otherVehicle.hasReservation) isFree = false;
-                    if (b.numObjs > 0) isFree = false;
+                    //if (b.numObjs > 0) isFree = false;
                 }
                 // return cell before obstacle
                 if (!isRoad || !isFree) return i;
@@ -576,8 +577,26 @@ public class DriverAgent implements Steppable, Driver {
         desiredSpeed = maxSpeed;
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
-        // request a reservation if needed
+        // check reservation or request as needed
         if (inIntersection || nearIntersection) {
+            // cancel reservation if reservationTime can't be honored
+            if (hasReservation) {
+                int timeIndex = (int)(step - reservationTime);
+                if (timeIndex >= 0 && timeIndex < reservationPath.length
+                    && !location.equals(reservationPath[timeIndex][0])) {
+                    if (nextIntersection.idNum == 5) {
+                        System.out.println("*********");
+                        System.out.print(this.vehicle.toString());
+                        System.out.print(this.toString());
+                        System.out.println(Arrays.deepToString(reservationPath));
+                        System.out.println(reservationPath[timeIndex][0]);
+                    }
+                    nextIntersection.cancelReservation(vehicle);
+                    hasReservation = false;
+                    vehicle.hasReservation = false;
+                }
+            }
+            // get a reservation if needed
             if (!hasReservation) {
                 reservationTime = 0;
                 if (inIntersection) {
@@ -595,22 +614,8 @@ public class DriverAgent implements Steppable, Driver {
                 } else {
                     reservationTime = step
                         + getStepsToCell(getCellAhead(nextApproachLeg, 1));
-                    //path = getPath(ac, location, direction);
                 }
                 reservationPath = getReservationPath(waypoints);
-                hasReservation =
-                    nextIntersection.requestReservation(vehicle,
-                                                        reservationTime,
-                                                        reservationPath);
-                vehicle.hasReservation = hasReservation;
-            } else if (step - reservationTime >= 0
-                       && !location.equals(reservationPath[(int)(step - reservationTime)][0])) {
-                    System.out.println("*********");
-                    System.out.print(this.vehicle.toString());
-                    System.out.print(this.toString());
-                    System.out.println(Arrays.deepToString(reservationPath));
-                    System.out.println(reservationPath[(int)(step - reservationTime)][0]);
-                nextIntersection.cancelReservation(vehicle);
                 hasReservation =
                     nextIntersection.requestReservation(vehicle,
                                                         reservationTime,
