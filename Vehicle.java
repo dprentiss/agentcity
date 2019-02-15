@@ -88,6 +88,9 @@ public class Vehicle implements Steppable, Driveable {
      */
     public Driver getDriver() { return driver; }
 
+    /** Gets the Driver's desired speed. */
+    public int getDesiredSpeed() { return driver.getDesiredSpeed(); }
+
     /** Sets the Driver object provided as the driver of this Vehicle. */
     public void setDriver(Driver newDriver) { driver = newDriver; }
 
