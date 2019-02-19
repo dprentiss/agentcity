@@ -128,28 +128,28 @@ public class DriverAgent implements Steppable, Driver {
     int getSafeSpeed(AgentCity ac, Int2D loc, Direction dir,
                      boolean hasReservation) {
         Int2D cell;
-        boolean isRoad = true;
-        boolean isFree = true;
         Vehicle otherVehicle;
+        int otherSpeed;
 
         // For each cell ahead of vehicle, check for obstacles and boundaries.
         for (int i = 0; i < maxSpeed; i++) { // Check cells out to maxSpeed
             cell = getCellAhead(loc, dir, i + 1);
-            if (ac.checkBounds(cell.x, cell.y)) {
-                isRoad = ac.roadGrid.get(cell.x, cell.y) != 0;
-                Bag b = ac.agentGrid.getObjectsAtLocation(cell.x, cell.y);
-                if (b != null) {
-                    otherVehicle = (Vehicle)b.objs[0];
-                    isFree = otherVehicle.hasReservation
-                        && otherVehicle.getDesiredSpeed() > 0;
-                    //if (!otherVehicle.hasReservation) isFree = false;
-                    //if (b.numObjs > 0) isFree = false;
+            // check if cell is on grid
+            if (!ac.checkBounds(cell.x, cell.y)) { return i; }
+            // check if cell is a road cell
+            if (ac.roadGrid.get(cell.x, cell.y) == 0) { return i; }
+            // get any vehicles on cell
+            Bag b = ac.agentGrid.getObjectsAtLocation(cell.x, cell.y);
+            if (b != null) { // if there is another vehicle at the cell
+                otherVehicle = (Vehicle)b.objs[0]; // get the other vehicle
+                // check if the other vehicle has a reservation
+                if (!otherVehicle.hasReservation) { return i; }
+                otherSpeed = otherVehicle.getSpeed();
+                if (otherSpeed <= 0) { return i; }
+                if (otherVehicle.getDirection() == dir
+                    && i + otherSpeed  < maxSpeed) {
+                    return i + otherSpeed - 1;
                 }
-                // return cell before obstacle
-                if (!isRoad || !isFree) return i;
-            } else {
-                // return cell before boundary
-                return i;
             }
         }
         // return maxSpeed since no obstacles or boundaries found
