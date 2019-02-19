@@ -125,15 +125,12 @@ public class DriverAgent implements Steppable, Driver {
      *
      * @return the maximum safe speed.
      */
-    int getSafeSpeed(AgentCity ac, Int2D loc, Direction dir,
-                     boolean hasReservation) {
+    int getSafeSpeed(AgentCity ac, int locX, int locY, Direction dir) {
         Int2D cell;
-        Vehicle otherVehicle;
-        int otherSpeed;
 
-        // For each cell ahead of vehicle, check for obstacles and boundaries.
+        // for each cell ahead of vehicle, check for obstacles and boundaries.
         for (int i = 0; i < maxSpeed; i++) { // Check cells out to maxSpeed
-            cell = getCellAhead(loc, dir, i + 1);
+            cell = getCellAhead(locX, locY, dir, i + 1);
             // check if cell is on grid
             if (!ac.checkBounds(cell.x, cell.y)) { return i; }
             // check if cell is a road cell
@@ -141,14 +138,31 @@ public class DriverAgent implements Steppable, Driver {
             // get any vehicles on cell
             Bag b = ac.agentGrid.getObjectsAtLocation(cell.x, cell.y);
             if (b != null) { // if there is another vehicle at the cell
-                otherVehicle = (Vehicle)b.objs[0]; // get the other vehicle
+                // get the other vehicle
+                Vehicle otherVehicle = (Vehicle)b.objs[0];
                 // check if the other vehicle has a reservation
                 if (!otherVehicle.hasReservation) { return i; }
-                otherSpeed = otherVehicle.getSpeed();
-                if (otherSpeed <= 0) { return i; }
-                if (otherVehicle.getDirection() == dir
-                    && i + otherSpeed  < maxSpeed) {
-                    return i + otherSpeed - 1;
+                // get more information about the other vehicle
+                Direction otherDirection = otherVehicle.getDirection();
+                int otherSafeSpeed = getSafeSpeed(ac, cell.x, cell.y,
+                                                  otherDirection);
+                // check if other vehicle can move
+                if (otherSafeSpeed < 1) { return i; }
+                // check if other vehicle is traveling in the same direction
+                if (otherDirection == dir) {
+                    // get more information about the other vehicle
+                    int otherSpeed = otherVehicle.getSpeed();
+                    // check if the other vehicle is slow
+                    // 116436188 step 15
+                    if (i + otherSpeed + 1 < maxSpeed) {
+                        return i + otherSpeed + 1;
+                    }
+                    // check if other vehicle will stop for an obstacle
+                    if (i + otherSafeSpeed < maxSpeed) {
+                        return i + otherSafeSpeed;
+                    }
+                    // the path is clear up to maxSpeed
+                    break;
                 }
             }
         }
@@ -157,7 +171,12 @@ public class DriverAgent implements Steppable, Driver {
     }
 
     int getSafeSpeed(AgentCity ac) {
-        return getSafeSpeed(ac, location, direction, false);
+        return getSafeSpeed(ac, this.location.x, this.location.y,
+                            this.direction);
+    }
+
+    int getSafeSpeed(AgentCity ac, Int2D loc, Direction dir) {
+        return getSafeSpeed(ac, loc.x, loc.y, dir);
     }
 
     /**
@@ -456,6 +475,10 @@ public class DriverAgent implements Steppable, Driver {
         return getCellAhead(cell.x, cell.y, direction, offset);
     }
 
+    Int2D getCellAhead(int cellX, int cellY, int offset) {
+        return getCellAhead(cellX, cellY, this.direction, offset);
+    }
+
     int getGapToCell(Int2D cell, Int2D loc, Direction dir) {
         int x = cell.x - loc.x;
         int y = cell.y - loc.y;
@@ -506,7 +529,7 @@ public class DriverAgent implements Steppable, Driver {
         step = ac.schedule.getSteps();
 
         // Current Vehicle position and velocity;
-        location = ac.agentGrid.getObjectLocation(vehicle);
+        location = vehicle.getLocation();
         direction = vehicle.getDirection();
         speed = vehicle.getSpeed();
         hasReservation = vehicle.hasReservation;
@@ -626,8 +649,7 @@ public class DriverAgent implements Steppable, Driver {
 
         // If the directive is move forward and the way is not clear, stop.
         maxSafeSpeed = getSafeSpeed(ac);
-        if (maxSafeSpeed < desiredSpeed
-            && (!hasReservation || !inIntersection)) {
+        if (maxSafeSpeed < desiredSpeed) {
             desiredSpeed = maxSafeSpeed;
         }
 
@@ -659,8 +681,7 @@ public class DriverAgent implements Steppable, Driver {
         }
 
         // If the directive is move forward and the way is not clear, stop.
-        if (maxSafeSpeed < desiredSpeed
-            && (!hasReservation || !inIntersection)) {
+        if (maxSafeSpeed < desiredSpeed) {
             desiredSpeed = maxSafeSpeed;
         }
 
