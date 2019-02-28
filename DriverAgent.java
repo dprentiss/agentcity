@@ -141,7 +141,8 @@ public class DriverAgent implements Steppable, Driver {
                 // get the other vehicle
                 Vehicle otherVehicle = (Vehicle)b.objs[0];
                 // check if the other vehicle has a reservation
-                if (!otherVehicle.hasReservation) { return i; }
+                if (!otherVehicle.hasReservation ||
+                    ac.roadGrid.get(cell.x, cell.y) != 9) { return i; }
                 // get more information about the other vehicle
                 Direction otherDirection = otherVehicle.getDirection();
                 int otherSafeSpeed = getSafeSpeed(ac, cell.x, cell.y,
@@ -604,16 +605,10 @@ public class DriverAgent implements Steppable, Driver {
         if (inIntersection || nearIntersection) {
             // cancel reservation if reservationTime can't be honored
             if (hasReservation) {
+                // 192834420
                 int timeIndex = (int)(step - reservationTime);
                 if (timeIndex >= 0 && timeIndex < reservationPath.length
                     && !location.equals(reservationPath[timeIndex][0])) {
-                    if (nextIntersection.idNum == 5) {
-                        System.out.println("*********");
-                        System.out.print(this.vehicle.toString());
-                        System.out.print(this.toString());
-                        System.out.println(Arrays.deepToString(reservationPath));
-                        System.out.println(reservationPath[timeIndex][0]);
-                    }
                     nextIntersection.cancelReservation(vehicle);
                     hasReservation = false;
                     vehicle.hasReservation = false;
