@@ -321,26 +321,6 @@ public class IntersectionAgent implements Steppable {
         } else {
             acceptingReservations = true;
         }
-        /*
-        for (int k = 0; k < vehicles.numObjs; k++) {
-            vehicle = (Vehicle)vehicles.objs[k];
-            driver = (Driver)vehicle.getDriver();
-            if (driver.getNextDirective() == Driver.Directive.STOP) {
-                clearSchedule();
-                for (int i = 0; i < width; i++) {
-                    for (int j = 0; j < height; j++) {
-                        x = cells[i][j].x;
-                        y = cells[i][j].y;
-                        bag = ac.agentGrid.getObjectsAtLocation(x, y);
-                        if (bag == null) continue;
-                        vehicle = (Vehicle)bag.objs[0];
-                        schedule[(int)(steps % scheduleSize)][i][j]
-                            = vehicle.idNum;
-                        vehicles.add(vehicle);
-                    }
-                }
-            }
-        */
     }
 
     private void clearSchedule() {
