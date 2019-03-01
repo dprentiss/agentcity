@@ -116,7 +116,7 @@ public class IntersectionAgent implements Steppable {
                 if (step % scheduleSize == 0) {
                     s.append("\u2551");
                 } else {
-                    s.append("|");
+                    s.append("\u2502");
                 }
                 for (int j = 0; j < scheduleSize; j++) {
                     for (int k = 0; k < width; k++) {
@@ -127,7 +127,7 @@ public class IntersectionAgent implements Steppable {
                         || j == step % scheduleSize - 1) {
                         s.append("\u2551");
                     } else {
-                        s.append("|");
+                        s.append("\u2502");
                     }
                 }
                 s.append("\n");
