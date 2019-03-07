@@ -3,6 +3,7 @@
  */
 
 package sim.app.agentcity;
+import sim.display.Console;
 import sim.engine.*;
 import sim.util.*;
 import sim.field.grid.*;
@@ -10,7 +11,9 @@ import java.util.Arrays;
 
 public class AgentCity extends SimState {
 
-    // Required for serialization
+    Console console;
+	
+	// Required for serialization
     private static final long serialVersionUID = 1;
 
     // Utility
@@ -86,6 +89,7 @@ public class AgentCity extends SimState {
                 SparseGrid2D grid = ac.agentGrid;
                 Vehicle v;
                 Bag b;
+                boolean collision = false;
                 for (int i = 0; i < grid.allObjects.numObjs; i++) {
                     v = (Vehicle)grid.allObjects.objs[i];
                     b = grid.getObjectsAtLocationOfObject(v);
@@ -95,8 +99,10 @@ public class AgentCity extends SimState {
                         System.out.print(v.toString());
                         System.out.print(v.getDriver().toString());
                         System.out.println();
+                        collision = true;
                     }
                 }
+                if (collision) {ac.console.pressPause();}
             }
         };
 

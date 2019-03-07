@@ -125,8 +125,12 @@ public class DriverAgent implements Steppable, Driver {
      *
      * @return the maximum safe speed.
      */
-    int getSafeSpeed(AgentCity ac, int locX, int locY, Direction dir) {
+    int getSafeSpeed(AgentCity ac, int locX, int locY, Direction dir,
+    		int depth) {
         Int2D cell;
+        
+        int MAX_DEPTH = 32;
+        if (depth > MAX_DEPTH) {return 0;}
 
         // for each cell ahead of vehicle, check for obstacles and boundaries.
         for (int i = 0; i < maxSpeed; i++) { // Check cells out to maxSpeed
@@ -146,7 +150,7 @@ public class DriverAgent implements Steppable, Driver {
                 // get more information about the other vehicle
                 Direction otherDirection = otherVehicle.getDirection();
                 int otherSafeSpeed = getSafeSpeed(ac, cell.x, cell.y,
-                                                  otherDirection);
+                                                  otherDirection, depth+1);
                 // check if other vehicle can move
                 if (otherSafeSpeed < 1) { return i; }
                 // check if other vehicle is traveling in the same direction
@@ -173,11 +177,11 @@ public class DriverAgent implements Steppable, Driver {
 
     int getSafeSpeed(AgentCity ac) {
         return getSafeSpeed(ac, this.location.x, this.location.y,
-                            this.direction);
+                            this.direction, 0);
     }
 
     int getSafeSpeed(AgentCity ac, Int2D loc, Direction dir) {
-        return getSafeSpeed(ac, loc.x, loc.y, dir);
+        return getSafeSpeed(ac, loc.x, loc.y, dir, 0);
     }
 
     /**
@@ -616,7 +620,7 @@ public class DriverAgent implements Steppable, Driver {
             }
             // get a reservation if needed
             if (!hasReservation) {
-                reservationTime = 0;
+                reservationTime = step + 1;
                 if (inIntersection) {
                     if (direction == nextDirection) {
                         waypoints = new Waypoint[] {

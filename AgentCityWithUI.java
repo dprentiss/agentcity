@@ -27,7 +27,8 @@ public class AgentCityWithUI extends GUIState {
     }
 
     public AgentCityWithUI() {
-        super(new AgentCity(System.currentTimeMillis()));
+        //super(new AgentCity(System.currentTimeMillis()));
+        super(new AgentCity(1324367672));
     }
 
     public AgentCityWithUI(SimState state) { super(state); }
@@ -92,6 +93,7 @@ public class AgentCityWithUI extends GUIState {
     public void init(Controller c) {
         AgentCity ac = (AgentCity)state;
         super.init(c);
+        ac.console = (Console)c;
 
         display = new Display2D(800, 800, this);
         displayFrame = display.createFrame();

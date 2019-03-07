@@ -311,9 +311,12 @@ public class IntersectionAgent implements Steppable {
         long steps = ac.schedule.getSteps();
         // If schedule is wrong revoke all reservations and clear schedule
         if (!scheduleValid(ac)) {
-            System.out.printf("*** Schedule not valid at intersection %d\n",
-                              this.idNum);
-            System.out.print(this.toString(SCHEDULE));
+        	if (this.idNum == 5) {
+        		System.out.printf("*** Schedule not valid at intersection %d\n",
+        				this.idNum);
+        	
+        		System.out.print(this.toString(SCHEDULE));
+        	}
             acceptingReservations = false;
             clearSchedule();
             // Add Vehicles already in the intersection to schedule and bag
