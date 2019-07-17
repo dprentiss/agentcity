@@ -5,5 +5,5 @@
 package sim.app.agentcity;
 
 public interface VehicleClient {
-
+    void enterVehicle(Vehicle vehicle);
 }

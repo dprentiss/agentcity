@@ -20,6 +20,7 @@ public class Person implements Steppable, VehicleClient, Driver {
 
     // Accessors
     public Int2D getLocation() { return location; }
+    public Vehicle getVehicle() { return currentVehicle; }
 
     /** Constructor */
     public Person(int id) {
@@ -34,20 +35,24 @@ public class Person implements Steppable, VehicleClient, Driver {
         return 0;
     }
 
+    public void enterVehicle(Vehicle vehicle) {
+    }
+
+
     /** Choose trip */
-    // A Person is either travelling or stationary at her location. 
+    // A Person is either travelling or stationary at her location.
     // A Person that is traveling must have at least a current location, a
     // destination, and start time.
 
     /** Get travel information */
-    // A traveler must have enough information to plan a route. 
+    // A traveler must have enough information to plan a route.
     // A traveler may request a recommendation from a RouteFindingService.
 
     /** Choose mode and route */
     // A Person chooses a mode based on her destination, and available travel
     // information.
     // The Person class must implement at least a weighted least-cost
-    // optimization. 
+    // optimization.
     // Route choice is typically chosen with mode. However, route choice is
     // dynamic and can change many times during the trip.
     // Mode choice may also change during the trip
@@ -71,5 +76,13 @@ public class Person implements Steppable, VehicleClient, Driver {
     // A Person may choose to exit a Vehicle if the vehicle is stopped.
 
     public void step(final SimState state) {
+        // get Simulation state
+        AgentCity ac = (AgentCity)state;
+        // select random intersection
+        int numIntersections = ac.intersections.length;
+        int randomIntersection = ac.random.nextInt(numIntersections);
+        // request a vehicle
+        // enter vehicle
+        // exit vehicle
     }
 }

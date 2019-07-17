@@ -6,13 +6,14 @@ package sim.app.agentcity;
 import sim.display.Console;
 import sim.engine.*;
 import sim.util.*;
+import sim.util.distribution.*;
 import sim.field.grid.*;
 import java.util.Arrays;
 
 public class AgentCity extends SimState {
 
     Console console;
-	
+
 	// Required for serialization
     private static final long serialVersionUID = 1;
 
@@ -109,7 +110,6 @@ public class AgentCity extends SimState {
         if (checkForCollisions) {
             schedule.scheduleRepeating(collisionCheck, 3, 1);
         }
-
     }
 
     // check the neighbors of each intersection cell for previous labels
@@ -195,6 +195,10 @@ public class AgentCity extends SimState {
             }
         }
 
+        // Make a DispatchAgent
+        DispatchAgent testDispatchAgent = new DispatchAgent(0, NUM_VEHICLES);
+        testDispatchAgent.stopper = schedule.scheduleRepeating(testDispatchAgent, 4, 1);
+
         // Make some Vehicle and Driver agents
         for (int i = 0; i < NUM_VEHICLES; i++) {
             // Get random location on road
@@ -211,6 +215,8 @@ public class AgentCity extends SimState {
             Direction newDir = Direction.byInt(roadGrid.get(newLocation.x,
                                                             newLocation.y));
             Vehicle testCar = new Vehicle(i, newDir);
+            // add Vehicle to DispatchAgent pool
+            testDispatchAgent.addVehicleToPool(testCar);
             agentGrid.setObjectLocation(testCar, newLocation);
             // Add Vehicle to Schedule
             testCar.stopper = schedule.scheduleRepeating(testCar, 0, 1);
@@ -222,7 +228,7 @@ public class AgentCity extends SimState {
             newDriver.stopper = schedule.scheduleRepeating(newDriver, 2, 1);
         }
 
-        // Make some Intersections and IntersectionAgents
+        // Make some Intersections, IntersectionAgents, and TripGenerators
         int maxXs[] = new int[numIntersections + 1];
         int minXs[] = new int[numIntersections + 1];
         int maxYs[] = new int[numIntersections + 1];
@@ -244,9 +250,12 @@ public class AgentCity extends SimState {
             }
         }
         for (int i = 1; i < numIntersections + 1; i++) {
-            intersections[i] = new Intersection(i, minXs[i], maxXs[i], minYs[i], maxYs[i], this);
+            intersections[i] =
+                new Intersection(i, minXs[i], maxXs[i], minYs[i], maxYs[i],
+                                 this);
             intersectionAgents[i] = new IntersectionAgent(i, intersections[i]);
-            intersectionAgents[i].stopper = schedule.scheduleRepeating(intersectionAgents[i], 1, 1);
+            intersectionAgents[i].stopper =
+                schedule.scheduleRepeating(intersectionAgents[i], 1, 1);
         }
     }
 
