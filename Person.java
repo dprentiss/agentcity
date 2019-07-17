@@ -8,23 +8,30 @@ import sim.engine.*;
 
 public class Person implements Steppable, VehicleClient, Driver {
 
-    // Required for serialization
+    // MASON
     private static final long serialVersionUID = 1;
+    Stoppable stopper;
+    long step;
 
     // Properties
     public final int idNum;
 
     // Variables
-    public Int2D location;
+    public Intersection location;
     public Vehicle currentVehicle = null;
+    public Intersection destination = null;
 
     // Accessors
-    public Int2D getLocation() { return location; }
+    public Intersection getLocation() { return location; }
     public Vehicle getVehicle() { return currentVehicle; }
+    public Intersection getDestination() { return destination; }
 
     /** Constructor */
-    public Person(int id) {
+    public Person(int id,
+                  Intersection location, Intersection destination) {
         idNum = id;
+        this.location = location;
+        this.destination = destination;
     }
 
     public Driver.Directive getNextDirective() {
@@ -78,11 +85,11 @@ public class Person implements Steppable, VehicleClient, Driver {
     public void step(final SimState state) {
         // get Simulation state
         AgentCity ac = (AgentCity)state;
-        // select random intersection
-        int numIntersections = ac.intersections.length;
-        int randomIntersection = ac.random.nextInt(numIntersections);
-        // request a vehicle
-        // enter vehicle
-        // exit vehicle
+        ac.dispatcher.requestVehicle(location, 0);
+        /*
+        System.out.printf("I'm at %s, headed to %s.\n",
+                          location,
+                          destination);
+        */
     }
 }

@@ -60,6 +60,9 @@ public class AgentCity extends SimState {
     // Array of Intersection agents
     public IntersectionAgent[] intersectionAgents;
 
+    // Temporary dispatcher
+    public DispatchAgent dispatcher;
+
     /** Constructor default */
     public AgentCity(long seed) {
         // Required by SimState
@@ -196,8 +199,8 @@ public class AgentCity extends SimState {
         }
 
         // Make a DispatchAgent
-        DispatchAgent testDispatchAgent = new DispatchAgent(0, NUM_VEHICLES);
-        testDispatchAgent.stopper = schedule.scheduleRepeating(testDispatchAgent, 4, 1);
+        dispatcher = new DispatchAgent(0, NUM_VEHICLES);
+        dispatcher.stopper = schedule.scheduleRepeating(dispatcher, 4, 1);
 
         // Make some Vehicle and Driver agents
         for (int i = 0; i < NUM_VEHICLES; i++) {
@@ -216,7 +219,7 @@ public class AgentCity extends SimState {
                                                             newLocation.y));
             Vehicle testCar = new Vehicle(i, newDir);
             // add Vehicle to DispatchAgent pool
-            testDispatchAgent.addVehicleToPool(testCar);
+            dispatcher.addVehicleToPool(testCar);
             agentGrid.setObjectLocation(testCar, newLocation);
             // Add Vehicle to Schedule
             testCar.stopper = schedule.scheduleRepeating(testCar, 0, 1);
@@ -256,11 +259,9 @@ public class AgentCity extends SimState {
             intersectionAgents[i] = new IntersectionAgent(i, intersections[i]);
             intersectionAgents[i].stopper =
                 schedule.scheduleRepeating(intersectionAgents[i], 1, 1);
-            /*
             TripGenerator gen = new TripGenerator(i, intersections[i], 0.05, random);
             gen.stopper =
                 schedule.scheduleRepeating(gen, 5, 1);
-            */
         }
     }
 

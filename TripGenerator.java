@@ -89,7 +89,17 @@ public class TripGenerator implements Steppable {
     public void step(final SimState state) {
         AgentCity ac = (AgentCity)state;
         step = ac.schedule.getSteps();
-        int i = distribution.nextInt();
-        // if (i > 0) { System.out.println(i); }
+        int numPersons = distribution.nextInt();
+        Person newPerson;
+        for (int i = numPersons; i > 0; i--) {
+            Intersection destination =
+                ac.intersections[ac.random.nextInt(ac.intersections.length - 1) + 1];
+            while (destination == intersection) {
+                destination =
+                    ac.intersections[ac.random.nextInt(ac.intersections.length - 1) + 1];
+            }
+            newPerson = new Person(0, intersection, destination);
+            newPerson.stopper = ac.schedule.scheduleRepeating(newPerson, 6, 1);
+        }
     }
 }
