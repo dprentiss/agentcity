@@ -256,6 +256,11 @@ public class AgentCity extends SimState {
             intersectionAgents[i] = new IntersectionAgent(i, intersections[i]);
             intersectionAgents[i].stopper =
                 schedule.scheduleRepeating(intersectionAgents[i], 1, 1);
+            /*
+            TripGenerator gen = new TripGenerator(i, intersections[i], 0.05, random);
+            gen.stopper =
+                schedule.scheduleRepeating(gen, 5, 1);
+            */
         }
     }
 

@@ -13,7 +13,7 @@ import java.util.Arrays;
  * Generates Person objects at an Intersection with a Poisson distribution.
  */
 
-public class tripGenerator implements Steppable {
+public class TripGenerator implements Steppable {
 
     // MASON
     private static final long serialVersionUID = 1;
@@ -78,7 +78,7 @@ public class tripGenerator implements Steppable {
      * @param id (required) int label for this class. Should be unique but
      * uniqueness is not checked.
      */
-    public tripGenerator(int id, Intersection intersection, double mean,
+    public TripGenerator(int id, Intersection intersection, double mean,
                          MersenneTwisterFast randomGenerator) {
         idNum = id;
         this.intersection = intersection;
@@ -90,5 +90,6 @@ public class tripGenerator implements Steppable {
         AgentCity ac = (AgentCity)state;
         step = ac.schedule.getSteps();
         int i = distribution.nextInt();
+        // if (i > 0) { System.out.println(i); }
     }
 }
