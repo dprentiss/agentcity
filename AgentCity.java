@@ -60,6 +60,8 @@ public class AgentCity extends SimState {
     // Array of Intersection agents
     public IntersectionAgent[] intersectionAgents;
 
+    public Bag travelers;
+
     // Temporary dispatcher
     public DispatchAgent dispatcher;
 
@@ -144,7 +146,8 @@ public class AgentCity extends SimState {
     public void makeTestGrids() {
 
         n = 1;
-        int vehicleDensity = 128;
+        // int vehicleDensity = 4;
+        int vehicleDensity = 4;
 
         final int NUM_VEHICLES = n * n * vehicleDensity;
         gridHeight = n * 38 + 2;
@@ -199,8 +202,8 @@ public class AgentCity extends SimState {
         }
 
         // Make a DispatchAgent
-        dispatcher = new DispatchAgent(0, NUM_VEHICLES);
-        dispatcher.stopper = schedule.scheduleRepeating(dispatcher, 4, 1);
+        //dispatcher = new DispatchAgent(0, NUM_VEHICLES);
+        //dispatcher.stopper = schedule.scheduleRepeating(dispatcher, 4, 1);
 
         // Make some Vehicle and Driver agents
         for (int i = 0; i < NUM_VEHICLES; i++) {
@@ -219,7 +222,7 @@ public class AgentCity extends SimState {
                                                             newLocation.y));
             Vehicle testCar = new Vehicle(i, newDir);
             // add Vehicle to DispatchAgent pool
-            dispatcher.addVehicleToPool(testCar);
+            //dispatcher.addVehicleToPool(testCar);
             agentGrid.setObjectLocation(testCar, newLocation);
             // Add Vehicle to Schedule
             testCar.stopper = schedule.scheduleRepeating(testCar, 0, 1);

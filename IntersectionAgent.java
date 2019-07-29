@@ -41,6 +41,8 @@ public class IntersectionAgent implements Steppable {
 
     // Accessors
 
+    public Bag getVehicles() { return vehicles; }
+
     /** Gets the Intersection object controlled by this IntersectionAgent. */
     public Intersection getIntersection() { return intersection; }
 
@@ -84,11 +86,13 @@ public class IntersectionAgent implements Steppable {
     /** Considers a request from an approaching Vehicle object and returns
      * whether or not the the request is approved
      */
+    /*
     public boolean requestReservation(Vehicle vehicle, long time,
                                       Int2D[] path) {
         // check path against schedule
         return addVehicleToSchedule(vehicle, time, path);
     }
+    */
 
     /** Considers a request from an approaching Vehicle object and returns
      * whether or not the the request is approved
@@ -140,12 +144,14 @@ public class IntersectionAgent implements Steppable {
         return toString(NONE);
     }
 
+    /*
     /** Handles reservation requests for the Intersection controlled by this
      * intersection agent.
      *
      * @param vehicle Vehicle requesting reservation
      * @param time
      */
+    /*
     private boolean addVehicleToSchedule(Vehicle vehicle,
                                          long time,
                                          Int2D[] path) {
@@ -178,6 +184,7 @@ public class IntersectionAgent implements Steppable {
         }
         return true;
     }
+    */
 
     /** Handles reservation requests for the Intersection controlled by this
      * intersection agent.
@@ -314,7 +321,7 @@ public class IntersectionAgent implements Steppable {
         	if (this.idNum == 5) {
         		System.out.printf("*** Schedule not valid at intersection %d\n",
         				this.idNum);
-        	
+
         		System.out.print(this.toString(SCHEDULE));
         	}
             acceptingReservations = false;

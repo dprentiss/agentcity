@@ -56,6 +56,8 @@ public class DriverAgent implements Steppable, Driver {
     public boolean nearNextLeg = false;
     public boolean atNextLeg = false;
 
+    public boolean hasAssignment = false;
+
     // Accessors
     public Vehicle getVehicle() { return vehicle; }
     public void setVehicle(Vehicle v) {
@@ -64,6 +66,11 @@ public class DriverAgent implements Steppable, Driver {
     }
     public Driver.Directive getNextDirective() { return nextDirective; }
     public int getDesiredSpeed() { return desiredSpeed; }
+    public int assignVehicle(Person person,
+                             Intersection pickUp,
+                             Intersection dropOff) {
+        return -1;
+    }
 
     @Override
     public String toString() {
@@ -128,7 +135,7 @@ public class DriverAgent implements Steppable, Driver {
     int getSafeSpeed(AgentCity ac, int locX, int locY, Direction dir,
     		int depth) {
         Int2D cell;
-        
+
         int MAX_DEPTH = 32;
         if (depth > MAX_DEPTH) {return 0;}
 

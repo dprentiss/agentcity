@@ -6,7 +6,7 @@ package sim.app.agentcity;
 import sim.util.*;
 import sim.engine.*;
 
-public class Person implements Steppable, VehicleClient, Driver {
+public class Person implements Steppable, VehicleClient {
 
     // MASON
     private static final long serialVersionUID = 1;
@@ -17,13 +17,15 @@ public class Person implements Steppable, VehicleClient, Driver {
     public final int idNum;
 
     // Variables
-    public Intersection location;
-    public Vehicle currentVehicle = null;
-    public Intersection destination = null;
+    private Intersection location = null;
+    private Vehicle vehicle = null;
+    private Intersection destination = null;
+    private boolean inVehicle = false;
+    private boolean atDestination = false;
 
     // Accessors
     public Intersection getLocation() { return location; }
-    public Vehicle getVehicle() { return currentVehicle; }
+    public Vehicle getVehicle() { return vehicle; }
     public Intersection getDestination() { return destination; }
 
     /** Constructor */
@@ -34,62 +36,46 @@ public class Person implements Steppable, VehicleClient, Driver {
         this.destination = destination;
     }
 
-    public Driver.Directive getNextDirective() {
-        return Driver.Directive.STOP;
+    @Override
+    public String toString() {
+        return new StringBuilder()
+            .append("PersonAgent: {")
+            .append("idNum: " + idNum)
+            .append(", ")
+            .append("location: " + location.idNum)
+            .append(", ")
+            .append("destination: " + destination.idNum)
+            .append("}\n")
+            .toString();
     }
-
-    public int getDesiredSpeed() {
-        return 0;
-    }
-
-    public void enterVehicle(Vehicle vehicle) {
-    }
-
-
-    /** Choose trip */
-    // A Person is either travelling or stationary at her location.
-    // A Person that is traveling must have at least a current location, a
-    // destination, and start time.
-
-    /** Get travel information */
-    // A traveler must have enough information to plan a route.
-    // A traveler may request a recommendation from a RouteFindingService.
-
-    /** Choose mode and route */
-    // A Person chooses a mode based on her destination, and available travel
-    // information.
-    // The Person class must implement at least a weighted least-cost
-    // optimization.
-    // Route choice is typically chosen with mode. However, route choice is
-    // dynamic and can change many times during the trip.
-    // Mode choice may also change during the trip
-    // The Person class must implement at least one choice at the start of the
-    // trip.
-    // The Person class may also check for criteria that trigger a new route
-    // choice.
-
-    /** Walk */
-    // A Person may travels by foot to her destination or to the start of the
-    // next leg of the trip.
-
-    /** Request vehicle */
-    // A Person may request a Vehicle at her location or at some other waypoint.
-
-    /** Enter vehicle */
-    // A Person may choose to enter a Vehicle if she is authorized, both are in
-    // the same location, and the Vehicle is stopped.
-
-    /** Exit vehicle */
-    // A Person may choose to exit a Vehicle if the vehicle is stopped.
 
     public void step(final SimState state) {
         // get Simulation state
         AgentCity ac = (AgentCity)state;
-        ac.dispatcher.requestVehicle(location, 0);
-        /*
-        System.out.printf("I'm at %s, headed to %s.\n",
-                          location,
-                          destination);
-        */
+        if (!inVehicle) {
+            Bag vehicles = location.getController().getVehicles();
+            for (int i = 0; i < vehicles.numObjs; i++) {
+                if (!((Vehicle)vehicles.objs[i]).hasPassengers) {
+                    if (((Vehicle)vehicles.objs[i]).boardVehicle(this) > 0) {
+                        vehicle = (Vehicle)vehicles.objs[i];
+                        inVehicle = true;
+                        System.out.println("Boarded:");
+                        System.out.print(this);
+                        System.out.print(vehicle);
+                        break;
+                    }
+                }
+            }
+        } else {
+            if (ac.intersectionGrid
+                .field[vehicle.getLocation().x][vehicle.getLocation().y]
+                == destination.idNum) {
+                vehicle.exitVehicle(this);
+                System.out.println("Arrived:");
+                System.out.print(this);
+                System.out.print(vehicle);
+                this.stopper.stop();
+            }
+        }
     }
 }

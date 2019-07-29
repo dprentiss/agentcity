@@ -38,14 +38,15 @@ public class Vehicle implements Steppable, Driveable {
     // Agents
     /** The agent responsible for driving this Vehicle. */
     private Driver driver;
-    /** An array of Person objects that comprises this Vehicle's passengers. */
-    private Person manifest[];
+    /** A Bag of Person objects that comprises this Vehicle's passengers. */
+    private Bag manifest;
 
     // Variables
     /** True indicates that this Vehicle is clear to enter the relevant
      * intersection.
      */
     public boolean hasReservation = false;
+    public boolean hasPassengers = false;
     /** The next Driver.Directive for the Driver of this Vehicle. */
     private Driver.Directive nextDirective;
     /** The speed desired by this Vehicle's Driver. */
@@ -57,6 +58,19 @@ public class Vehicle implements Steppable, Driveable {
     private int speed;
 
     // Accessors
+
+    public int boardVehicle(Person person) {
+        if (manifest.numObjs < 1) {
+            manifest.add(person);
+            return 1;
+        } else {
+            return 0;
+        }
+    }
+
+    public void exitVehicle(Person person) {
+        manifest.remove(person);
+    }
 
     /** Returns a string representation of this Vehicle */
     @Override
@@ -106,7 +120,7 @@ public class Vehicle implements Steppable, Driveable {
     /** Gets an array of Person objects that comprise this Vehicle's current
      * passengers.
      */
-    public Person[] getManifest() { return manifest; }
+    public Bag getManifest() { return manifest; }
 
     /** Adds the provide Person object as a passenger of this Vehicle if there
      * is room.
@@ -175,7 +189,7 @@ public class Vehicle implements Steppable, Driveable {
         idNum = id;
         length = len;
         passengerCap = cap;
-        manifest = new Person[passengerCap];
+        manifest = new Bag(passengerCap);
         direction = dir;
     }
 

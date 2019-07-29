@@ -33,9 +33,12 @@ public class Intersection {
     public void setController(IntersectionAgent controller) {
         this.controller = controller;
     }
+    public IntersectionAgent getController() { return controller; }
+    /*
     public boolean requestReservation(Vehicle vehicle, long time, Int2D[] path) {
         return controller.requestReservation(vehicle, time, path);
     }
+    */
     public boolean requestReservation(Vehicle vehicle, long time, Int2D[][] path) {
         return controller.requestReservation(vehicle, time, path);
     }

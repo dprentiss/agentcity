@@ -24,11 +24,21 @@ public class DispatchAgent implements Steppable, Dispatcher {
 
     // Variables
     private Bag vehiclePool;
+    private Bag clients;
     private Bag idleVehicles;
 
     // Accessors
-    public int requestVehicle(Intersection intersection, long step) {
-        return 0;
+    public int requestVehicle(Intersection location,
+                              Intersection destination,
+                              Person person,
+                              long step) {
+        if (idleVehicles.numObjs > 0) {
+            assignVehicle((Vehicle)idleVehicles.pop(),
+                          person,
+                          location,
+                          destination);
+        }
+        return -1;
     }
 
     public int addVehicleToPool(Vehicle vehicle) {
@@ -36,6 +46,13 @@ public class DispatchAgent implements Steppable, Dispatcher {
             idleVehicles.add(vehicle);
             return 0;
         }
+        return -1;
+    }
+
+    private int assignVehicle(Vehicle vehicle,
+                              Person person,
+                              Intersection start,
+                              Intersection end) {
         return -1;
     }
 
@@ -47,36 +64,6 @@ public class DispatchAgent implements Steppable, Dispatcher {
             .append("idNum: " + idNum)
             .append(", ")
             .append("desiredSpeed: " + desiredSpeed)
-            .append(", ")
-            //.append("destination: " + destination)
-            //.append(", ")
-            .append("hasReservation: " + hasReservation)
-            .append(", ")
-            .append("nextApproachLeg: " + nextApproachLeg)
-            .append(", ")
-            .append("nextTurnCell: " + nextTurnCell)
-            .append(", ")
-            .append("nextLeg: " + nextLeg)
-            .append(", ")
-            .append("nextDirection: " + nextDirection)
-            .append(", ")
-            //.append("nearIntersection: " + nearIntersection)
-            //.append(", ")
-            .append("nearApproachLeg: " + nearApproachLeg)
-            .append(", ")
-            .append("atApproachLeg: " + atApproachLeg)
-            .append(", ")
-            .append("nearIntersection: " + nearIntersection)
-            .append(", ")
-            .append("inIntersection: " + inIntersection)
-            .append(", ")
-            .append("stepsToWaypoint: " + stepsToWaypoint)
-            .append(", ")
-            .append("nearWaypoint: " + nearWaypoint)
-            .append(", ")
-            //.append("nearNextLeg: " + nearNextLeg)
-            //.append(", ")
-            .append("atNextLeg: " + atNextLeg)
             .append("}\n")
             .toString();
     }
