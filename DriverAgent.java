@@ -80,6 +80,8 @@ public class DriverAgent implements Steppable, Driver {
             .append(", ")
             .append("desiredSpeed: " + desiredSpeed)
             .append(", ")
+            .append("maxSafeSpeed: " + maxSafeSpeed)
+            .append(", ")
             //.append("destination: " + destination)
             //.append(", ")
             .append("hasReservation: " + hasReservation)
@@ -165,7 +167,6 @@ public class DriverAgent implements Steppable, Driver {
                     // get more information about the other vehicle
                     int otherSpeed = otherVehicle.getSpeed();
                     // check if the other vehicle is slow
-                    // 116436188 step 15
                     if (i + otherSpeed + 1 < maxSpeed) {
                         return i + otherSpeed + 1;
                     }
@@ -188,7 +189,7 @@ public class DriverAgent implements Steppable, Driver {
     }
 
     int getSafeSpeed(AgentCity ac, Int2D loc, Direction dir) {
-        return getSafeSpeed(ac, loc.x, loc.y, dir, 0);
+        return getSafeSpeed(ac, loc.x, loc.y, dir, 4);
     }
 
     /**
@@ -616,10 +617,25 @@ public class DriverAgent implements Steppable, Driver {
         if (inIntersection || nearIntersection) {
             // cancel reservation if reservationTime can't be honored
             if (hasReservation) {
-                // 192834420
                 int timeIndex = (int)(step - reservationTime);
-                if (timeIndex >= 0 && timeIndex < reservationPath.length
-                    && !location.equals(reservationPath[timeIndex][0])) {
+                boolean cannotEnter = false;
+                boolean cannotLeave =
+                    (timeIndex >= 0
+                     && timeIndex < reservationPath.length
+                     && !location.equals(reservationPath[timeIndex][0]));
+                if (vehicle.idNum == 104) {
+                    System.out.println("**********");
+                    System.out.print(this);
+                    System.out.println(step);
+                    System.out.println(reservationTime);
+                    System.out.println(timeIndex);
+                    System.out.println(reservationPath.length);
+                    System.out.println(timeIndex >= 0);
+                    System.out.println(timeIndex < reservationPath.length);
+                    System.out.println(cannotLeave);
+                    System.out.println("**********");
+                }
+                if (cannotLeave) {
                     nextIntersection.cancelReservation(vehicle);
                     hasReservation = false;
                     vehicle.hasReservation = false;
@@ -702,5 +718,6 @@ public class DriverAgent implements Steppable, Driver {
             System.out.println(getStepsToCell(getCellAhead(nextApproachLeg, 1)));
         }
         */
+        //if(this.idNum == 89) {System.out.print(this.toString());}
     }
 }

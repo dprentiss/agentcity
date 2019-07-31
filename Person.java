@@ -74,6 +74,7 @@ public class Person implements Steppable, VehicleClient {
                 System.out.println("Arrived:");
                 System.out.print(this);
                 System.out.print(vehicle);
+                ac.travelers.remove(this);
                 this.stopper.stop();
             }
         }

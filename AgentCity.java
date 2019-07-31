@@ -84,6 +84,7 @@ public class AgentCity extends SimState {
 
     public void start() {
         super.start();
+        travelers = new Bag();
 
         if(isTest) {
             makeTestGrids();
@@ -147,7 +148,7 @@ public class AgentCity extends SimState {
 
         n = 1;
         // int vehicleDensity = 4;
-        int vehicleDensity = 4;
+        int vehicleDensity = 128;
 
         final int NUM_VEHICLES = n * n * vehicleDensity;
         gridHeight = n * 38 + 2;

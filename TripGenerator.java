@@ -100,6 +100,8 @@ public class TripGenerator implements Steppable {
             }
             int newId = (int)step % 100 * 10000 + 100 * intersection.idNum + destination.idNum;
             newPerson = new Person(newId, intersection, destination);
+            ac.travelers.add(newPerson);
+            System.out.println(ac.travelers.numObjs);
             newPerson.stopper = ac.schedule.scheduleRepeating(newPerson, 6, 1);
         }
     }
