@@ -53,7 +53,7 @@ public class Vehicle implements Steppable, Driveable {
     private int desiredSpeed;
 
     // Physical Variables
-    private Int2D location;
+    public Int2D location;
     private Direction direction;
     private int speed;
 

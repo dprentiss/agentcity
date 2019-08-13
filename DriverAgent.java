@@ -364,7 +364,11 @@ public class DriverAgent implements Steppable, Driver {
         path = new Int2D[k - m + 1][maxSpeed];
         for (int i = 0; i < k - m + 1; i++) {
             for (int j = 0; j < maxSpeed; j++) {
-                path[i][j] = tmpPath[i + m - 1][j];
+            	if (step >= 174 && inIntersection) {
+            		path[i][j] = tmpPath[i][j];
+            	} else {
+            		path[i][j] = tmpPath[i + m - 1][j];
+            	}    
             }
         }
         return path;
@@ -618,7 +622,6 @@ public class DriverAgent implements Steppable, Driver {
             // cancel reservation if reservationTime can't be honored
             if (hasReservation) {
                 int timeIndex = (int)(step - reservationTime);
-                boolean cannotEnter = false;
                 boolean cannotLeave =
                     (timeIndex >= 0
                      && timeIndex < reservationPath.length
