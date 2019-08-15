@@ -253,7 +253,7 @@ public class IntersectionAgent implements Steppable {
         if (!vehicles.contains(vehicle)) {
         	vehicles.add(vehicle);
         }
-        if (intersection.idNum == 2) {
+        if (intersection.idNum == 5) {
             System.out.println();
             System.out.print(toString(SCHEDULE));
         }
@@ -357,7 +357,7 @@ public class IntersectionAgent implements Steppable {
         long steps = ac.schedule.getSteps();
         // If schedule is wrong revoke all reservations and clear schedule
         if (!scheduleValid(ac)) {
-        	if (this.idNum == 2) {
+        	if (this.idNum == 5) {
         		System.out.printf("*** Schedule not valid at intersection %d\n",
         				this.idNum);
 
@@ -415,7 +415,7 @@ public class IntersectionAgent implements Steppable {
         step = ac.schedule.getSteps();
         trimSchedule(ac);
         checkSchedule(ac);
-        if (intersection.idNum == 2) {
+        if (intersection.idNum == 5) {
             System.out.println();
             System.out.printf("Step %d, schedule %d/%d\n",
                                step,
