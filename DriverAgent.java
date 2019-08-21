@@ -341,6 +341,13 @@ public class DriverAgent implements Steppable, Driver {
 
         // loop over waypoints and add to path
         for (int i = 0; i < waypoints.length; i++) {
+        	if (tmpLoc.equals(waypoints[i].cell)) {
+        		if (waypoints[i].directive != Driver.Directive.MOVE_FORWARD) {
+                    tmpSpeed = 0;
+                }
+        		tmpDir = tmpDir.byDirective(waypoints[i].directive);
+        		continue;
+        	}
             pathToWaypoint =
                 getPathToWaypoint(waypoints[i], tmpLoc, tmpDir, tmpSpeed,
                                   desiredSpeed).clone();
@@ -360,17 +367,21 @@ public class DriverAgent implements Steppable, Driver {
             tmpDir = tmpDir.byDirective(waypoints[i].directive);
         }
         // copy tmpPath to trimmed path
-        int m = getStepsToCell(getCellAhead(waypoints[0].cell, 1));
-        path = new Int2D[k - m + 1][maxSpeed];
-        for (int i = 0; i < k - m + 1; i++) {
+        int m = getStepsToCell(getCellAhead(waypoints[0].cell, 1)) - 1;
+        path = new Int2D[k - m][maxSpeed];
+        for (int i = 0; i < k - m; i++) {
             for (int j = 0; j < maxSpeed; j++) {
-            	if (step >= 174 && inIntersection) {
-            		path[i][j] = tmpPath[i][j];
-            	} else {
-            		path[i][j] = tmpPath[i + m - 1][j];
-            	}    
+            		path[i][j] = tmpPath[i + m][j];
             }
         }
+            /*
+        path = new Int2D[k][maxSpeed];
+        for (int i = 0; i < k; i++) {
+            for (int j = 0; j < maxSpeed; j++) {
+                path[i][j] = tmpPath[i][j];
+            }
+        }
+            */
         return path;
     }
 
@@ -622,10 +633,15 @@ public class DriverAgent implements Steppable, Driver {
             // cancel reservation if reservationTime can't be honored
             if (hasReservation) {
                 int timeIndex = (int)(step - reservationTime);
+                stepsToWaypoint = getStepsToCell(nextWaypoint.cell);
+                boolean cannotEnter = 
+                		(timeIndex <= -1
+                		&& stepsToWaypoint > timeIndex);
                 boolean cannotLeave =
                     (timeIndex >= 0
                      && timeIndex < reservationPath.length
                      && !location.equals(reservationPath[timeIndex][0]));
+                /*
                 if (vehicle.idNum == 104) {
                     System.out.println("**********");
                     System.out.print(this);
@@ -638,6 +654,7 @@ public class DriverAgent implements Steppable, Driver {
                     System.out.println(cannotLeave);
                     System.out.println("**********");
                 }
+                */
                 if (cannotLeave) {
                     nextIntersection.cancelReservation(vehicle);
                     hasReservation = false;
