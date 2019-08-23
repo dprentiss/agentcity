@@ -147,7 +147,6 @@ public class AgentCity extends SimState {
     public void makeTestGrids() {
 
         n = 1;
-        // int vehicleDensity = 4;
         int vehicleDensity = 128;
 
         final int NUM_VEHICLES = n * n * vehicleDensity;
@@ -264,8 +263,10 @@ public class AgentCity extends SimState {
             intersectionAgents[i].stopper =
                 schedule.scheduleRepeating(intersectionAgents[i], 1, 1);
             TripGenerator gen = new TripGenerator(i, intersections[i], 0.05, random);
+            /*
             gen.stopper =
                 schedule.scheduleRepeating(gen, 5, 1);
+            */
         }
     }
 

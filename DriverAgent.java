@@ -367,7 +367,10 @@ public class DriverAgent implements Steppable, Driver {
             tmpDir = tmpDir.byDirective(waypoints[i].directive);
         }
         // copy tmpPath to trimmed path
-        int m = getStepsToCell(getCellAhead(waypoints[0].cell, 1)) - 1;
+        int m = 0;
+        if (!inIntersection) {
+        	m = getStepsToCell(getCellAhead(waypoints[0].cell, 1)) - 1;
+        }
         path = new Int2D[k - m][maxSpeed];
         for (int i = 0; i < k - m; i++) {
             for (int j = 0; j < maxSpeed; j++) {
@@ -693,6 +696,12 @@ public class DriverAgent implements Steppable, Driver {
         maxSafeSpeed = getSafeSpeed(ac);
         if (maxSafeSpeed < desiredSpeed) {
             desiredSpeed = maxSafeSpeed;
+        }
+        
+        if (hasReservation && inIntersection && maxSafeSpeed == 0 ) {
+        	nextIntersection.cancelReservation(vehicle);
+            hasReservation = false;
+            vehicle.hasReservation = false;
         }
 
         // prepare to take appropriate action at Waypoint
