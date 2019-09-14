@@ -253,7 +253,7 @@ public class IntersectionAgent implements Steppable {
         if (!vehicles.contains(vehicle)) {
         	vehicles.add(vehicle);
         }
-        if (intersection.idNum == 2) {
+        if (intersection.idNum == 5) {
             System.out.println();
             System.out.print(toString(SCHEDULE));
         }
@@ -328,7 +328,9 @@ public class IntersectionAgent implements Steppable {
         int y;
         Vehicle vehicle;
         Bag bag;
+        Bag tmp = new Bag(vehicles);
         long steps = ac.schedule.getSteps();
+        vehicles.clear();
         for (int i = 0; i < width; i++) {
             for (int j = 0; j < height; j++) {
                 x = cells[i][j].x;
@@ -337,15 +339,18 @@ public class IntersectionAgent implements Steppable {
                 if (bag == null) continue;
                 vehicle = (Vehicle)bag.objs[0];
                 schedule[(int)(steps % scheduleSize)][i][j] = vehicle;
+                //vehicles.add(vehicle);
+                tmp.remove(vehicle);
                 vehicles.add(vehicle);
-                /*
-                if (intersection.idNum == 6) {
-                    System.out.println(vehicles.numObjs);
-                    System.out.println(vehicle);
-                }
-                */
+                ((DriverAgent)vehicle.getDriver()).updateReservation(ac);
             }
         }
+        while (!tmp.isEmpty()) {
+            vehicle = (Vehicle)tmp.pop();
+            vehicles.add(vehicle);
+            ((DriverAgent)vehicle.getDriver()).updateReservation(ac);
+        }
+        acceptingReservations = true;
     }
 
     private void checkSchedule(AgentCity ac) {
@@ -357,7 +362,7 @@ public class IntersectionAgent implements Steppable {
         long steps = ac.schedule.getSteps();
         // If schedule is wrong revoke all reservations and clear schedule
         if (!scheduleValid(ac)) {
-        	if (this.idNum == 2) {
+        	if (this.idNum == 5) {
         		System.out.printf("*** Schedule not valid at intersection %d\n",
         				this.idNum);
 
@@ -382,9 +387,9 @@ public class IntersectionAgent implements Steppable {
                 }
             }
         }
-        // remove vehicles from bag
-        while (vehicles.numObjs > 0) {
-            v = (Vehicle)vehicles.pop();
+        // cancel all reservations
+        for (int i = 0; i < vehicles.numObjs; i++) {
+            v = (Vehicle)vehicles.objs[i];
             v.hasReservation = false;
             ((DriverAgent)v.getDriver()).hasReservation = false;
         }
@@ -415,7 +420,7 @@ public class IntersectionAgent implements Steppable {
         step = ac.schedule.getSteps();
         trimSchedule(ac);
         checkSchedule(ac);
-        if (intersection.idNum == 2) {
+        if (intersection.idNum == 5) {
             System.out.println();
             System.out.printf("Step %d, schedule %d/%d\n",
                                step,

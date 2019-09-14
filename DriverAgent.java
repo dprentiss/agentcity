@@ -555,15 +555,70 @@ public class DriverAgent implements Steppable, Driver {
         return Driver.Directive.STOP;
     }
 
-    public void step(final SimState state) {
-        AgentCity ac = (AgentCity)state;
-        step = ac.schedule.getSteps();
+    void updateReservation() {
+        if (inIntersection || nearIntersection) {
+            // cancel reservation if reservationTime can't be honored
+            if (hasReservation) {
+                int timeIndex = (int)(step - reservationTime);
+                stepsToWaypoint = getStepsToCell(nextWaypoint.cell);
+                boolean cannotLeave =
+                    (timeIndex >= 0
+                     && timeIndex < reservationPath.length
+                     && !location.equals(reservationPath[timeIndex][0]));
+                if (cannotLeave) {
+                    nextIntersection.cancelReservation(vehicle);
+                    hasReservation = false;
+                    vehicle.hasReservation = false;
+                }
+            }
+            // get a reservation if needed
+            if (!hasReservation) {
+                reservationTime = step + 1;
+                if (inIntersection) {
+                    if (direction == nextDirection) {
+                        waypoints = new Waypoint[] {
+                            new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+                        };
+                    } else {
+                        waypoints = new Waypoint[] {
+                            new Waypoint(nextTurnCell,
+                                         getTurnDirective(nextDirection)),
+                            new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+                        };
+                    }
+                } else {
+                    reservationTime = step
+                        + getStepsToCell(getCellAhead(nextApproachLeg, 1));
+                }
+                reservationPath = getReservationPath(waypoints);
+                hasReservation =
+                    nextIntersection.requestReservation(vehicle,
+                                                        reservationTime,
+                                                        reservationPath);
+                vehicle.hasReservation = hasReservation;
+            }
+        }
+    }
 
-        // Current Vehicle position and velocity;
+    void updateReservation(AgentCity ac) {
+        updateState(ac);
+        updateReservation();
+    }
+
+    void updateState(AgentCity ac) {
+        step = ac.schedule.getSteps();
         location = vehicle.getLocation();
         direction = vehicle.getDirection();
         speed = vehicle.getSpeed();
         hasReservation = vehicle.hasReservation;
+        inIntersection = ac.roadGrid.field[location.x][location.y] == 9;
+    }
+
+    public void step(final SimState state) {
+        AgentCity ac = (AgentCity)state;
+
+        // Current Vehicle position and velocity;
+        updateState(ac);
 
         // get a new destination if needed
         if (nextIntersection == null) {
@@ -632,74 +687,16 @@ public class DriverAgent implements Steppable, Driver {
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
         // check reservation or request as needed
-        if (inIntersection || nearIntersection) {
-            // cancel reservation if reservationTime can't be honored
-            if (hasReservation) {
-                int timeIndex = (int)(step - reservationTime);
-                stepsToWaypoint = getStepsToCell(nextWaypoint.cell);
-                boolean cannotEnter = 
-                		(timeIndex <= -1
-                		&& stepsToWaypoint > timeIndex);
-                boolean cannotLeave =
-                    (timeIndex >= 0
-                     && timeIndex < reservationPath.length
-                     && !location.equals(reservationPath[timeIndex][0]));
-                /*
-                if (vehicle.idNum == 104) {
-                    System.out.println("**********");
-                    System.out.print(this);
-                    System.out.println(step);
-                    System.out.println(reservationTime);
-                    System.out.println(timeIndex);
-                    System.out.println(reservationPath.length);
-                    System.out.println(timeIndex >= 0);
-                    System.out.println(timeIndex < reservationPath.length);
-                    System.out.println(cannotLeave);
-                    System.out.println("**********");
-                }
-                */
-                if (cannotLeave) {
-                    nextIntersection.cancelReservation(vehicle);
-                    hasReservation = false;
-                    vehicle.hasReservation = false;
-                }
-            }
-            // get a reservation if needed
-            if (!hasReservation) {
-                reservationTime = step + 1;
-                if (inIntersection) {
-                    if (direction == nextDirection) {
-                        waypoints = new Waypoint[] {
-                            new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
-                        };
-                    } else {
-                        waypoints = new Waypoint[] {
-                            new Waypoint(nextTurnCell,
-                                         getTurnDirective(nextDirection)),
-                            new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
-                        };
-                    }
-                } else {
-                    reservationTime = step
-                        + getStepsToCell(getCellAhead(nextApproachLeg, 1));
-                }
-                reservationPath = getReservationPath(waypoints);
-                hasReservation =
-                    nextIntersection.requestReservation(vehicle,
-                                                        reservationTime,
-                                                        reservationPath);
-                vehicle.hasReservation = hasReservation;
-            }
-        }
+        updateReservation();
 
         // If the directive is move forward and the way is not clear, stop.
         maxSafeSpeed = getSafeSpeed(ac);
         if (maxSafeSpeed < desiredSpeed) {
             desiredSpeed = maxSafeSpeed;
         }
-        
-        if (hasReservation && inIntersection && maxSafeSpeed == 0 ) {
-        	nextIntersection.cancelReservation(vehicle);
+
+        if (hasReservation && maxSafeSpeed == 0 ) {
+            nextIntersection.cancelReservation(vehicle);
             hasReservation = false;
             vehicle.hasReservation = false;
         }
@@ -735,18 +732,5 @@ public class DriverAgent implements Steppable, Driver {
         if (maxSafeSpeed < desiredSpeed) {
             desiredSpeed = maxSafeSpeed;
         }
-
-        /*
-        if (nextIntersection.idNum == 5 && hasReservation) {
-            System.out.print(this.vehicle.toString());
-            System.out.print(this.toString());
-            System.out.println(Arrays.toString(waypoints));
-            //System.out.println(Arrays.deepToString(getPath(waypoints)));
-            System.out.println(Arrays.deepToString(getReservationPath(waypoints)));
-            //System.out.println(ac.schedule.getSteps());
-            System.out.println(getStepsToCell(getCellAhead(nextApproachLeg, 1)));
-        }
-        */
-        //if(this.idNum == 89) {System.out.print(this.toString());}
     }
 }
