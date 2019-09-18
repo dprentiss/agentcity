@@ -136,9 +136,10 @@ public class DriverAgent implements Steppable, Driver {
      */
     int getSafeSpeed(AgentCity ac, int locX, int locY, Direction dir,
     		int depth) {
+
         Int2D cell;
 
-        int MAX_DEPTH = 32;
+        int MAX_DEPTH = 16;
         if (depth > MAX_DEPTH) {return 0;}
 
         // for each cell ahead of vehicle, check for obstacles and boundaries.
@@ -153,6 +154,10 @@ public class DriverAgent implements Steppable, Driver {
             if (b != null) { // if there is another vehicle at the cell
                 // get the other vehicle
                 Vehicle otherVehicle = (Vehicle)b.objs[0];
+                // check for gridlock
+                if (otherVehicle.equals(this.getVehicle())) {
+                    return 1;
+                }
                 // check if the other vehicle has a reservation
                 if (!otherVehicle.hasReservation ||
                     ac.roadGrid.get(cell.x, cell.y) != 9) { return i; }
@@ -561,6 +566,7 @@ public class DriverAgent implements Steppable, Driver {
             if (hasReservation) {
                 int timeIndex = (int)(step - reservationTime);
                 stepsToWaypoint = getStepsToCell(nextWaypoint.cell);
+                /*
                 boolean cannotLeave =
                     (timeIndex >= 0
                      && timeIndex < reservationPath.length
@@ -570,6 +576,7 @@ public class DriverAgent implements Steppable, Driver {
                     hasReservation = false;
                     vehicle.hasReservation = false;
                 }
+                */
             }
             // get a reservation if needed
             if (!hasReservation) {
@@ -695,10 +702,11 @@ public class DriverAgent implements Steppable, Driver {
             desiredSpeed = maxSafeSpeed;
         }
 
-        if (hasReservation && maxSafeSpeed == 0 ) {
+        if (hasReservation && maxSafeSpeed == 0 && !inIntersection) {
             nextIntersection.cancelReservation(vehicle);
             hasReservation = false;
             vehicle.hasReservation = false;
+            if (inIntersection) updateReservation();
         }
 
         // prepare to take appropriate action at Waypoint
