@@ -23,7 +23,7 @@ public class IntersectionAgent implements Steppable {
     // Utility
     private static final int NONE = 0;
     private static final int SCHEDULE = 1;
-    private static final int intIdNum = 5;
+    private static final int intIdNum = 0;
 
     // Properties
     public final int idNum;
@@ -281,7 +281,7 @@ public class IntersectionAgent implements Steppable {
     }
 
     /*
-    private void allowPriorityReservationsTMP2(AgentCity ac) {
+    private void allowPriorityReservations(AgentCity ac) {
         int x;
         int y;
         Vehicle vehicle;
@@ -334,6 +334,7 @@ public class IntersectionAgent implements Steppable {
     }
     */
 
+    /*
     private void allowPriorityReservations(AgentCity ac) {
         int x;
         int y;
@@ -366,9 +367,39 @@ public class IntersectionAgent implements Steppable {
         }
         acceptingReservations = true;
     }
+    */
+
+    private void allowPriorityReservations(AgentCity ac) {
+        int x;
+        int y;
+        Vehicle vehicle;
+        Bag bag;
+        long steps = ac.schedule.getSteps();
+        vehicles.clear();
+        for (int i = 0; i < width; i++) {
+            for (int j = 0; j < height; j++) {
+                x = cells[i][j].x;
+                y = cells[i][j].y;
+                bag = ac.agentGrid.getObjectsAtLocation(x, y);
+                if (bag == null) continue;
+                vehicle = (Vehicle)bag.objs[0];
+                schedule[(int)(steps % scheduleSize)][i][j] = vehicle;
+                vehicles.add(vehicle);
+            }
+        }
+        vehicles.shuffle(ac.random);
+        for (int k = 0; k < vehicles.numObjs; k++) {
+            vehicle = (Vehicle)vehicles.objs[k];
+            ((DriverAgent)vehicle.getDriver()).updateReservation(ac);
+        }
+        if (intersection.getNumCells() <= 4) {
+            acceptingReservations = true;
+            return;
+        }
+    }
 
     /*
-    private void allowPriorityReservationsTMP(AgentCity ac) {
+    private void allowPriorityReservations(AgentCity ac) {
         int x;
         int y;
         Vehicle vehicle;

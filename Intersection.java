@@ -34,11 +34,10 @@ public class Intersection {
         this.controller = controller;
     }
     public IntersectionAgent getController() { return controller; }
-    /*
-    public boolean requestReservation(Vehicle vehicle, long time, Int2D[] path) {
-        return controller.requestReservation(vehicle, time, path);
+    public int getNumCells() {
+        return (maxX - minX + 1) * (maxY - minY + 1);
     }
-    */
+
     public boolean requestReservation(Vehicle vehicle, long time, Int2D[][] path) {
         return controller.requestReservation(vehicle, time, path);
     }
