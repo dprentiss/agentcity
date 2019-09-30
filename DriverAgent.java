@@ -22,6 +22,8 @@ public class DriverAgent implements Steppable, Driver {
     public final int idNum;
 
     // Variables
+    private AgentCity ac;
+
     public Vehicle vehicle = null;
     public Int2D location;
     public Direction direction;
@@ -621,8 +623,36 @@ public class DriverAgent implements Steppable, Driver {
         inIntersection = ac.roadGrid.field[location.x][location.y] == 9;
     }
 
+    void checkReservation() {
+        // check if Vehicle needs and has a reservation for its next turning
+        // movement
+        if (nearApproachLeg && !hasReservation) {
+            desiredSpeed = getGapToCell(nextApproachLeg) + 1;
+            nextDirective = Driver.Directive.STOP;
+        }
+        if (atApproachLeg && !hasReservation) {
+            desiredSpeed = 0;
+            nextDirective = Driver.Directive.STOP;
+        }
+        if (inIntersection && !hasReservation) {
+            desiredSpeed = 0;
+            nextDirective = Driver.Directive.STOP;
+        }
+    }
+
+    void checkReservation(AgentCity ac) {
+        // If the directive is move forward and the way is not clear, stop.
+        updateState(ac);
+        checkReservation();
+        maxSafeSpeed = getSafeSpeed(ac);
+        if (maxSafeSpeed < desiredSpeed) {
+            desiredSpeed = maxSafeSpeed;
+        }
+
+    }
+
     public void step(final SimState state) {
-        AgentCity ac = (AgentCity)state;
+        ac = (AgentCity)state;
 
         // Current Vehicle position and velocity;
         updateState(ac);
@@ -721,20 +751,7 @@ public class DriverAgent implements Steppable, Driver {
             }
         }
 
-        // check if Vehicle needs and has a reservation for its next turning
-        // movement
-        if (nearApproachLeg && !hasReservation) {
-            desiredSpeed = getGapToCell(nextApproachLeg) + 1;
-            nextDirective = Driver.Directive.STOP;
-        }
-        if (atApproachLeg && !hasReservation) {
-            desiredSpeed = 0;
-            nextDirective = Driver.Directive.STOP;
-        }
-        if (inIntersection && !hasReservation) {
-            desiredSpeed = 0;
-            nextDirective = Driver.Directive.STOP;
-        }
+        checkReservation();
 
         // If the directive is move forward and the way is not clear, stop.
         if (maxSafeSpeed < desiredSpeed) {

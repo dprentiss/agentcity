@@ -59,9 +59,11 @@ public class Person implements Steppable, VehicleClient {
                     if (((Vehicle)vehicles.objs[i]).boardVehicle(this) > 0) {
                         vehicle = (Vehicle)vehicles.objs[i];
                         inVehicle = true;
+                        /*
                         System.out.println("Boarded:");
                         System.out.print(this);
                         System.out.print(vehicle);
+                        */
                         break;
                     }
                 }
@@ -71,9 +73,11 @@ public class Person implements Steppable, VehicleClient {
                 .field[vehicle.getLocation().x][vehicle.getLocation().y]
                 == destination.idNum) {
                 vehicle.exitVehicle(this);
+                /*
                 System.out.println("Arrived:");
                 System.out.print(this);
                 System.out.print(vehicle);
+                */
                 ac.travelers.remove(this);
                 this.stopper.stop();
             }

@@ -33,6 +33,7 @@ public class IntersectionAgent implements Steppable {
     public int scheduleSize;
 
     // Variables
+    private AgentCity ac; // state
     private Int2D[][] cells;
     private Int2D[] approachLegs;
     private Vehicle[][][] schedule;
@@ -177,6 +178,7 @@ public class IntersectionAgent implements Steppable {
                         if (vehicle.hasPassengers) {
                             otherVehicle = schedule[timeIndex][x][y];
                             otherDriver = (DriverAgent)otherVehicle.getDriver();
+                            otherDriver.updateState(ac);
                             if (otherVehicle.hasPassengers
                                 || otherDriver.inIntersection) {
                                 return false;
@@ -200,10 +202,14 @@ public class IntersectionAgent implements Steppable {
                         otherVehicle = schedule[timeIndex][x][y];
                         otherDriver = (DriverAgent)otherVehicle.getDriver();
                         removeVehicleFromSchedule(otherVehicle);
+                        otherVehicle.hasReservation = false;
                         otherDriver.hasReservation = false;
-                        System.out.print(intersection);
+                        otherDriver.checkReservation(ac);
+                        /*
+                        System.out.print(vehicle);
                         System.out.print("removed from schedule");
                         System.out.print(otherVehicle);
+                        */
                     }
                     schedule[timeIndex][x][y] = vehicle;
                 }
@@ -429,7 +435,7 @@ public class IntersectionAgent implements Steppable {
     }
     */
 
-    private void checkSchedule(AgentCity ac) {
+    private void checkSchedule() {
         int x;
         int y;
         Vehicle vehicle;
@@ -491,11 +497,10 @@ public class IntersectionAgent implements Steppable {
     }
 
     public void step(final SimState state) {
-        // World state
-        AgentCity ac = (AgentCity)state;
+        ac = (AgentCity)state;
         step = ac.schedule.getSteps();
         trimSchedule(ac);
-        checkSchedule(ac);
+        checkSchedule();
         if (intersection.idNum == intIdNum) {
             System.out.println();
             System.out.printf("Step %d, schedule %d/%d\n",

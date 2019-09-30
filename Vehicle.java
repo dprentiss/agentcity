@@ -62,6 +62,7 @@ public class Vehicle implements Steppable, Driveable {
     public int boardVehicle(Person person) {
         if (manifest.numObjs < 1) {
             manifest.add(person);
+            hasPassengers = true;
             return 1;
         } else {
             return 0;
@@ -70,22 +71,25 @@ public class Vehicle implements Steppable, Driveable {
 
     public void exitVehicle(Person person) {
         manifest.remove(person);
+        hasPassengers = false;
     }
 
     /** Returns a string representation of this Vehicle */
     @Override
     public String toString() {
         return new StringBuilder()
-                .append("Vehicle: {")
-                .append("idNum: " + idNum)
-                .append(", ")
-                .append("location: " + location)
-                .append(", ")
-                .append("direction: " + direction)
-                .append(", ")
-                .append("speed: " + speed)
-                .append("}\n")
-                .toString();
+            .append("Vehicle: {")
+            .append("idNum: " + idNum)
+            .append(", ")
+            .append("location: " + location)
+            .append(", ")
+            .append("direction: " + direction)
+            .append(", ")
+            .append("speed: " + speed)
+            .append(", ")
+            .append("hasPassengers: " + hasPassengers)
+            .append("}\n")
+            .toString();
     }
 
     /** Gets the ID number of this Vehicle. */
