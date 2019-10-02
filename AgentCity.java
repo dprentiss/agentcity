@@ -22,9 +22,13 @@ public class AgentCity extends SimState {
     private final boolean isTest;
 
     // Grid dimensions
+    public int grids;
+    public int density;
     public int gridHeight;
     public int gridWidth;
+    /*
     public int n;
+    */
 
     // Intersection turning movements
     enum TurningMovements {
@@ -67,15 +71,17 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 0, 0);
+        this(seed, 1, 128);
     }
 
     /** Constructor */
-    public AgentCity(long seed, int height, int width) {
+    public AgentCity(long seed, int grids, int density) {
         // Required by SimState
         super(seed);
         isTest = true;
         checkForCollisions = true;
+        this.grids = grids;
+        this.density = density;
     }
 
     public void start() {
@@ -141,9 +147,13 @@ public class AgentCity extends SimState {
     }
 
     public void makeTestGrids() {
+        makeTestGrids(this.grids, this.density);
+    }
 
-        n = 1;
-        int vehicleDensity = 128;
+    public void makeTestGrids(int grids, int density) {
+
+        int n = grids;
+        int vehicleDensity = density;
 
         final int NUM_VEHICLES = n * n * vehicleDensity;
         gridHeight = n * 38 + 2;
@@ -267,6 +277,7 @@ public class AgentCity extends SimState {
     /** Main */
     public static void main(String[] args) {
         long seed = System.currentTimeMillis();
+
         SimState state = new AgentCity(seed);
         state.start();
         do {
