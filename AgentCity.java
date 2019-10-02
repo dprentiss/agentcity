@@ -67,11 +67,7 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        // Required by SimState
-        super(seed);
-
-        isTest = true;
-        checkForCollisions = true;
+        this(seed, 0, 0);
     }
 
     /** Constructor */
@@ -270,7 +266,11 @@ public class AgentCity extends SimState {
 
     /** Main */
     public static void main(String[] args) {
-        doLoop(AgentCity.class, args);
+        long seed = System.currentTimeMillis();
+        SimState state = new AgentCity(seed);
+        state.start();
+        do {
+        } while (state.schedule.step(state));
         System.exit(0);
     }
 }
