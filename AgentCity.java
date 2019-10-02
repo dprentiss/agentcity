@@ -9,6 +9,9 @@ import sim.util.*;
 import sim.util.distribution.*;
 import sim.field.grid.*;
 import java.util.Arrays;
+import java.time.format.DateTimeFormatter;
+import java.time.Instant;
+import java.time.ZoneId;
 
 public class AgentCity extends SimState {
 
@@ -20,6 +23,7 @@ public class AgentCity extends SimState {
     // Utility
     private final boolean checkForCollisions;
     private final boolean isTest;
+    private final String filename;
 
     // Grid dimensions
     public int grids;
@@ -82,6 +86,13 @@ public class AgentCity extends SimState {
         checkForCollisions = true;
         this.grids = grids;
         this.density = density;
+        DateTimeFormatter formatter =
+            DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
+            .withZone(ZoneId.systemDefault());
+        String dateTimeString = formatter.format(Instant.now());
+        filename = String.format("%s-%d.csv",
+                                 dateTimeString,
+                                 seed);
     }
 
     public void start() {
@@ -91,6 +102,8 @@ public class AgentCity extends SimState {
         if(isTest) {
             makeTestGrids();
         }
+
+        System.out.println(filename);
 
         Steppable collisionCheck = new Steppable() {
             public void step(final SimState state) {
