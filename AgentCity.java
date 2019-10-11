@@ -1,5 +1,5 @@
 /*
- * Copyright 2018 David Prentiss
+ * Copyright 2019 David Prentiss
  */
 
 package sim.app.agentcity;
@@ -17,8 +17,13 @@ public class AgentCity extends SimState {
 
     Console console;
 
-	// Required for serialization
     private static final long serialVersionUID = 1;
+    private static final int VEHICLE_SCHEDULE_NUM = 0;
+    private static final int INTERSECTION_SCHEDULE_NUM = 1;
+    private static final int DRIVER_SCHEDULE_NUM = 2;
+    private static final int COLLISION_SCHEDULE_NUM = 3;
+    private static final int REPORT_SCHEDULE_NUM = 4;
+    private static final int TRIPGEN_SCHEDULE_NUM = 5;
 
     // Utility
     private final boolean checkForCollisions;
@@ -30,9 +35,6 @@ public class AgentCity extends SimState {
     public int density;
     public int gridHeight;
     public int gridWidth;
-    /*
-    public int n;
-    */
 
     // Intersection turning movements
     enum TurningMovements {
@@ -71,7 +73,7 @@ public class AgentCity extends SimState {
     public Bag travelers;
 
     // Temporary dispatcher
-    public DispatchAgent dispatcher;
+    //public DispatchAgent dispatcher;
 
     /** Constructor default */
     public AgentCity(long seed) {
@@ -105,32 +107,41 @@ public class AgentCity extends SimState {
 
         System.out.println(filename);
 
-        Steppable collisionCheck = new Steppable() {
-            public void step(final SimState state) {
-                AgentCity ac = (AgentCity)state;
-                SparseGrid2D grid = ac.agentGrid;
-                Vehicle v;
-                Bag b;
-                boolean collision = false;
-                for (int i = 0; i < grid.allObjects.numObjs; i++) {
-                    v = (Vehicle)grid.allObjects.objs[i];
-                    b = grid.getObjectsAtLocationOfObject(v);
-                    if (b.numObjs > 1) {
-                        System.out.printf("Collision at [%d, %d]\n",
-                                          v.getLocation().x, v.getLocation().y);
-                        System.out.print(v.toString());
-                        System.out.print(v.getDriver().toString());
-                        System.out.println();
-                        collision = true;
-                    }
+        Steppable report = new Steppable() {
+                public void step(final SimState state) {
+                    System.out.println(travelers.numObjs);
                 }
-                if (collision) {ac.console.pressPause();}
-            }
-        };
+            };
+
+        Steppable collisionCheck = new Steppable() {
+                public void step(final SimState state) {
+                    AgentCity ac = (AgentCity)state;
+                    SparseGrid2D grid = ac.agentGrid;
+                    Vehicle v;
+                    Bag b;
+                    boolean collision = false;
+                    for (int i = 0; i < grid.allObjects.numObjs; i++) {
+                        v = (Vehicle)grid.allObjects.objs[i];
+                        b = grid.getObjectsAtLocationOfObject(v);
+                        if (b.numObjs > 1) {
+                            System.out.printf("Collision at [%d, %d]\n",
+                                              v.getLocation().x, v.getLocation().y);
+                            System.out.print(v.toString());
+                            System.out.print(v.getDriver().toString());
+                            System.out.println();
+                            collision = true;
+                        }
+                    }
+                    if (collision) {ac.console.pressPause();}
+                }
+            };
 
         if (checkForCollisions) {
-            schedule.scheduleRepeating(collisionCheck, 3, 1);
+            schedule.scheduleRepeating(collisionCheck,
+                                       COLLISION_SCHEDULE_NUM, 1);
         }
+
+        schedule.scheduleRepeating(report, REPORT_SCHEDULE_NUM, 1);
     }
 
     // check the neighbors of each intersection cell for previous labels
@@ -187,7 +198,8 @@ public class AgentCity extends SimState {
             for (int y = 0; y < gridHeight; y++) {
                 if (x == 0 || (x-2)%38 == 16 || (x-2)%38 == 17 || (x-2)%38 == 36) {
                     if (roadGrid.field[x][y] != 0) {
-                        numIntersections += labelIntersection(x, y, numIntersections);
+                        numIntersections +=
+                            labelIntersection(x, y, numIntersections);
                         roadGrid.field[x][y] = Direction.ALL.toInt();
                     }
                     else roadGrid.field[x][y] = Direction.SOUTH.toInt();
@@ -195,7 +207,8 @@ public class AgentCity extends SimState {
                 }
                 if (x == 1 || (x-2)%38 == 18 || (x-2)%38 == 19 || (x-2)%38 == 37) {
                     if (roadGrid.field[x][y] != 0) {
-                        numIntersections += labelIntersection(x, y, numIntersections);
+                        numIntersections +=
+                            labelIntersection(x, y, numIntersections);
                         roadGrid.field[x][y] = Direction.ALL.toInt();
                     }
                     else roadGrid.field[x][y] = Direction.NORTH.toInt();
@@ -203,7 +216,8 @@ public class AgentCity extends SimState {
                 }
                 if (y == 0 || (y-2)%38 == 16 || (y-2)%38 == 17 || (y-2)%38 == 36) {
                     if (roadGrid.field[x][y] != 0) {
-                        numIntersections += labelIntersection(x, y, numIntersections);
+                        numIntersections +=
+                            labelIntersection(x, y, numIntersections);
                         roadGrid.field[x][y] = Direction.ALL.toInt();
                     }
                     else roadGrid.field[x][y] = Direction.WEST.toInt();
@@ -211,7 +225,8 @@ public class AgentCity extends SimState {
                 }
                 if (y == 1 || (y-2)%38 == 18 || (y-2)%38 == 19 || (y-2)%38 == 37) {
                     if (roadGrid.field[x][y] != 0) {
-                        numIntersections += labelIntersection(x, y, numIntersections);
+                        numIntersections +=
+                            labelIntersection(x, y, numIntersections);
                         roadGrid.field[x][y] = Direction.ALL.toInt();
                     }
                     else roadGrid.field[x][y] = Direction.EAST.toInt();
@@ -222,7 +237,8 @@ public class AgentCity extends SimState {
 
         // Make a DispatchAgent
         //dispatcher = new DispatchAgent(0, NUM_VEHICLES);
-        //dispatcher.stopper = schedule.scheduleRepeating(dispatcher, 4, 1);
+        //dispatcher.stopper = schedule.scheduleRepeating(dispatcher,
+        //DISPATCH_SCHEDULE_NUM, 1);
 
         // Make some Vehicle and Driver agents
         for (int i = 0; i < NUM_VEHICLES; i++) {
@@ -230,27 +246,29 @@ public class AgentCity extends SimState {
             Int2D newLocation = new Int2D(random.nextInt(gridWidth),
                                           random.nextInt(gridHeight));
             while (roadGrid.get(newLocation.x, newLocation.y) == 0
-                    || roadGrid.get(newLocation.x, newLocation.y) == 9
-                    || agentGrid.getObjectsAtLocation(newLocation.x,
-                                                      newLocation.y) != null) {
+                   || roadGrid.get(newLocation.x, newLocation.y) == 9
+                   || agentGrid.getObjectsAtLocation(newLocation.x,
+                                                     newLocation.y) != null) {
                 newLocation = new Int2D(random.nextInt(gridWidth),
                                         random.nextInt(gridHeight));
-                    }
+            }
             // One Vehicle on a road cell in the correct direction
             Direction newDir = Direction.byInt(roadGrid.get(newLocation.x,
                                                             newLocation.y));
-            Vehicle testCar = new Vehicle(i, newDir);
+            Vehicle newVehicle = new Vehicle(i, newDir);
             // add Vehicle to DispatchAgent pool
             //dispatcher.addVehicleToPool(testCar);
-            agentGrid.setObjectLocation(testCar, newLocation);
+            agentGrid.setObjectLocation(newVehicle, newLocation);
             // Add Vehicle to Schedule
-            testCar.stopper = schedule.scheduleRepeating(testCar, 0, 1);
+            newVehicle.stopper =
+                schedule.scheduleRepeating(newVehicle, VEHICLE_SCHEDULE_NUM, 1);
             // DriverAgent for Vehicle
             DriverAgent newDriver = new DriverAgent(i);
-            testCar.setDriver(newDriver);
-            newDriver.setVehicle(testCar);
+            newVehicle.setDriver(newDriver);
+            newDriver.setVehicle(newVehicle);
             // add Driver to Schedule
-            newDriver.stopper = schedule.scheduleRepeating(newDriver, 2, 1);
+            newDriver.stopper =
+                schedule.scheduleRepeating(newDriver, DRIVER_SCHEDULE_NUM, 1);
         }
 
         // Make some Intersections, IntersectionAgents, and TripGenerators
@@ -280,16 +298,19 @@ public class AgentCity extends SimState {
                                  this);
             intersectionAgents[i] = new IntersectionAgent(i, intersections[i]);
             intersectionAgents[i].stopper =
-                schedule.scheduleRepeating(intersectionAgents[i], 1, 1);
-            TripGenerator gen = new TripGenerator(i, intersections[i], 0.10, random);
+                schedule.scheduleRepeating(intersectionAgents[i],
+                                           INTERSECTION_SCHEDULE_NUM, 1);
+            TripGenerator gen =
+                new TripGenerator(i, intersections[i], 0.10, random);
             gen.stopper =
-                schedule.scheduleRepeating(gen, 5, 1);
+                schedule.scheduleRepeating(gen, TRIPGEN_SCHEDULE_NUM, 1);
         }
     }
 
     /** Main */
     public static void main(String[] args) {
-        long seed = System.currentTimeMillis();
+        //long seed = System.currentTimeMillis();
+        long seed = 1324367672;
 
         SimState state = new AgentCity(seed);
         state.start();
