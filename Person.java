@@ -17,68 +17,89 @@ public class Person implements Steppable, VehicleClient {
     public final int idNum;
 
     // Variables
-    private Intersection location = null;
+    private AgentCity ac;
+
+    private Intersection origin = null;
     private Vehicle vehicle = null;
     private Intersection destination = null;
     private boolean inVehicle = false;
     private boolean atDestination = false;
+    private int stepsAlive = 0;
+    private int stepsWaiting = 0;
+    private int stepsTraveling = 0;
+    private long lastStep = -1;
 
     // Accessors
-    public Intersection getLocation() { return location; }
+    public Intersection getOrigin() { return origin; }
     public Vehicle getVehicle() { return vehicle; }
     public Intersection getDestination() { return destination; }
+    public boolean atDestination() {
+        return ac.intersectionGrid
+            .field[vehicle.getLocation().x][vehicle.getLocation().y]
+            == destination.idNum;
+    }
 
     /** Constructor */
     public Person(int id,
-                  Intersection location, Intersection destination) {
+                  Intersection origin, Intersection destination) {
         idNum = id;
-        this.location = location;
+        this.origin = origin;
         this.destination = destination;
     }
 
     @Override
     public String toString() {
         return new StringBuilder()
-            .append("PersonAgent: {")
-            .append("idNum: " + idNum)
+            .append("\"PersonAgent\": {")
+            .append("\"idNum\": " + idNum)
             .append(", ")
-            .append("location: " + location.idNum)
+            .append("\"originIdNum\": " + origin.idNum)
             .append(", ")
-            .append("destination: " + destination.idNum)
+            .append("\"destinationIdNum\": " + destination.idNum)
+            .append(", ")
+            .append("\"inVehicle\": " + inVehicle)
+            .append(", ")
+            .append("\"atDestination\": " + atDestination)
+            .append(", ")
+            .append("\"stepsAlive\": " + stepsAlive)
+            .append(", ")
+            .append("\"stepsWaiting\": " + stepsWaiting)
+            .append(", ")
+            .append("\"stepsTraveling\": " + stepsTraveling)
+            .append(", ")
+            .append("\"lastStep\": " + lastStep)
             .append("}\n")
             .toString();
     }
 
+    public void updateState(AgentCity state) {
+    }
+
     public void step(final SimState state) {
         // get Simulation state
-        AgentCity ac = (AgentCity)state;
+        ac = (AgentCity)state;
+        stepsAlive++;
+
         if (!inVehicle) {
-            Bag vehicles = location.getController().getVehicles();
+            stepsWaiting++;
+            Bag vehicles = origin.getController().getVehicles();
             for (int i = 0; i < vehicles.numObjs; i++) {
                 if (!((Vehicle)vehicles.objs[i]).hasPassengers) {
                     if (((Vehicle)vehicles.objs[i]).boardVehicle(this) > 0) {
                         vehicle = (Vehicle)vehicles.objs[i];
                         inVehicle = true;
-                        /*
-                        System.out.println("Boarded:");
-                        System.out.print(this);
-                        System.out.print(vehicle);
-                        */
                         break;
                     }
                 }
             }
         } else {
-            if (ac.intersectionGrid
-                .field[vehicle.getLocation().x][vehicle.getLocation().y]
-                == destination.idNum) {
+            stepsTraveling++;
+            if (atDestination = atDestination()) {
                 vehicle.exitVehicle(this);
-                /*
-                System.out.println("Arrived:");
-                System.out.print(this);
-                System.out.print(vehicle);
-                */
+                inVehicle = false;
+                lastStep = ac.schedule.getSteps();
                 ac.travelers.remove(this);
+                System.out.print(this);
                 this.stopper.stop();
             }
         }
