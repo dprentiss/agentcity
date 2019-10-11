@@ -71,7 +71,9 @@ public class Vehicle implements Steppable, Driveable {
 
     public void exitVehicle(Person person) {
         manifest.remove(person);
-        hasPassengers = false;
+        if (manifest.numObjs < 1) {
+            hasPassengers = false;
+        }
     }
 
     /** Returns a string representation of this Vehicle */
