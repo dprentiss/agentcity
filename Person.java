@@ -33,10 +33,13 @@ public class Person implements Steppable, VehicleClient {
     public Intersection getOrigin() { return origin; }
     public Vehicle getVehicle() { return vehicle; }
     public Intersection getDestination() { return destination; }
+    public boolean inVehicle() { return inVehicle; }
     public boolean atDestination() {
-        return ac.intersectionGrid
+        atDestination =
+            ac.intersectionGrid
             .field[vehicle.getLocation().x][vehicle.getLocation().y]
             == destination.idNum;
+        return(atDestination);
     }
 
     /** Constructor */
@@ -51,6 +54,8 @@ public class Person implements Steppable, VehicleClient {
     public String toString() {
         return new StringBuilder()
             .append("\"PersonAgent\": {")
+            .append("\"step\": " + ac.schedule.getSteps())
+            .append(", ")
             .append("\"idNum\": " + idNum)
             .append(", ")
             .append("\"originIdNum\": " + origin.idNum)
@@ -72,7 +77,24 @@ public class Person implements Steppable, VehicleClient {
             .toString();
     }
 
-    public void updateState(AgentCity state) {
+    private boolean boardVehicle(Vehicle v) {
+        if (v.boardVehicle(this)) {
+            this.vehicle = v;
+            inVehicle = true;
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    private boolean exitVehicle() {
+        if (vehicle.exitVehicle(this)) {
+            this.vehicle = null;
+            inVehicle = false;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public void step(final SimState state) {
@@ -83,24 +105,23 @@ public class Person implements Steppable, VehicleClient {
         if (!inVehicle) {
             stepsWaiting++;
             Bag vehicles = origin.getController().getVehicles();
+            Vehicle v;
             for (int i = 0; i < vehicles.numObjs; i++) {
-                if (!((Vehicle)vehicles.objs[i]).hasPassengers) {
-                    if (((Vehicle)vehicles.objs[i]).boardVehicle(this) > 0) {
-                        vehicle = (Vehicle)vehicles.objs[i];
-                        inVehicle = true;
-                        break;
-                    }
+                v = (Vehicle)vehicles.objs[i];
+                if (boardVehicle(v)) {
+                    break;
                 }
             }
         } else {
             stepsTraveling++;
-            if (atDestination = atDestination()) {
-                vehicle.exitVehicle(this);
-                inVehicle = false;
-                lastStep = ac.schedule.getSteps();
-                ac.travelers.remove(this);
-                System.out.print(this);
-                this.stopper.stop();
+            if (atDestination()) {
+                if (exitVehicle()) {
+                    lastStep = ac.schedule.getSteps();
+                }
+                if (ac.removeTraveler(this)) {
+                    System.out.print(this);
+                    this.stopper.stop();
+                }
             }
         }
     }

@@ -11,12 +11,8 @@ import sim.engine.*;
  */
 public class Vehicle implements Steppable, Driveable {
 
-    /**
-     * Required for serialization
-     */
+    // MASON
     private static final long serialVersionUID = 1;
-
-    // Stopper
     Stoppable stopper;
 
     // Properties
@@ -59,24 +55,27 @@ public class Vehicle implements Steppable, Driveable {
 
     // Accessors
 
-    public int boardVehicle(Person person) {
-        if (manifest.numObjs < 1) {
+    public boolean boardVehicle(Person person) {
+        if (manifest.numObjs < passengerCap) {
             manifest.add(person);
             hasPassengers = true;
-            return 1;
+            return true;
         } else {
-            return 0;
+            return false;
         }
     }
 
-    public void exitVehicle(Person person) {
-        manifest.remove(person);
-        if (manifest.numObjs < 1) {
-            hasPassengers = false;
+    public boolean exitVehicle(Person person) {
+        if(manifest.remove(person)) {
+            if (manifest.numObjs < 1) {
+                hasPassengers = false;
+            }
+            return true;
+        } else {
+            return false;
         }
     }
 
-    /** Returns a string representation of this Vehicle */
     @Override
     public String toString() {
         return new StringBuilder()
@@ -94,34 +93,20 @@ public class Vehicle implements Steppable, Driveable {
             .toString();
     }
 
-    /** Gets the ID number of this Vehicle. */
-    public int getIdNum() { return idNum; }
-
-    /** Gets the length of the Vehicle. */
-    public int getLength() { return length; }
-
-    /** Gets the ID number of this Vehicle */
-    public int getPassengerCap() { return passengerCap; }
-
-    /** Gets the Driver object of this Vehicle.
-     * Returns null if there is no driver
-     */
     public Driver getDriver() { return driver; }
-
-    /** Gets the Driver's desired speed. */
-    public int getDesiredSpeed() { return driver.getDesiredSpeed(); }
-
-    /** Sets the Driver object provided as the driver of this Vehicle. */
     public void setDriver(Driver newDriver) { driver = newDriver; }
 
-    /** Removes the current Driver object as the driver of this Vehicle and
-     * returns the Driver object.
-     */
+    //public int getIdNum() { return idNum; }
+    //public int getLength() { return length; }
+    //public int getPassengerCap() { return passengerCap; }
+    //public int getDesiredSpeed() { return driver.getDesiredSpeed(); }
+    /*
     public Driver removeDriver() {
         Driver currentDriver = driver;
         driver = null;
         return currentDriver;
     }
+    */
 
     /** Gets an array of Person objects that comprise this Vehicle's current
      * passengers.
@@ -165,7 +150,7 @@ public class Vehicle implements Steppable, Driveable {
      * capacity of four, and Direction of NONE.
      */
     public Vehicle(int id) {
-        this(id, 1, 4, Direction.NONE);
+        this(id, 1, 1, Direction.NONE);
     }
 
     /** Creates a Vehicle object with the given ID number and initial direction.
@@ -174,7 +159,7 @@ public class Vehicle implements Steppable, Driveable {
      * capacity of four.
      */
     public Vehicle(int id, Direction dir) {
-        this(id, 1, 4, dir);
+        this(id, 1, 1, dir);
     }
 
     /** Creates a Vehicle object with the given ID number, passenger capacity

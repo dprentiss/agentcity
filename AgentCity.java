@@ -15,20 +15,23 @@ import java.time.ZoneId;
 
 public class AgentCity extends SimState {
 
+    // MASON
     Console console;
-
     private static final long serialVersionUID = 1;
+
+    // Schedule order
     private static final int VEHICLE_SCHEDULE_NUM = 0;
     private static final int INTERSECTION_SCHEDULE_NUM = 1;
     private static final int DRIVER_SCHEDULE_NUM = 2;
     private static final int COLLISION_SCHEDULE_NUM = 3;
-    private static final int REPORT_SCHEDULE_NUM = 4;
-    private static final int TRIPGEN_SCHEDULE_NUM = 5;
+    private static final int TRIPGEN_SCHEDULE_NUM = 4;
+    private static final int REPORT_SCHEDULE_NUM = 5;
 
     // Utility
     private final boolean checkForCollisions;
     private final boolean isTest;
     private final String filename;
+    private long step;
 
     // Grid dimensions
     public int grids;
@@ -37,6 +40,7 @@ public class AgentCity extends SimState {
     public int gridWidth;
 
     // Intersection turning movements
+    /*
     enum TurningMovements {
         NONE,
         STOP,
@@ -53,8 +57,9 @@ public class AgentCity extends SimState {
         STRAIGHT_RIGHT_YEILD,
         STRAIGHT_LEFT_YEILD,
         RIGHT_LEFT_YEILD,
-        ALL_YEILD,
+        ALL_YEILD
     }
+    */
 
     // Grid of agent locations
     public SparseGrid2D agentGrid;
@@ -70,7 +75,17 @@ public class AgentCity extends SimState {
     // Array of Intersection agents
     public IntersectionAgent[] intersectionAgents;
 
-    public Bag travelers;
+    // Travelers
+    private Bag travelers;
+    public boolean removeTraveler(Person person) {
+        //travelersInVehicle.remove(person);
+        return travelers.remove(person);
+    }
+    public boolean addTraveler(Person person) {
+        //System.out.print(person.toString());
+        //travelersInVehicle.add(person);
+        return travelers.add(person);
+    }
 
     // Temporary dispatcher
     //public DispatchAgent dispatcher;
@@ -97,6 +112,17 @@ public class AgentCity extends SimState {
                                  seed);
     }
 
+    @Override
+    public String toString() {
+        return new StringBuilder()
+            .append("\"AgentCity\": {")
+            .append("\"step\": " + step)
+            .append(", ")
+            .append("\"numTravelers\": " + travelers.numObjs)
+            .append("}\n")
+            .toString();
+    }
+
     public void start() {
         super.start();
         travelers = new Bag();
@@ -109,7 +135,9 @@ public class AgentCity extends SimState {
 
         Steppable report = new Steppable() {
                 public void step(final SimState state) {
-                    System.out.println(travelers.numObjs);
+                    AgentCity ac = (AgentCity)state;
+                    step = schedule.getSteps();
+                    System.out.print(ac);
                 }
             };
 
