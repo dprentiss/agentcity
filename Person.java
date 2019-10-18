@@ -122,7 +122,7 @@ public class Person implements Steppable, VehicleClient {
                 }
                 if (ac.removeTraveler(this)) {
                     System.out.print(this);
-                    ac.fileout.print(this);
+                    if (ac.FILE_OUT) { ac.fileout.print(this); }
                     this.stopper.stop();
                 }
             }

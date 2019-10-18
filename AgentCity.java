@@ -29,10 +29,12 @@ public class AgentCity extends SimState {
     private static final int REPORT_SCHEDULE_NUM = 5;
 
     // Utility
+    public final boolean CONSOLE_OUT = true;
+    public final boolean FILE_OUT = false;
     private final boolean checkForCollisions;
     private final boolean isTest;
-    private final String filename;
     private long step;
+    private final String filename;
     FileWriter fw;
     BufferedWriter bw;
     public PrintWriter fileout;
@@ -114,11 +116,13 @@ public class AgentCity extends SimState {
         filename = String.format("%s-%d.csv",
                                  dateTimeString,
                                  seed);
-        try {
-            fw = new FileWriter(filename, true);
-            bw = new BufferedWriter(fw);
-            fileout = new PrintWriter(bw);
-        } catch (IOException e) { }
+        if (FILE_OUT) {
+            try {
+                fw = new FileWriter(filename, true);
+                bw = new BufferedWriter(fw);
+                fileout = new PrintWriter(bw);
+            } catch (IOException e) { }
+        }
     }
 
     @Override
@@ -147,7 +151,7 @@ public class AgentCity extends SimState {
                     AgentCity ac = (AgentCity)state;
                     step = schedule.getSteps();
                     System.out.print(ac);
-                    ac.fileout.print(ac);
+                    if (FILE_OUT) { ac.fileout.print(ac); }
                 }
             };
 
