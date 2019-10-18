@@ -651,14 +651,7 @@ public class DriverAgent implements Steppable, Driver {
 
     }
 
-    public void step(final SimState state) {
-        ac = (AgentCity)state;
-
-        // Current Vehicle position and velocity;
-        updateState(ac);
-
-        // get a new destination if needed
-        if (nextIntersection == null) {
+    private void updateDestination() {
             nextIntersection = getIntersectionAhead(ac, location);
             nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
             nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
@@ -678,6 +671,22 @@ public class DriverAgent implements Steppable, Driver {
             }
             nextWaypoint = new Waypoint(nextTurnCell,
                                         getTurnDirective(nextDirection));
+    }
+
+    void updateDestination(AgentCity ac) {
+        updateState(ac);
+        updateDestination();
+    }
+
+    public void step(final SimState state) {
+        ac = (AgentCity)state;
+
+        // Current Vehicle position and velocity;
+        updateState(ac);
+
+        // get a new destination if needed
+        if (nextIntersection == null) {
+            updateDestination();
         }
 
         nearApproachLeg = getStepsToCell(nextApproachLeg) == 1;
