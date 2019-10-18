@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.time.format.DateTimeFormatter;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.io.*;
 
 public class AgentCity extends SimState {
 
@@ -32,6 +33,9 @@ public class AgentCity extends SimState {
     private final boolean isTest;
     private final String filename;
     private long step;
+    FileWriter fw;
+    BufferedWriter bw;
+    public PrintWriter fileout;
 
     // Grid dimensions
     public int grids;
@@ -110,16 +114,21 @@ public class AgentCity extends SimState {
         filename = String.format("%s-%d.csv",
                                  dateTimeString,
                                  seed);
+        try {
+            fw = new FileWriter(filename, true);
+            bw = new BufferedWriter(fw);
+            fileout = new PrintWriter(bw);
+        } catch (IOException e) { }
     }
 
     @Override
     public String toString() {
         return new StringBuilder()
-            .append("\"AgentCity\": {")
+            .append("{\"AgentCity\": {")
             .append("\"step\": " + step)
             .append(", ")
-            .append("\"numTravelers\": " + travelers.numObjs)
-            .append("}\n")
+            .append("\"numTravelers\": " + (travelers==null ? "null" : travelers.numObjs))
+            .append("}},\n")
             .toString();
     }
 
@@ -138,6 +147,7 @@ public class AgentCity extends SimState {
                     AgentCity ac = (AgentCity)state;
                     step = schedule.getSteps();
                     System.out.print(ac);
+                    ac.fileout.print(ac);
                 }
             };
 
@@ -329,7 +339,7 @@ public class AgentCity extends SimState {
                 schedule.scheduleRepeating(intersectionAgents[i],
                                            INTERSECTION_SCHEDULE_NUM, 1);
             TripGenerator gen =
-                new TripGenerator(i, intersections[i], 0.10, random);
+                new TripGenerator(i, intersections[i], 0.12, random);
             gen.stopper =
                 schedule.scheduleRepeating(gen, TRIPGEN_SCHEDULE_NUM, 1);
         }

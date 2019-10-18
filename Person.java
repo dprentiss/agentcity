@@ -28,6 +28,7 @@ public class Person implements Steppable, VehicleClient {
     private int stepsWaiting = 0;
     private int stepsTraveling = 0;
     private long lastStep = -1;
+    private long firstStep = -1;
 
     // Accessors
     public Intersection getOrigin() { return origin; }
@@ -53,9 +54,7 @@ public class Person implements Steppable, VehicleClient {
     @Override
     public String toString() {
         return new StringBuilder()
-            .append("\"PersonAgent\": {")
-            .append("\"step\": " + ac.schedule.getSteps())
-            .append(", ")
+            .append("{\"PersonAgent\": {")
             .append("\"idNum\": " + idNum)
             .append(", ")
             .append("\"originIdNum\": " + origin.idNum)
@@ -72,8 +71,10 @@ public class Person implements Steppable, VehicleClient {
             .append(", ")
             .append("\"stepsTraveling\": " + stepsTraveling)
             .append(", ")
+            .append("\"firstStep\": " + firstStep)
+            .append(", ")
             .append("\"lastStep\": " + lastStep)
-            .append("}\n")
+            .append("}},\n")
             .toString();
     }
 
@@ -100,6 +101,7 @@ public class Person implements Steppable, VehicleClient {
     public void step(final SimState state) {
         // get Simulation state
         ac = (AgentCity)state;
+        if (firstStep < 0) firstStep = ac.schedule.getSteps();
         stepsAlive++;
 
         if (!inVehicle) {
@@ -120,6 +122,7 @@ public class Person implements Steppable, VehicleClient {
                 }
                 if (ac.removeTraveler(this)) {
                     System.out.print(this);
+                    ac.fileout.print(this);
                     this.stopper.stop();
                 }
             }
