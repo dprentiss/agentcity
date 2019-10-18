@@ -563,49 +563,47 @@ public class DriverAgent implements Steppable, Driver {
     }
 
     void updateReservation() {
-        if (inIntersection || nearIntersection) {
-            // cancel reservation if reservationTime can't be honored
-            if (hasReservation) {
-                int timeIndex = (int)(step - reservationTime);
-                stepsToWaypoint = getStepsToCell(nextWaypoint.cell);
-                /*
-                boolean cannotLeave =
-                    (timeIndex >= 0
-                     && timeIndex < reservationPath.length
-                     && !location.equals(reservationPath[timeIndex][0]));
-                if (cannotLeave) {
-                    nextIntersection.cancelReservation(vehicle);
-                    hasReservation = false;
-                    vehicle.hasReservation = false;
-                }
-                */
-            }
-            // get a reservation if needed
-            if (!hasReservation) {
-                reservationTime = step + 1;
-                if (inIntersection) {
-                    if (direction == nextDirection) {
-                        waypoints = new Waypoint[] {
-                            new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
-                        };
-                    } else {
-                        waypoints = new Waypoint[] {
-                            new Waypoint(nextTurnCell,
-                                         getTurnDirective(nextDirection)),
-                            new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
-                        };
-                    }
+        // cancel reservation if reservationTime can't be honored
+        if (hasReservation) {
+            int timeIndex = (int)(step - reservationTime);
+            stepsToWaypoint = getStepsToCell(nextWaypoint.cell);
+            /*
+              boolean cannotLeave =
+              (timeIndex >= 0
+              && timeIndex < reservationPath.length
+              && !location.equals(reservationPath[timeIndex][0]));
+              if (cannotLeave) {
+              nextIntersection.cancelReservation(vehicle);
+              hasReservation = false;
+              vehicle.hasReservation = false;
+              }
+            */
+        }
+        // get a reservation if needed
+        if (!hasReservation) {
+            reservationTime = step + 1;
+            if (inIntersection) {
+                if (direction == nextDirection) {
+                    waypoints = new Waypoint[] {
+                        new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+                    };
                 } else {
-                    reservationTime = step
-                        + getStepsToCell(getCellAhead(nextApproachLeg, 1));
+                    waypoints = new Waypoint[] {
+                        new Waypoint(nextTurnCell,
+                                     getTurnDirective(nextDirection)),
+                        new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+                    };
                 }
-                reservationPath = getReservationPath(waypoints);
-                hasReservation =
-                    nextIntersection.requestReservation(vehicle,
-                                                        reservationTime,
-                                                        reservationPath);
-                vehicle.hasReservation = hasReservation;
+            } else {
+                reservationTime = step
+                    + getStepsToCell(getCellAhead(nextApproachLeg, 1));
             }
+            reservationPath = getReservationPath(waypoints);
+            hasReservation =
+                nextIntersection.requestReservation(vehicle,
+                                                    reservationTime,
+                                                    reservationPath);
+            vehicle.hasReservation = hasReservation;
         }
     }
 
@@ -652,25 +650,25 @@ public class DriverAgent implements Steppable, Driver {
     }
 
     private void updateDestination() {
-            nextIntersection = getIntersectionAhead(ac, location);
-            nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
-            nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
-            nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
-            nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
-            if (direction == nextDirection) {
-                waypoints = new Waypoint[] {
-                    new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
-                    new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
-                };
-            } else {
-                waypoints = new Waypoint[] {
-                    new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
-                    new Waypoint(nextTurnCell, getTurnDirective(nextDirection)),
-                    new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
-                };
-            }
-            nextWaypoint = new Waypoint(nextTurnCell,
-                                        getTurnDirective(nextDirection));
+        nextIntersection = getIntersectionAhead(ac, location);
+        nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+        nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
+        nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
+        nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+        if (direction == nextDirection) {
+            waypoints = new Waypoint[] {
+                new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
+                new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+            };
+        } else {
+            waypoints = new Waypoint[] {
+                new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
+                new Waypoint(nextTurnCell, getTurnDirective(nextDirection)),
+                new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+            };
+        }
+        nextWaypoint = new Waypoint(nextTurnCell,
+                                    getTurnDirective(nextDirection));
     }
 
     void updateDestination(AgentCity ac) {
@@ -705,35 +703,23 @@ public class DriverAgent implements Steppable, Driver {
 
         // get a new destination if needed
         if (atNextLeg) {
-            nextIntersection = getIntersectionAhead(ac, location);
-            nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
-            nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
-            nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
-            nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+            nextIntersection.cancelReservation(vehicle);
             vehicle.hasReservation = false;
             hasReservation = false;
-            nextWaypoint = new Waypoint(nextTurnCell,
-                                        getTurnDirective(nextDirection));
-            if (direction == nextDirection) {
-                waypoints = new Waypoint[] {
-                    new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
-                    new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
-                };
-            } else {
-                waypoints = new Waypoint[] {
-                    new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
-                    new Waypoint(nextTurnCell, getTurnDirective(nextDirection)),
-                    new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
-                };
-            }
+            updateDestination();
         }
 
         // Default state is move forward at max speed
         desiredSpeed = maxSpeed;
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
+
+        // check if lane change is required
+
         // check reservation or request as needed
-        updateReservation();
+        if (inIntersection || nearIntersection) {
+            updateReservation();
+        }
 
         // If the directive is move forward and the way is not clear, stop.
         maxSafeSpeed = getSafeSpeed(ac);
