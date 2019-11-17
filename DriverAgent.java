@@ -57,6 +57,8 @@ public class DriverAgent implements Steppable, Driver {
     public boolean inIntersection = false;
     public boolean nearNextLeg = false;
     public boolean atNextLeg = false;
+    public boolean laneOnLeft = false;
+    public boolean laneOnRight = false;
 
     public boolean hasAssignment = false;
 
@@ -676,6 +678,27 @@ public class DriverAgent implements Steppable, Driver {
         updateDestination();
     }
 
+    boolean safeMerge(Direction dir) {
+        Bag bag;
+        int x = location.x
+            + desiredSpeed * direction.getXOffset()
+            + dir.getXOffset();
+        int y = location.y
+            + desiredSpeed * direction.getYOffset()
+            + dir.getYOffset();
+        if (!ac.checkBounds(x, y)) {
+            return false;
+        }
+        if (ac.roadGrid.field[x][y] != dir.toInt()) {
+            return false;
+        }
+        bag = ac.agentGrid.getObjectsAtLocation(x, y);
+        if (bag != null) {
+            return true;
+        }
+        return false;
+    }
+
     public void step(final SimState state) {
         ac = (AgentCity)state;
 
@@ -701,6 +724,17 @@ public class DriverAgent implements Steppable, Driver {
         // check if Vehicle is at nextWaypoint
         atWaypoint = getGapToCell(nextWaypoint.cell) < 0;
 
+
+        /*
+        laneOnLeft =
+            ac.roadGrid.field[location.x + direction.onLeft().getXOffset()]
+            [location.y + direction.onLeft().getYOffset()] == direction.toInt();
+
+        laneOnRight =
+            ac.roadGrid.field[location.x + direction.onRight().getXOffset()]
+            [location.y + direction.onRight().getYOffset()] == direction.toInt();
+        */
+
         // get a new destination if needed
         if (atNextLeg) {
             nextIntersection.cancelReservation(vehicle);
@@ -713,8 +747,20 @@ public class DriverAgent implements Steppable, Driver {
         desiredSpeed = maxSpeed;
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
-
         // check if lane change is required
+        if (vehicle.hasPassengers) {
+            if (safeMerge(direction.onLeft())) {
+                //System.out.println("MERGING_LEFT");
+                nextDirective = Driver.Directive.MERGE_LEFT;
+            }
+        } else {
+            if (safeMerge(direction.onRight())) {
+                System.out.println("MERGING_RIGHT");
+                //System.out.print(this);
+                //System.out.print(this.vehicle.toString());
+                nextDirective = Driver.Directive.MERGE_RIGHT;
+            }
+        }
 
         // check reservation or request as needed
         if (inIntersection || nearIntersection) {
