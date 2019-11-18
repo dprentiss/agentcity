@@ -159,7 +159,7 @@ public class Intersection {
 
     // Get all departure legs execpt Direction dir
     public Int2D[] getDepartureLegs(AgentCity ac, Direction dir) {
-        int numLegs = 0; // numeber of relevant departure legs
+        int numLegs = 0; // number of relevant departure legs
         Int2D[] legs; // array to return
         // Count relevant departure legs
         for (int i = 0; i < departureLegs.length; i++) {
