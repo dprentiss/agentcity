@@ -653,7 +653,11 @@ public class DriverAgent implements Steppable, Driver {
 
     private void updateDestination() {
         nextIntersection = getIntersectionAhead(ac, location);
-        nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+        if (ac.LANE_POLICY) {
+            nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+        } else {
+            nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+        }
         nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
         nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
         nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
@@ -679,24 +683,34 @@ public class DriverAgent implements Steppable, Driver {
     }
 
     boolean safeMerge(Direction dir) {
-        Bag bag;
-        int x = location.x
-            + desiredSpeed * direction.getXOffset()
-            + dir.getXOffset();
-        int y = location.y
-            + desiredSpeed * direction.getYOffset()
-            + dir.getYOffset();
+        Vehicle vehicle;
+        int speed = (this.speed < 1 ? this.speed + 1 : 1);
+        int x = location.x + speed * direction.getXOffset() + dir.getXOffset();
+        int y = location.y + speed * direction.getYOffset() + dir.getYOffset();
         if (!ac.checkBounds(x, y)) {
             return false;
         }
-        if (ac.roadGrid.field[x][y] != dir.toInt()) {
+        if (ac.roadGrid.field[x][y] != direction.toInt()) {
             return false;
         }
-        bag = ac.agentGrid.getObjectsAtLocation(x, y);
-        if (bag != null) {
-            return true;
+        for (int i = 0; i < maxSpeed + 1; i++) {
+            //System.out.println(x);
+            //System.out.println(y);
+            if (ac.agentGrid.numObjectsAtLocation(x, y) > 0) {
+                vehicle =
+                    (Vehicle)ac.agentGrid.getObjectsAtLocation(x, y).objs[0];
+                if (vehicle.getSpeed() >= i - 1) {
+                    //System.out.println(this);
+                    //System.out.println(vehicle);
+                    //System.out.println(x);
+                    //System.out.println(y);
+                    return false;
+                }
+            }
+            x = x + direction.opposite().getXOffset();
+            y = y + direction.opposite().getYOffset();
         }
-        return false;
+        return true;
     }
 
     public void step(final SimState state) {
@@ -706,7 +720,9 @@ public class DriverAgent implements Steppable, Driver {
         updateState(ac);
 
         // get a new destination if needed
-        if (nextIntersection == null) {
+        if (nextIntersection == null
+            || nextDirective == Driver.Directive.MERGE_LEFT
+            || nextDirective == Driver.Directive.MERGE_RIGHT) {
             updateDestination();
         }
 
@@ -725,16 +741,6 @@ public class DriverAgent implements Steppable, Driver {
         atWaypoint = getGapToCell(nextWaypoint.cell) < 0;
 
 
-        /*
-        laneOnLeft =
-            ac.roadGrid.field[location.x + direction.onLeft().getXOffset()]
-            [location.y + direction.onLeft().getYOffset()] == direction.toInt();
-
-        laneOnRight =
-            ac.roadGrid.field[location.x + direction.onRight().getXOffset()]
-            [location.y + direction.onRight().getYOffset()] == direction.toInt();
-        */
-
         // get a new destination if needed
         if (atNextLeg) {
             nextIntersection.cancelReservation(vehicle);
@@ -748,17 +754,22 @@ public class DriverAgent implements Steppable, Driver {
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
         // check if lane change is required
-        if (vehicle.hasPassengers) {
-            if (safeMerge(direction.onLeft())) {
-                //System.out.println("MERGING_LEFT");
-                nextDirective = Driver.Directive.MERGE_LEFT;
-            }
-        } else {
-            if (safeMerge(direction.onRight())) {
-                System.out.println("MERGING_RIGHT");
+        if (ac.LANE_POLICY) {
+            if (!inIntersection && !nearIntersection) {
+                if (vehicle.hasPassengers) {
+                    if (safeMerge(direction.onLeft())) {
+                        //System.out.println("MERGING_LEFT");
+                        nextDirective = Driver.Directive.MERGE_LEFT;
+                        desiredSpeed = 1;
+                    }
+                    desiredSpeed = 1;
+                } else if (safeMerge(direction.onRight())) {
+                    //System.out.println("MERGING_RIGHT");
                 //System.out.print(this);
                 //System.out.print(this.vehicle.toString());
-                nextDirective = Driver.Directive.MERGE_RIGHT;
+                    nextDirective = Driver.Directive.MERGE_RIGHT;
+                    desiredSpeed = 1;
+                }
             }
         }
 
@@ -769,8 +780,11 @@ public class DriverAgent implements Steppable, Driver {
 
         // If the directive is move forward and the way is not clear, stop.
         maxSafeSpeed = getSafeSpeed(ac);
-        if (maxSafeSpeed < desiredSpeed) {
-            desiredSpeed = maxSafeSpeed;
+        if (nextDirective != Driver.Directive.MERGE_RIGHT
+            && nextDirective != Driver.Directive.MERGE_LEFT) {
+            if (maxSafeSpeed < desiredSpeed) {
+                desiredSpeed = maxSafeSpeed;
+            }
         }
 
         if (hasReservation && maxSafeSpeed == 0 && !inIntersection) {
@@ -795,8 +809,11 @@ public class DriverAgent implements Steppable, Driver {
         checkReservation();
 
         // If the directive is move forward and the way is not clear, stop.
-        if (maxSafeSpeed < desiredSpeed) {
-            desiredSpeed = maxSafeSpeed;
+        if (nextDirective != Driver.Directive.MERGE_RIGHT
+            && nextDirective != Driver.Directive.MERGE_LEFT) {
+            if (maxSafeSpeed < desiredSpeed) {
+                desiredSpeed = maxSafeSpeed;
+            }
         }
     }
 }

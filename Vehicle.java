@@ -278,24 +278,38 @@ public class Vehicle implements Steppable, Driveable {
             setSpeed(0);
             break;
         case MERGE_RIGHT:
-            setLocation(ac,
-                        location.x
-                        + desiredSpeed * direction.getXOffset()
-                        + direction.onRight().getXOffset(),
-                        location.y
-                        + desiredSpeed * direction.getYOffset()
-                        + direction.onRight().getYOffset()
-                        );
+            if (speed < MAX_SPEED && speed < desiredSpeed) {
+                setSpeed(speed + 1);
+            } else if (speed > desiredSpeed) {
+                setSpeed(desiredSpeed);
+            }
+            if (speed > 0) {
+                setLocation(ac,
+                            location.x
+                            + speed * direction.getXOffset()
+                            + direction.onRight().getXOffset(),
+                            location.y
+                            + speed * direction.getYOffset()
+                            + direction.onRight().getYOffset()
+                            );
+            }
             break;
         case MERGE_LEFT:
-            setLocation(ac,
-                        location.x
-                        + desiredSpeed * direction.getXOffset()
-                        + direction.onLeft().getXOffset(),
-                        location.y
-                        + desiredSpeed * direction.getYOffset()
-                        + direction.onLeft().getYOffset()
-                        );
+            if (speed < MAX_SPEED && speed < desiredSpeed) {
+                setSpeed(speed + 1);
+            } else if (speed > desiredSpeed) {
+                setSpeed(desiredSpeed);
+            }
+            if (speed > 0) {
+                setLocation(ac,
+                            location.x
+                            + speed * direction.getXOffset()
+                            + direction.onLeft().getXOffset(),
+                            location.y
+                            + speed * direction.getYOffset()
+                            + direction.onLeft().getYOffset()
+                            );
+            }
             break;
         }
     }
