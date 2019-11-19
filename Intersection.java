@@ -38,6 +38,10 @@ public class Intersection {
         return (maxX - minX + 1) * (maxY - minY + 1);
     }
 
+    public boolean legBlocked(Int2D leg) {
+        return controller.legBlocked(leg);
+    }
+
     public boolean requestReservation(Vehicle vehicle, long time, Int2D[][] path) {
         return controller.requestReservation(vehicle, time, path);
     }
@@ -157,6 +161,29 @@ public class Intersection {
         }
     }
 
+    public Int2D[] getDepartureLegsByDirection(AgentCity ac, Direction dir) {
+        int numLegs = 0; // number of relevant departure legs
+        Int2D[] legs; // array to return
+        // Count relevant departure legs
+        for (int i = 0; i < departureLegs.length; i++) {
+            if (ac.roadGrid.get(departureLegs[i].x, departureLegs[i].y)
+                == dir.toInt()) {
+                numLegs++;
+            }
+        }
+        // Fill new array with relevant departure legs
+        legs = new Int2D[numLegs];
+        int nextIndex = 0;
+        for (int i = 0; i < departureLegs.length; i++) {
+            if (ac.roadGrid.get(departureLegs[i].x, departureLegs[i].y)
+                == dir.toInt()) {
+                legs[nextIndex] = departureLegs[i];
+                nextIndex++;
+            }
+        }
+        return legs;
+    }
+
     // Get all departure legs execpt Direction dir
     public Int2D[] getDepartureLegs(AgentCity ac, Direction dir) {
         int numLegs = 0; // number of relevant departure legs
@@ -179,6 +206,25 @@ public class Intersection {
             }
         }
         return legs;
+    }
+
+    public Int2D getDepartureLeg(AgentCity ac, Direction dir,
+                                   Direction laneDir) {
+        Int2D[] departureLegs = getDepartureLegsByDirection(ac, dir);
+        int[] departureInt = new int[departureLegs.length];
+        int nextDepartureIdx = 0;
+        int xOffset = laneDir.getXOffset();
+        int yOffset = laneDir.getYOffset();
+        for (int i = 0; i < departureLegs.length; i++) {
+            departureInt[i] =
+                departureLegs[i].x * xOffset + departureLegs[i].y * yOffset;
+        }
+        for (int j = 1; j < departureInt.length; j++) {
+            if (departureInt[j] > departureInt[nextDepartureIdx]) {
+                nextDepartureIdx = j;
+            }
+        }
+        return departureLegs[nextDepartureIdx];
     }
 
 /*

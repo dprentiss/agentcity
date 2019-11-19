@@ -462,6 +462,17 @@ public class IntersectionAgent implements Steppable {
         }
     }
 
+    public boolean legBlocked(Int2D leg) {
+        Bag b = ac.agentGrid.getObjectsAtLocation(leg);
+        if (b != null) {
+            Vehicle vehicle = (Vehicle)b.objs[0];
+            if (vehicle.getSpeed() == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void clearSchedule() {
         Vehicle v;
         // clear every cell of the schedule

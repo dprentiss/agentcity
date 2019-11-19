@@ -221,6 +221,23 @@ public class DriverAgent implements Steppable, Driver {
         return ac.intersections[ac.intersectionGrid.get(cellX, cellY)];
     }
 
+    /*
+    Int2D getNextDepartureLeg(AgentCity ac, Intersection in, Direction dir,
+                              Direction laneDir) {
+        int xOffset = laneDir.getXOffset();
+        int yOffset = laneDir.getYOffset();
+        Int2D[] departureLegs = in.getDepartureLegs(ac, dir);
+        Int2D nextDepartureLeg = departureLegs[0];
+        for (int i = 1; i < departureLegs.length; i++) {
+            if (offset > 0) {
+                int idx = nextDepartureLeg.x * xOffset +
+            } else {
+            }
+        }
+        return nextDepartureLeg;
+    }
+    */
+
     Int2D getRandomDepartureLeg(AgentCity ac, Intersection in, Direction dir) {
         Int2D[] departureLegs = in.getDepartureLegs(ac, dir);
         return departureLegs[ac.random.nextInt(departureLegs.length)];
@@ -623,24 +640,44 @@ public class DriverAgent implements Steppable, Driver {
         inIntersection = ac.roadGrid.field[location.x][location.y] == 9;
     }
 
-    void checkReservation() {
+    private void checkReservation() {
         // check if Vehicle needs and has a reservation for its next turning
         // movement
-        if (nearApproachLeg && !hasReservation) {
-            desiredSpeed = getGapToCell(nextApproachLeg) + 1;
-            nextDirective = Driver.Directive.STOP;
+        if (!hasReservation) {
+            if (nearApproachLeg) {
+                desiredSpeed = getGapToCell(nextApproachLeg) + 1;
+                nextDirective = Driver.Directive.STOP;
+            }
+            if (atApproachLeg) {
+                desiredSpeed = 0;
+                nextDirective = Driver.Directive.STOP;
+            }
+            if (inIntersection) {
+                desiredSpeed = 0;
+                nextDirective = Driver.Directive.STOP;
+            }
         }
-        if (atApproachLeg && !hasReservation) {
-            desiredSpeed = 0;
-            nextDirective = Driver.Directive.STOP;
+        if (nearApproachLeg) {
+            if (nextIntersection.legBlocked(nextLeg)) {
+                desiredSpeed = getGapToCell(nextApproachLeg) + 1;
+                nextDirective = Driver.Directive.STOP;
+                //nextIntersection.cancelReservation(vehicle);
+                vehicle.hasReservation = false;
+                hasReservation = false;
+            }
         }
-        if (inIntersection && !hasReservation) {
-            desiredSpeed = 0;
-            nextDirective = Driver.Directive.STOP;
+        if (atApproachLeg) {
+            if (nextIntersection.legBlocked(nextLeg)) {
+                desiredSpeed = 0;
+                nextDirective = Driver.Directive.STOP;
+                //nextIntersection.cancelReservation(vehicle);
+                vehicle.hasReservation = false;
+                hasReservation = false;
+            }
         }
     }
 
-    void checkReservation(AgentCity ac) {
+    public void checkReservation(AgentCity ac) {
         // If the directive is move forward and the way is not clear, stop.
         updateState(ac);
         checkReservation();
@@ -655,12 +692,22 @@ public class DriverAgent implements Steppable, Driver {
         nextIntersection = getIntersectionAhead(ac, location);
         if (ac.LANE_POLICY) {
             nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+            nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+            if (vehicle.hasPassengers) {
+                nextLeg =
+                    nextIntersection.getDepartureLeg(ac, nextDirection,
+                                                     nextDirection.onLeft());
+            } else {
+                nextLeg =
+                    nextIntersection.getDepartureLeg(ac, nextDirection,
+                                                     nextDirection.onRight());
+            }
         } else {
             nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+            nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
         }
         nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
         nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
-        nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
         if (direction == nextDirection) {
             waypoints = new Waypoint[] {
                 new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
@@ -765,8 +812,8 @@ public class DriverAgent implements Steppable, Driver {
                     desiredSpeed = 1;
                 } else if (safeMerge(direction.onRight())) {
                     //System.out.println("MERGING_RIGHT");
-                //System.out.print(this);
-                //System.out.print(this.vehicle.toString());
+                    //System.out.print(this);
+                    //System.out.print(this.vehicle.toString());
                     nextDirective = Driver.Directive.MERGE_RIGHT;
                     desiredSpeed = 1;
                 }
