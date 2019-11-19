@@ -8,6 +8,7 @@ import sim.engine.*;
 import sim.display.*;
 import sim.util.*;
 import sim.portrayal.grid.*;
+import sim.portrayal.*;
 import java.awt.*;
 import javax.swing.*;
 
@@ -69,11 +70,28 @@ public class AgentCityWithUI extends GUIState {
         agentPortrayal.setPortrayalForClass(Vehicle.class,
                 new sim.portrayal.simple.OvalPortrayal2D(Color.red));
         Bag vehicles = ac.agentGrid.getAllObjects();
-        for (int i = 0; i < vehicles.numObjs; i++) {
-            Color newColor = new Color(ac.random.nextInt(255),
-                    ac.random.nextInt(255), ac.random.nextInt(255));
-            agentPortrayal.setPortrayalForObject(vehicles.objs[i],
-                    new sim.portrayal.simple.OvalPortrayal2D(newColor));
+        if (ac.LANE_POLICY) {
+            Color newColor = new Color(0, 255, 0);
+            agentPortrayal.setPortrayalForAll(new sim.portrayal.simple.OvalPortrayal2D()
+                {
+                    public void draw(Object object, Graphics2D graphics, DrawInfo2D info)
+                    {
+                        Vehicle vehicle = (Vehicle)object;
+                        if (vehicle.hasPassengers) {
+                            paint = new Color(0, 0, 255);
+                        } else {
+                            paint = new Color(0, 255, 0);
+                        }
+                        super.draw(object, graphics, info);
+                    }
+                });
+        } else {
+            for (int i = 0; i < vehicles.numObjs; i++) {
+                Color newColor = new Color(ac.random.nextInt(255),
+                                           ac.random.nextInt(255), ac.random.nextInt(255));
+                agentPortrayal.setPortrayalForObject(vehicles.objs[i],
+                                                     new sim.portrayal.simple.OvalPortrayal2D(newColor));
+            }
         }
 
         display.reset();
