@@ -29,6 +29,7 @@ public class AgentCity extends SimState {
     private static final int REPORT_SCHEDULE_NUM = 5;
 
     // Utility
+    public final boolean LANE_POLICY = true;
     public final boolean CONSOLE_OUT = true;
     public final boolean FILE_OUT = false;
     private final boolean checkForCollisions;
@@ -343,7 +344,7 @@ public class AgentCity extends SimState {
                 schedule.scheduleRepeating(intersectionAgents[i],
                                            INTERSECTION_SCHEDULE_NUM, 1);
             TripGenerator gen =
-                new TripGenerator(i, intersections[i], 0.12, random);
+                new TripGenerator(i, intersections[i], 0.02, random);
             gen.stopper =
                 schedule.scheduleRepeating(gen, TRIPGEN_SCHEDULE_NUM, 1);
         }
