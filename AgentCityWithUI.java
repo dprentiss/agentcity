@@ -78,9 +78,9 @@ public class AgentCityWithUI extends GUIState {
                     {
                         Vehicle vehicle = (Vehicle)object;
                         if (vehicle.hasPassengers) {
-                            paint = new Color(0, 0, 150 + ac.random.nextInt(105));
+                            paint = new Color(0, 0, 255);
                         } else {
-                            paint = new Color(0, 150 + ac.random.nextInt(105), 0);
+                            paint = new Color(0, 255, 0);
                         }
                         super.draw(object, graphics, info);
                     }
