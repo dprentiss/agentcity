@@ -30,6 +30,7 @@ public class AgentCity extends SimState {
 
     // Utility
     public final boolean LANE_POLICY = true;
+    public final boolean SMART_TURNS = true;
     public final boolean CONSOLE_OUT = true;
     public final boolean FILE_OUT = false;
     private final boolean checkForCollisions;
@@ -99,7 +100,7 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 1, 128);
+        this(seed, 16, 64);
     }
 
     /** Constructor */
@@ -344,7 +345,7 @@ public class AgentCity extends SimState {
                 schedule.scheduleRepeating(intersectionAgents[i],
                                            INTERSECTION_SCHEDULE_NUM, 1);
             TripGenerator gen =
-                new TripGenerator(i, intersections[i], 0.02, random);
+                new TripGenerator(i, intersections[i], 0.001, random);
             gen.stopper =
                 schedule.scheduleRepeating(gen, TRIPGEN_SCHEDULE_NUM, 1);
         }

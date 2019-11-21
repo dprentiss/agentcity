@@ -691,18 +691,42 @@ public class DriverAgent implements Steppable, Driver {
     private void updateDestination() {
         nextIntersection = getIntersectionAhead(ac, location);
         if (ac.LANE_POLICY) {
-            nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
-            nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
             if (vehicle.hasPassengers) {
+                if (ac.SMART_TURNS) {
+                    Intersection destination =
+                        vehicle.getPassengerDestination();
+                    Direction[] directions =
+                        nextIntersection.getDirectionsTo(destination);
+                    int i = ac.random.nextInt(directions.length);
+                    if (directions[i] != null) {
+                        nextDirection = directions[i];
+                    } else {
+                        nextDirection = directions[(i+1)%2];
+                    }
+                    if (destination.idNum == nextIntersection.idNum) {
+                        nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+                        nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+                    }
+                } else {
+                    nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+                    nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+                }
                 nextLeg =
                     nextIntersection.getDepartureLeg(ac, nextDirection,
                                                      nextDirection.onLeft());
             } else {
+                nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+                nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
                 nextLeg =
                     nextIntersection.getDepartureLeg(ac, nextDirection,
                                                      nextDirection.onRight());
             }
         } else {
+            nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+            nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+        }
+        if (nextDirection == null
+            || nextDirection.toInt() == direction.opposite().toInt()) {
             nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
             nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
         }

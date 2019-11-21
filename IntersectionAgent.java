@@ -463,12 +463,21 @@ public class IntersectionAgent implements Steppable {
     }
 
     public boolean legBlocked(Int2D leg) {
-        Bag b = ac.agentGrid.getObjectsAtLocation(leg);
-        if (b != null) {
-            Vehicle vehicle = (Vehicle)b.objs[0];
-            if (vehicle.getSpeed() == 0) {
-                return true;
+        int x = leg.x;
+        int y = leg.y;
+        Bag b;
+        int numCells = 1;
+        Direction dir = Direction.byInt(ac.roadGrid.get(x, y));
+            for (int i = 0; i < numCells; i++) {
+                b = ac.agentGrid.getObjectsAtLocation(x, y);
+            if (b != null) {
+                Vehicle vehicle = (Vehicle)b.objs[0];
+                if (vehicle.getSpeed() == 0) {
+                    return true;
+                }
             }
+            x = dir.getXOffset();
+            y = dir.getYOffset();
         }
         return false;
     }

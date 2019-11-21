@@ -38,6 +38,23 @@ public class Intersection {
         return (maxX - minX + 1) * (maxY - minY + 1);
     }
 
+    public Direction[] getDirectionsTo(Intersection other) {
+        Direction[] directions = new Direction[2];
+        int xOffset = other.minX - this.minX;
+        int yOffset = other.minY - this.minY;
+        if (xOffset < 0) {
+            directions[0] = Direction.WEST;
+        } else if (xOffset > 0) {
+            directions[0] = Direction.EAST;
+        }
+        if (yOffset < 0) {
+            directions[1] = Direction.NORTH;
+        } else if (yOffset > 0) {
+            directions[1] = Direction.SOUTH;
+        }
+        return directions;
+    }
+
     public boolean legBlocked(Int2D leg) {
         return controller.legBlocked(leg);
     }

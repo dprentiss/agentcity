@@ -112,6 +112,12 @@ public class Vehicle implements Steppable, Driveable {
      * passengers.
      */
     public Bag getManifest() { return manifest; }
+    public Intersection getPassengerDestination() {
+        if (hasPassengers) {
+            return ((Person)manifest.objs[0]).getDestination();
+        }
+        return null;
+    }
 
     /** Adds the provide Person object as a passenger of this Vehicle if there
      * is room.
