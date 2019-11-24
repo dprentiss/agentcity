@@ -695,22 +695,29 @@ public class DriverAgent implements Steppable, Driver {
                 if (ac.SMART_TURNS) {
                     Intersection destination =
                         vehicle.getPassengerDestination();
-                    Direction[] directions =
-                        nextIntersection.getDirectionsTo(destination);
-                    int i = ac.random.nextInt(directions.length);
-                    if (directions[i] != null) {
-                        nextDirection = directions[i];
-                    } else {
-                        nextDirection = directions[(i+1)%2];
-                    }
                     if (destination.idNum == nextIntersection.idNum) {
-                        nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
-                        nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+                       nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+                    } else {
+                        Direction[] directions =
+                            nextIntersection.getDirectionsTo(destination);
+                        Bag legs = new Bag();
+                        for (int i = 0; i < directions.length; i++) {
+                            if (directions[i] != null) {
+                                legs.addAll(nextIntersection.getDepartureLegsByDirection(ac, directions[i]));
+                            }
+                        }
+                        if (legs.numObjs == 0) {
+                            System.out.println(this);
+                            System.out.println(vehicle);
+                            System.out.println(nextIntersection);
+                            System.out.println(destination);
+                        }
+                        nextLeg = (Int2D)(legs.objs[ac.random.nextInt(legs.numObjs)]);
                     }
                 } else {
                     nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
-                    nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
                 }
+                nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
                 nextLeg =
                     nextIntersection.getDepartureLeg(ac, nextDirection,
                                                      nextDirection.onLeft());
