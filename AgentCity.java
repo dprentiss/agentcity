@@ -22,11 +22,12 @@ public class AgentCity extends SimState {
 
     // Schedule order
     private static final int VEHICLE_SCHEDULE_NUM = 0;
-    private static final int INTERSECTION_SCHEDULE_NUM = 1;
-    private static final int DRIVER_SCHEDULE_NUM = 2;
-    private static final int COLLISION_SCHEDULE_NUM = 3;
-    private static final int TRIPGEN_SCHEDULE_NUM = 4;
-    private static final int REPORT_SCHEDULE_NUM = 5;
+    private static final int DETECTOR_SCHEDULE_NUM = 1;
+    private static final int INTERSECTION_SCHEDULE_NUM = 2;
+    private static final int DRIVER_SCHEDULE_NUM = 3;
+    private static final int COLLISION_SCHEDULE_NUM = 4;
+    private static final int TRIPGEN_SCHEDULE_NUM = 5;
+    private static final int REPORT_SCHEDULE_NUM = 6;
 
     // Utility
     public final boolean LANE_POLICY = true;
@@ -100,7 +101,7 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 16, 64);
+        this(seed, 8, 64);
     }
 
     /** Constructor */
@@ -345,7 +346,7 @@ public class AgentCity extends SimState {
                 schedule.scheduleRepeating(intersectionAgents[i],
                                            INTERSECTION_SCHEDULE_NUM, 1);
             TripGenerator gen =
-                new TripGenerator(i, intersections[i], 0.001, random);
+                new TripGenerator(i, intersections[i], 0.020, random);
             gen.stopper =
                 schedule.scheduleRepeating(gen, TRIPGEN_SCHEDULE_NUM, 1);
         }
@@ -354,7 +355,8 @@ public class AgentCity extends SimState {
     /** Main */
     public static void main(String[] args) {
         //long seed = System.currentTimeMillis();
-        long seed = 1324367672;
+        //long seed = 1324367672;
+        long seed = 1324367673;
 
         SimState state = new AgentCity(seed);
         state.start();
