@@ -121,7 +121,7 @@ public class Person implements Steppable, VehicleClient {
                     lastStep = ac.schedule.getSteps();
                 }
                 if (ac.removeTraveler(this)) {
-                    System.out.print(this);
+                    //if (ac.CONSOLE_OUT) { System.out.print(this); }
                     if (ac.FILE_OUT) { ac.fileout.print(this); }
                     this.stopper.stop();
                 }
