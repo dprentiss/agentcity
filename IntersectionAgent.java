@@ -84,7 +84,7 @@ public class IntersectionAgent implements Steppable {
      */
     public IntersectionAgent(int id, Intersection intersection) {
         this.idNum = id;
-        setPriority(true);
+        setPriority(ac.RESERVATION_PRIORITY);
         setIntersection(intersection);
     }
 
@@ -466,7 +466,7 @@ public class IntersectionAgent implements Steppable {
         int x = leg.x;
         int y = leg.y;
         Bag b;
-        int numCells = 1;
+        int numCells = 5;
         Direction dir = Direction.byInt(ac.roadGrid.get(x, y));
             for (int i = 0; i < numCells; i++) {
                 b = ac.agentGrid.getObjectsAtLocation(x, y);
@@ -476,8 +476,8 @@ public class IntersectionAgent implements Steppable {
                     return true;
                 }
             }
-            x = dir.getXOffset();
-            y = dir.getYOffset();
+            x = x + dir.getXOffset();
+            y = y + dir.getYOffset();
         }
         return false;
     }
