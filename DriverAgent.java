@@ -139,7 +139,7 @@ public class DriverAgent implements Steppable, Driver {
      * @return the maximum safe speed.
      */
     int getSafeSpeed(AgentCity ac, int locX, int locY, Direction dir,
-    		int depth) {
+                     int depth) {
 
         Int2D cell;
 
@@ -222,20 +222,20 @@ public class DriverAgent implements Steppable, Driver {
     }
 
     /*
-    Int2D getNextDepartureLeg(AgentCity ac, Intersection in, Direction dir,
-                              Direction laneDir) {
-        int xOffset = laneDir.getXOffset();
-        int yOffset = laneDir.getYOffset();
-        Int2D[] departureLegs = in.getDepartureLegs(ac, dir);
-        Int2D nextDepartureLeg = departureLegs[0];
-        for (int i = 1; i < departureLegs.length; i++) {
-            if (offset > 0) {
-                int idx = nextDepartureLeg.x * xOffset +
-            } else {
-            }
-        }
-        return nextDepartureLeg;
-    }
+      Int2D getNextDepartureLeg(AgentCity ac, Intersection in, Direction dir,
+      Direction laneDir) {
+      int xOffset = laneDir.getXOffset();
+      int yOffset = laneDir.getYOffset();
+      Int2D[] departureLegs = in.getDepartureLegs(ac, dir);
+      Int2D nextDepartureLeg = departureLegs[0];
+      for (int i = 1; i < departureLegs.length; i++) {
+      if (offset > 0) {
+      int idx = nextDepartureLeg.x * xOffset +
+      } else {
+      }
+      }
+      return nextDepartureLeg;
+      }
     */
 
     Int2D getRandomDepartureLeg(AgentCity ac, Intersection in, Direction dir) {
@@ -355,7 +355,7 @@ public class DriverAgent implements Steppable, Driver {
     }
 
     Int2D[][] getReservationPath(Waypoint[] waypoints, Int2D loc, Direction dir,
-                   int currentSpeed, int desiredSpeed) {
+                                 int currentSpeed, int desiredSpeed) {
         Int2D[] pathToWaypoint;
         Int2D[][] tmpPath = new Int2D[16][maxSpeed];
         Int2D[][] path;
@@ -367,13 +367,13 @@ public class DriverAgent implements Steppable, Driver {
 
         // loop over waypoints and add to path
         for (int i = 0; i < waypoints.length; i++) {
-        	if (tmpLoc.equals(waypoints[i].cell)) {
-        		if (waypoints[i].directive != Driver.Directive.MOVE_FORWARD) {
+            if (tmpLoc.equals(waypoints[i].cell)) {
+                if (waypoints[i].directive != Driver.Directive.MOVE_FORWARD) {
                     tmpSpeed = 0;
                 }
-        		tmpDir = tmpDir.byDirective(waypoints[i].directive);
-        		continue;
-        	}
+                tmpDir = tmpDir.byDirective(waypoints[i].directive);
+                continue;
+            }
             pathToWaypoint =
                 getPathToWaypoint(waypoints[i], tmpLoc, tmpDir, tmpSpeed,
                                   desiredSpeed).clone();
@@ -395,128 +395,128 @@ public class DriverAgent implements Steppable, Driver {
         // copy tmpPath to trimmed path
         int m = 0;
         if (!inIntersection) {
-        	m = getStepsToCell(getCellAhead(waypoints[0].cell, 1)) - 1;
+            m = getStepsToCell(getCellAhead(waypoints[0].cell, 1)) - 1;
         }
         path = new Int2D[k - m][maxSpeed];
         for (int i = 0; i < k - m; i++) {
             for (int j = 0; j < maxSpeed; j++) {
-            		path[i][j] = tmpPath[i + m][j];
+                path[i][j] = tmpPath[i + m][j];
             }
         }
-            /*
-        path = new Int2D[k][maxSpeed];
-        for (int i = 0; i < k; i++) {
-            for (int j = 0; j < maxSpeed; j++) {
-                path[i][j] = tmpPath[i][j];
-            }
-        }
-            */
+        /*
+          path = new Int2D[k][maxSpeed];
+          for (int i = 0; i < k; i++) {
+          for (int j = 0; j < maxSpeed; j++) {
+          path[i][j] = tmpPath[i][j];
+          }
+          }
+        */
         return path;
     }
 
     /*
-    Int2D[] getPath(Waypoint[] waypoints, Int2D loc, Direction dir,
-                   int currentSpeed, int desiredSpeed) {
-        Int2D[] path;
-        Int2D[] pathToWaypoint;
-        Int2D[] tmpPath = new Int2D[16];
-        Int2D tmpLoc = loc;
-        Direction tmpDir = dir;
-        int tmpSpeed = currentSpeed;
-        int k = 0;
+      Int2D[] getPath(Waypoint[] waypoints, Int2D loc, Direction dir,
+      int currentSpeed, int desiredSpeed) {
+      Int2D[] path;
+      Int2D[] pathToWaypoint;
+      Int2D[] tmpPath = new Int2D[16];
+      Int2D tmpLoc = loc;
+      Direction tmpDir = dir;
+      int tmpSpeed = currentSpeed;
+      int k = 0;
 
-        // loop over waypoints and add to path
-        for (int i = 0; i < waypoints.length; i++) {
-            pathToWaypoint =
-                getPathToWaypoint(waypoints[i], tmpLoc, tmpDir, tmpSpeed,
-                                  desiredSpeed).clone();
-            for (int j = 0; j < pathToWaypoint.length; j++) {
-                tmpPath[k] = pathToWaypoint[j];
-                if (waypoints[i].directive == Driver.Directive.MOVE_FORWARD) {
-                    tmpSpeed = getGapToCell(tmpPath[k], tmpLoc, tmpDir) + 1;
-                } else {
-                    tmpSpeed = 0;
-                }
-                tmpLoc = tmpPath[k];
-                k++;
-            }
-            tmpDir = tmpDir.byDirective(waypoints[i].directive);
-        }
-        // copy tmpPath to trimmed path
-        path = new Int2D[k];
-        for (int i = 0; i < k; i++) {
-            path[i] = tmpPath[i];
-        }
-        return path;
-    }
+      // loop over waypoints and add to path
+      for (int i = 0; i < waypoints.length; i++) {
+      pathToWaypoint =
+      getPathToWaypoint(waypoints[i], tmpLoc, tmpDir, tmpSpeed,
+      desiredSpeed).clone();
+      for (int j = 0; j < pathToWaypoint.length; j++) {
+      tmpPath[k] = pathToWaypoint[j];
+      if (waypoints[i].directive == Driver.Directive.MOVE_FORWARD) {
+      tmpSpeed = getGapToCell(tmpPath[k], tmpLoc, tmpDir) + 1;
+      } else {
+      tmpSpeed = 0;
+      }
+      tmpLoc = tmpPath[k];
+      k++;
+      }
+      tmpDir = tmpDir.byDirective(waypoints[i].directive);
+      }
+      // copy tmpPath to trimmed path
+      path = new Int2D[k];
+      for (int i = 0; i < k; i++) {
+      path[i] = tmpPath[i];
+      }
+      return path;
+      }
     */
 
     /*
-    Int2D[] getPath(Waypoint[] waypoints) {
-        return getPath(waypoints, location, direction, speed, maxSpeed);
-    }
+      Int2D[] getPath(Waypoint[] waypoints) {
+      return getPath(waypoints, location, direction, speed, maxSpeed);
+      }
     */
 
     /*
-    Int2D[] getPath(AgentCity ac, Int2D loc, Direction dir) {
-        Int2D[] tmpPath = new Int2D[16];
-        Int2D[] returnPath;
-        Int2D tmpCell = new Int2D();
-        int speed = 2;
-        int desiredSpeed = 2;
-        int i = 0;
-        // start at current location
-        int cellX = loc.x;
-        int cellY = loc.y;
-        // advance to intersection
-        while (ac.roadGrid.field[cellX][cellY] != 9) {
-            tmpCell = getCellAhead(cellX, cellY, dir, 1);
-            cellX = tmpCell.x;
-            cellY = tmpCell.y;
-        }
-        // advance to turn cell and add cells to path
-        while (cellX != nextTurnCell.x || cellY != nextTurnCell.y) {
-            tmpPath[i] = new Int2D(cellX, cellY);
-            i++;
-            tmpCell = getCellAhead(cellX, cellY, dir, 1);
-            cellX = tmpCell.x;
-            cellY = tmpCell.y;
-        }
-        // add turning time to path if turning
-        if (dir != nextDirection) {
-            tmpPath[i] = new Int2D(cellX, cellY);
-            i++;
-        }
-        // advance out of intersection and add cells to path
-        while (ac.roadGrid.field[cellX][cellY] == 9) {
-            tmpPath[i] = new Int2D(cellX, cellY);
-            i++;
-            tmpCell = getCellAhead(cellX, cellY, nextDirection, 1);
-            cellX = tmpCell.x;
-            cellY = tmpCell.y;
-        }
-        returnPath = new Int2D[i];
-        for (int j = 0; j < returnPath.length; j++) {
-            returnPath[j] = tmpPath[j];
-        }
-        return returnPath;
-    }
+      Int2D[] getPath(AgentCity ac, Int2D loc, Direction dir) {
+      Int2D[] tmpPath = new Int2D[16];
+      Int2D[] returnPath;
+      Int2D tmpCell = new Int2D();
+      int speed = 2;
+      int desiredSpeed = 2;
+      int i = 0;
+      // start at current location
+      int cellX = loc.x;
+      int cellY = loc.y;
+      // advance to intersection
+      while (ac.roadGrid.field[cellX][cellY] != 9) {
+      tmpCell = getCellAhead(cellX, cellY, dir, 1);
+      cellX = tmpCell.x;
+      cellY = tmpCell.y;
+      }
+      // advance to turn cell and add cells to path
+      while (cellX != nextTurnCell.x || cellY != nextTurnCell.y) {
+      tmpPath[i] = new Int2D(cellX, cellY);
+      i++;
+      tmpCell = getCellAhead(cellX, cellY, dir, 1);
+      cellX = tmpCell.x;
+      cellY = tmpCell.y;
+      }
+      // add turning time to path if turning
+      if (dir != nextDirection) {
+      tmpPath[i] = new Int2D(cellX, cellY);
+      i++;
+      }
+      // advance out of intersection and add cells to path
+      while (ac.roadGrid.field[cellX][cellY] == 9) {
+      tmpPath[i] = new Int2D(cellX, cellY);
+      i++;
+      tmpCell = getCellAhead(cellX, cellY, nextDirection, 1);
+      cellX = tmpCell.x;
+      cellY = tmpCell.y;
+      }
+      returnPath = new Int2D[i];
+      for (int j = 0; j < returnPath.length; j++) {
+      returnPath[j] = tmpPath[j];
+      }
+      return returnPath;
+      }
     */
 
     /*
-    Int2D[] getUpdatedPath(Int2D location) {
-        int i = 0;
-        Int2D[] updatedPath;
-        while (i < path.length && !location.equals(path[i])) {
-            path[i] = null;
-            i++;
-        }
-        updatedPath = new Int2D[path.length - i];
-        for (int j = 0; j < updatedPath.length; j++) {
-            updatedPath[j] = path[i + j];
-        }
-        return updatedPath;
-    }
+      Int2D[] getUpdatedPath(Int2D location) {
+      int i = 0;
+      Int2D[] updatedPath;
+      while (i < path.length && !location.equals(path[i])) {
+      path[i] = null;
+      i++;
+      }
+      updatedPath = new Int2D[path.length - i];
+      for (int j = 0; j < updatedPath.length; j++) {
+      updatedPath[j] = path[i + j];
+      }
+      return updatedPath;
+      }
     */
 
     Int2D getCellAhead(int cellX, int cellY, Direction dir, int offset) {
@@ -664,6 +664,7 @@ public class DriverAgent implements Steppable, Driver {
                 //nextIntersection.cancelReservation(vehicle);
                 vehicle.hasReservation = false;
                 hasReservation = false;
+                if (ac.AVOID_CONGESTION) updateDestination();
             }
         }
         if (atApproachLeg) {
@@ -673,14 +674,15 @@ public class DriverAgent implements Steppable, Driver {
                 //nextIntersection.cancelReservation(vehicle);
                 vehicle.hasReservation = false;
                 hasReservation = false;
+                if (ac.AVOID_CONGESTION) updateDestination();
             }
         }
     }
 
     public void checkReservation(AgentCity ac) {
-        // If the directive is move forward and the way is not clear, stop.
         updateState(ac);
         checkReservation();
+        // If the directive is move forward and the way is not clear, stop.
         maxSafeSpeed = getSafeSpeed(ac);
         if (maxSafeSpeed < desiredSpeed) {
             desiredSpeed = maxSafeSpeed;
@@ -690,13 +692,79 @@ public class DriverAgent implements Steppable, Driver {
 
     private void updateDestination() {
         nextIntersection = getIntersectionAhead(ac, location);
+
+        // chose direction
+        if (ac.SMART_TURNS && vehicle.hasPassengers) {
+            Intersection destination =
+                vehicle.getPassengerDestination();
+            if (destination.idNum == nextIntersection.idNum) {
+                nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+            } else {
+                Direction[] directions =
+                    nextIntersection.getDirectionsTo(destination);
+                Bag legs = new Bag();
+                for (int i = 0; i < directions.length; i++) {
+                    if (directions[i] != null) {
+                        legs.addAll(nextIntersection.getDepartureLegsByDirection(ac, directions[i]));
+                    }
+                }
+                nextLeg = (Int2D)(legs.objs[ac.random.nextInt(legs.numObjs)]);
+            }
+        } else {
+            nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+        }
+        nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+
+        // choose departure lane by occupancy policy
+        if (ac.LANE_POLICY) {
+            if (vehicle.hasPassengers) {
+                /*
+                nextLeg =
+                    nextIntersection.getDepartureLeg(ac, nextDirection,
+                                                     nextDirection.onLeft());
+            */
+            } else {
+                nextLeg =
+                    nextIntersection.getDepartureLeg(ac, nextDirection,
+                                                     nextDirection.onRight());
+            }
+        }
+
+        // choose random direction if nextDirection is infeasible
+        if (nextDirection == null
+            || nextDirection.toInt() == direction.opposite().toInt()) {
+            nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+            nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
+        }
+        // set up next turning movement
+        nextApproachLeg = getNextApproachLeg(ac, nextIntersection, location, direction);
+        nextTurnCell = setTurnCell(ac, nextLeg, location, direction);
+        if (direction == nextDirection) {
+            waypoints = new Waypoint[] {
+                new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
+                new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+            };
+        } else {
+            waypoints = new Waypoint[] {
+                new Waypoint(nextApproachLeg, Driver.Directive.MOVE_FORWARD),
+                new Waypoint(nextTurnCell, getTurnDirective(nextDirection)),
+                new Waypoint(nextLeg, Driver.Directive.MOVE_FORWARD)
+            };
+        }
+        nextWaypoint = new Waypoint(nextTurnCell,
+                                    getTurnDirective(nextDirection));
+    }
+
+    /*
+    private void updateDestination() {
+        nextIntersection = getIntersectionAhead(ac, location);
         if (ac.LANE_POLICY) {
             if (vehicle.hasPassengers) {
                 if (ac.SMART_TURNS) {
                     Intersection destination =
                         vehicle.getPassengerDestination();
                     if (destination.idNum == nextIntersection.idNum) {
-                       nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
+                        nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
                     } else {
                         Direction[] directions =
                             nextIntersection.getDirectionsTo(destination);
@@ -754,6 +822,7 @@ public class DriverAgent implements Steppable, Driver {
         nextWaypoint = new Waypoint(nextTurnCell,
                                     getTurnDirective(nextDirection));
     }
+    */
 
     void updateDestination(AgentCity ac) {
         updateState(ac);
