@@ -51,10 +51,11 @@ public class Detector implements Steppable {
         this.height = maxY - minY + 1;
 
         cells = new Int2D[this.width * this.height];
+        int i = 0;
         for (int j = 0; j < this.width; j++) {
             for (int k = 0; k < this.height; k++) {
-                cells[j + k] = new Int2D(j + minX, k + minY);
-                System.out.println(cells[j + k]);
+                cells[i] = new Int2D(j + minX, k + minY);
+                i++;
             }
         }
     }
@@ -68,22 +69,18 @@ public class Detector implements Steppable {
 
     public void step(final SimState state) {
         ac = (AgentCity)state;
-        int j = 0;
 
         for (int i = 0; i < cells.length; i++) {
-            System.out.printf("i = %d\n", i);
-            System.out.println(cells[i]);
             b = ac.agentGrid.getObjectsAtLocation(cells[i]);
-            if (b == null) {
-                continue;
-            }
+            if (b == null) { continue; }
             vehicle = (Vehicle)b.objs[0];
             buffer.add(vehicle);
             if (vehicles.contains(vehicle)) continue;
             vehicles.add(vehicle);
             System.out.print(vehicle);
         }
-        j = 0;
+        System.out.println(vehicles.numObjs);
+        int j = 0;
         while (j < vehicles.numObjs) {
             if (buffer.contains(vehicles.objs[j])) {
                 j++;
@@ -91,5 +88,6 @@ public class Detector implements Steppable {
                 vehicles.remove(vehicles.objs[j]);
             }
         }
+        buffer.clear();
     }
 }
