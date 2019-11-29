@@ -30,6 +30,15 @@ public class Intersection {
     // Accessors
     public Int2D[] getDepartureLegs() { return departureLegs; }
     public Int2D[] getApproachLegs() { return approachLegs; }
+    public int getNumApproachLegs(AgentCity ac, Direction direction) {
+        Int2D cell;
+        int num = 0;
+        for (int i = 0; i < approachLegs.length; i++) {
+            cell = approachLegs[i];
+            if (ac.roadGrid.get(cell.x, cell.y) == direction.toInt()) num++;
+        }
+        return num;
+    }
     public void setController(IntersectionAgent controller) {
         this.controller = controller;
     }

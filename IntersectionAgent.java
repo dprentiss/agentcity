@@ -166,8 +166,8 @@ public class IntersectionAgent implements Steppable {
         int x;
         int y;
         int timeIndex;
-        Vehicle otherVehicle;
-        DriverAgent otherDriver;
+        Vehicle otherVehicle = null;
+        DriverAgent otherDriver = null;
         // check if accepting reservations
         if (!acceptingReservations && !vehicles.contains(vehicle)) return false;
         // Check if Vehicles desired path is free
@@ -179,7 +179,7 @@ public class IntersectionAgent implements Steppable {
                     x = path[i][j].x - intersection.minX;
                     y = path[i][j].y - intersection.minY;
                     if (schedule[timeIndex][x][y] != null) {
-                        if (passengerPriority) {
+                        if (passengerPriority && height * width > 4) {
                             if (vehicle.hasPassengers) {
                                 otherVehicle = schedule[timeIndex][x][y];
                                 otherDriver = (DriverAgent)otherVehicle.getDriver();
@@ -206,7 +206,9 @@ public class IntersectionAgent implements Steppable {
                     && intersection.inIntersection(path[i][j])) {
                     x = path[i][j].x - intersection.minX;
                     y = path[i][j].y - intersection.minY;
-                    if (passengerPriority && schedule[timeIndex][x][y] != null) {
+                    if (passengerPriority
+                        && schedule[timeIndex][x][y] != null
+                        && height * width > 4) {
                         otherVehicle = schedule[timeIndex][x][y];
                         otherDriver = (DriverAgent)otherVehicle.getDriver();
                         removeVehicleFromSchedule(otherVehicle);
