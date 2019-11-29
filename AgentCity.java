@@ -239,8 +239,6 @@ public class AgentCity extends SimState {
         int numIntersections = 0;
 
         roadGrid = new IntGrid2D(gridWidth, gridHeight, Direction.NONE.toInt());
-        //walkwayGrid = new IntGrid2D(gridWidth, gridHeight, 0);
-        //parkingGrid = new IntGrid2D(gridWidth, gridHeight, 0);
         intersectionGrid = new IntGrid2D(gridWidth, gridHeight, 0);
         blockGrid = new IntGrid2D(gridWidth, gridHeight, 1);
 
@@ -289,9 +287,11 @@ public class AgentCity extends SimState {
         }
 
         // make a temporary detector
+        /*
         Detector tmpDetector = new Detector(0, 18, 19, 12, 13);
         tmpDetector.stopper =
             schedule.scheduleRepeating(tmpDetector, DETECTOR_SCHEDULE_NUM, 1);
+        */
 
         // make some intersections
         int maxXs[] = new int[numIntersections + 1];
