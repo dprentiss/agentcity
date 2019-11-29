@@ -7,7 +7,7 @@ import sim.util.*;
 import sim.engine.*;
 import java.util.Arrays;
 
-public class Detector {
+public class Detector implements Steppable {
 
     // Required for serialization
     private static final long serialVersionUID = 1;
@@ -23,6 +23,16 @@ public class Detector {
     public final int maxY;
 
     // Variables
+    AgentCity ac;
+    Direction direction;
+    long step;
+    int stepIdx;
+    int nextIdx;
+    Vehicle vehicle;
+    int bufferSize;
+    Bag b = new Bag();
+    Bag vehicles = new Bag();
+    Bag buffer = new Bag();
     private int width;
     private int height;
     private Int2D[] cells;
@@ -41,33 +51,45 @@ public class Detector {
         this.height = maxY - minY + 1;
 
         cells = new Int2D[this.width * this.height];
-
-        int k = 0;
-        for (int i = this.minX; i < this.width; i++) {
-            for (int j = this.minY; j < this.height; j++) {
-                cells[k] = new Int2D(i, j);
+        for (int j = 0; j < this.width; j++) {
+            for (int k = 0; k < this.height; k++) {
+                cells[j + k] = new Int2D(j + minX, k + minY);
+                System.out.println(cells[j + k]);
             }
         }
     }
 
     /** Constructor */
     /*
-    public Detector(int id, Int2D cell, AgentCity ac) {
-        idNum = id;
+    public Detector(int id, Int2D cell, int numLanes) {
         direction = Direction.byInt(ac.roadGrid.get(cell.x, cell.y));
     }
     */
 
     public void step(final SimState state) {
-        /*
-        AgentCity ac = (AgentCity)state;
-        Bag b;
-        for (int i = 0; i < cells.length; i++) {
-            b = ac.agentGrid.getObjectsAtLocation(cells[i]);
-            if(vehicles != null) {
+        ac = (AgentCity)state;
+        int j = 0;
 
+        for (int i = 0; i < cells.length; i++) {
+            System.out.printf("i = %d\n", i);
+            System.out.println(cells[i]);
+            b = ac.agentGrid.getObjectsAtLocation(cells[i]);
+            if (b == null) {
+                continue;
+            }
+            vehicle = (Vehicle)b.objs[0];
+            buffer.add(vehicle);
+            if (vehicles.contains(vehicle)) continue;
+            vehicles.add(vehicle);
+            System.out.print(vehicle);
+        }
+        j = 0;
+        while (j < vehicles.numObjs) {
+            if (buffer.contains(vehicles.objs[j])) {
+                j++;
+            } else {
+                vehicles.remove(vehicles.objs[j]);
             }
         }
-        */
     }
 }
