@@ -102,7 +102,7 @@ public class TripGenerator implements Steppable {
             newPerson = new Person(newId, intersection, destination);
             ac.addTraveler(newPerson);
             //System.out.println(ac.travelers.numObjs);
-            newPerson.stopper = ac.schedule.scheduleRepeating(newPerson, 6, 1);
+            newPerson.stopper = ac.schedule.scheduleRepeating(newPerson, ac.TRIPGEN_SCHEDULE_NUM, 1);
         }
     }
 }

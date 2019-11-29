@@ -45,6 +45,16 @@ public class Person implements Steppable, VehicleClient {
 
     /** Constructor */
     public Person(int id,
+                  Intersection origin,
+                  Intersection destination, Vehicle vehicle) {
+        idNum = id;
+        this.origin = origin;
+        this.destination = destination;
+        this.boardVehicle(vehicle);
+    }
+
+    /** Constructor */
+    public Person(int id,
                   Intersection origin, Intersection destination) {
         idNum = id;
         this.origin = origin;
