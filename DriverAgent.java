@@ -909,7 +909,6 @@ public class DriverAgent implements Steppable, Driver {
                         nextDirective = Driver.Directive.MERGE_LEFT;
                         desiredSpeed = 1;
                     }
-                    desiredSpeed = 1;
                 } else if (safeMerge(direction.onRight())) {
                     //System.out.println("MERGING_RIGHT");
                     //System.out.print(this);
