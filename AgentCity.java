@@ -21,21 +21,23 @@ public class AgentCity extends SimState {
     private static final long serialVersionUID = 1;
 
     // Schedule order
-    private static final int VEHICLE_SCHEDULE_NUM = 0;
-    private static final int DETECTOR_SCHEDULE_NUM = 1;
-    private static final int INTERSECTION_SCHEDULE_NUM = 2;
-    private static final int DRIVER_SCHEDULE_NUM = 3;
-    private static final int COLLISION_SCHEDULE_NUM = 4;
-    private static final int TRIPGEN_SCHEDULE_NUM = 5;
-    private static final int REPORT_SCHEDULE_NUM = 6;
+    public static final int VEHICLE_SCHEDULE_NUM = 0;
+    public static final int DETECTOR_SCHEDULE_NUM = 1;
+    public static final int INTERSECTION_SCHEDULE_NUM = 2;
+    public static final int DRIVER_SCHEDULE_NUM = 3;
+    public static final int COLLISION_SCHEDULE_NUM = 4;
+    public static final int TRIPGEN_SCHEDULE_NUM = 5;
+    public static final int REPORT_SCHEDULE_NUM = 6;
 
     // Utility
-    public static final boolean LANE_POLICY = false;
+    public static final boolean LANE_POLICY = true;
     public static final boolean SMART_TURNS = true;
     public static final boolean AVOID_CONGESTION = true;
     public static final boolean RESERVATION_PRIORITY = true;
+    public static final boolean PASSENGER_WARM_START = true;
     public static final boolean CONSOLE_OUT = true;
     public static final boolean FILE_OUT = false;
+    public static final int MAX_SPEED = 2;
     private final boolean checkForCollisions;
     private final boolean isTest;
     private long step;
@@ -103,7 +105,7 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 4, 32);
+        this(seed, 2, 128);
     }
 
     /** Constructor */
@@ -155,7 +157,11 @@ public class AgentCity extends SimState {
                 public void step(final SimState state) {
                     AgentCity ac = (AgentCity)state;
                     step = schedule.getSteps();
-                    System.out.print(ac);
+                    if (CONSOLE_OUT) {
+                        if (step % 60 == 0) {
+                            System.out.print(ac);
+                        }
+                    }
                     if (FILE_OUT) { ac.fileout.print(ac); }
                 }
             };
@@ -282,43 +288,12 @@ public class AgentCity extends SimState {
             }
         }
 
-        // Make a DispatchAgent
-        //dispatcher = new DispatchAgent(0, NUM_VEHICLES);
-        //dispatcher.stopper = schedule.scheduleRepeating(dispatcher,
-        //DISPATCH_SCHEDULE_NUM, 1);
+        // make a temporary detector
+        Detector tmpDetector = new Detector(0, 18, 19, 12, 13);
+        tmpDetector.stopper =
+            schedule.scheduleRepeating(tmpDetector, DETECTOR_SCHEDULE_NUM, 1);
 
-        // Make some Vehicle and Driver agents
-        for (int i = 0; i < NUM_VEHICLES; i++) {
-            // Get random location on road
-            Int2D newLocation = new Int2D(random.nextInt(gridWidth),
-                                          random.nextInt(gridHeight));
-            while (roadGrid.get(newLocation.x, newLocation.y) == 0
-                   || roadGrid.get(newLocation.x, newLocation.y) == 9
-                   || agentGrid.getObjectsAtLocation(newLocation.x,
-                                                     newLocation.y) != null) {
-                newLocation = new Int2D(random.nextInt(gridWidth),
-                                        random.nextInt(gridHeight));
-            }
-            // One Vehicle on a road cell in the correct direction
-            Direction newDir = Direction.byInt(roadGrid.get(newLocation.x,
-                                                            newLocation.y));
-            Vehicle newVehicle = new Vehicle(i, newDir);
-            // add Vehicle to DispatchAgent pool
-            //dispatcher.addVehicleToPool(testCar);
-            agentGrid.setObjectLocation(newVehicle, newLocation);
-            // Add Vehicle to Schedule
-            newVehicle.stopper =
-                schedule.scheduleRepeating(newVehicle, VEHICLE_SCHEDULE_NUM, 1);
-            // DriverAgent for Vehicle
-            DriverAgent newDriver = new DriverAgent(i);
-            newVehicle.setDriver(newDriver);
-            newDriver.setVehicle(newVehicle);
-            // add Driver to Schedule
-            newDriver.stopper =
-                schedule.scheduleRepeating(newDriver, DRIVER_SCHEDULE_NUM, 1);
-        }
-
-        // Make some Intersections, IntersectionAgents, and TripGenerators
+        // make some intersections
         int maxXs[] = new int[numIntersections + 1];
         int minXs[] = new int[numIntersections + 1];
         int maxYs[] = new int[numIntersections + 1];
@@ -348,9 +323,47 @@ public class AgentCity extends SimState {
                 schedule.scheduleRepeating(intersectionAgents[i],
                                            INTERSECTION_SCHEDULE_NUM, 1);
             TripGenerator gen =
-                new TripGenerator(i, intersections[i], 0.07, random);
+                new TripGenerator(i, intersections[i], 0.02, random);
             gen.stopper =
                 schedule.scheduleRepeating(gen, TRIPGEN_SCHEDULE_NUM, 1);
+        }
+
+        // make some vehicles
+        for (int i = 0; i < NUM_VEHICLES; i++) {
+            // Get random location on road
+            Int2D newLocation = new Int2D(random.nextInt(gridWidth),
+                                          random.nextInt(gridHeight));
+            while (roadGrid.get(newLocation.x, newLocation.y) == 0
+                   || roadGrid.get(newLocation.x, newLocation.y) == 9
+                   || agentGrid.getObjectsAtLocation(newLocation.x,
+                                                     newLocation.y) != null) {
+                newLocation = new Int2D(random.nextInt(gridWidth),
+                                        random.nextInt(gridHeight));
+            }
+            // One Vehicle on a road cell in the correct direction
+            Direction newDir = Direction.byInt(roadGrid.get(newLocation.x,
+                                                            newLocation.y));
+            Vehicle newVehicle = new Vehicle(i, newDir);
+            agentGrid.setObjectLocation(newVehicle, newLocation);
+            // Add Vehicle to Schedule
+            newVehicle.stopper =
+                schedule.scheduleRepeating(newVehicle, VEHICLE_SCHEDULE_NUM, 1);
+            // DriverAgent for Vehicle
+            DriverAgent newDriver = new DriverAgent(i);
+            newVehicle.setDriver(newDriver);
+            newDriver.setVehicle(newVehicle);
+            // add Driver to Schedule
+            newDriver.stopper =
+                schedule.scheduleRepeating(newDriver, DRIVER_SCHEDULE_NUM, 1);
+            // add passenger if appropriate
+            if (PASSENGER_WARM_START && random.nextFloat() < 0.25) {
+                Intersection destination =
+                    intersections[random.nextInt(intersections.length - 1) + 1];
+                Person newPerson = new Person(i, null, destination, newVehicle);
+                addTraveler(newPerson);
+                // add passenger to schedule
+                newPerson.stopper = schedule.scheduleRepeating(newPerson, TRIPGEN_SCHEDULE_NUM, 1);
+            }
         }
     }
 
