@@ -18,9 +18,6 @@ public class AgentCityWithUI extends GUIState {
     public JFrame displayFrame;
 
     FastValueGridPortrayal2D roadPortrayal = new FastValueGridPortrayal2D("Road");
-    FastValueGridPortrayal2D blockPortrayal = new FastValueGridPortrayal2D("Block", true);
-    FastValueGridPortrayal2D intersectionPortrayal = new FastValueGridPortrayal2D("Intersection");
-
     SparseGridPortrayal2D agentPortrayal = new SparseGridPortrayal2D();
 
     public static void main(String[] args) {
@@ -51,27 +48,13 @@ public class AgentCityWithUI extends GUIState {
         roadPortrayal.setField(ac.roadGrid);
         roadPortrayal.setMap(new sim.util.gui.SimpleColorMap(roadColors));
 
-        // Block colors
-        Color blockColors[] = new Color[2];
-        blockColors[0] = new Color(0,0,0,0);
-        blockColors[1] = new Color(96,128,56);
-        blockPortrayal.setField(ac.blockGrid);
-        blockPortrayal.setMap(new sim.util.gui.SimpleColorMap(blockColors));
-
-        // Intersection colors
-        Color intersectionColors[] = new Color[2];
-        intersectionColors[0] = new Color(0,0,0,0);
-        intersectionColors[1] = new Color(0,0,0,0);
-        intersectionPortrayal.setField(ac.intersectionGrid);
-        intersectionPortrayal.setMap(new sim.util.gui.SimpleColorMap(intersectionColors));
-
         // Agent Colors
         agentPortrayal.setField(ac.agentGrid);
         agentPortrayal.setPortrayalForClass(Vehicle.class,
                 new sim.portrayal.simple.OvalPortrayal2D(Color.red));
         Bag vehicles = ac.agentGrid.getAllObjects();
         //if (ac.LANE_POLICY) {
-        if (true) {
+        if (false) {
             Color newColor = new Color(0, 255, 0);
             agentPortrayal.setPortrayalForAll(new sim.portrayal.simple.OvalPortrayal2D()
                 {
@@ -114,14 +97,12 @@ public class AgentCityWithUI extends GUIState {
         super.init(c);
         ac.console = (Console)c;
 
-        display = new Display2D(800, 800, this);
+        display = new Display2D(1600, 16, this);
         displayFrame = display.createFrame();
         c.registerFrame(displayFrame);
         displayFrame.setVisible(true);
 
         display.attach(roadPortrayal, "Road");
-        display.attach(blockPortrayal, "Block");
-        display.attach(intersectionPortrayal, "Intersection");
         display.attach(agentPortrayal, "Agents");
 
         display.setBackdrop(Color.white);
