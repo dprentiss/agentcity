@@ -79,7 +79,7 @@ public class Detector implements Steppable {
             vehicles.add(vehicle);
             System.out.print(vehicle);
         }
-        System.out.println(vehicles.numObjs);
+        //System.out.println(vehicles.numObjs);
         int j = 0;
         while (j < vehicles.numObjs) {
             if (buffer.contains(vehicles.objs[j])) {

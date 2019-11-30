@@ -29,7 +29,7 @@ public class Vehicle implements Steppable, Driveable {
     /** The maximum speed in grid cells per step of this Vehicle.
      * Must be one until faster speeds are supported.
      */
-    public final int MAX_SPEED = 2;
+    public final int MAX_SPEED = AgentCity.MAX_SPEED;
 
     // Agents
     /** The agent responsible for driving this Vehicle. */
@@ -38,6 +38,7 @@ public class Vehicle implements Steppable, Driveable {
     private Bag manifest;
 
     // Variables
+    private AgentCity ac;
     /** True indicates that this Vehicle is clear to enter the relevant
      * intersection.
      */
@@ -156,7 +157,7 @@ public class Vehicle implements Steppable, Driveable {
      * capacity of four, and Direction of NONE.
      */
     public Vehicle(int id) {
-        this(id, 1, 1, Direction.NONE);
+        this(id, 1, 1, Direction.NONE, 0);
     }
 
     /** Creates a Vehicle object with the given ID number and initial direction.
@@ -165,7 +166,11 @@ public class Vehicle implements Steppable, Driveable {
      * capacity of four.
      */
     public Vehicle(int id, Direction dir) {
-        this(id, 1, 1, dir);
+        this(id, 1, 1, dir, 0);
+    }
+
+    public Vehicle(int id, Direction dir, int speed) {
+        this(id, 1, 1, dir, speed);
     }
 
     /** Creates a Vehicle object with the given ID number, passenger capacity
@@ -174,7 +179,7 @@ public class Vehicle implements Steppable, Driveable {
      * The created vehicle will have the default size of one.
      */
     public Vehicle(int id, final int cap, Direction dir) {
-        this(id, 1, cap, dir);
+        this(id, 1, cap, dir, 0);
     }
 
     /** Creates a Vehicle object with the given ID number, length, size,
@@ -182,12 +187,14 @@ public class Vehicle implements Steppable, Driveable {
      * The ID number should be unique but this is not enforced.
      * Length must be one until larger vehicles are supported.
      */
-    private Vehicle(int id, final int len, final int cap, Direction dir) {
+    private Vehicle(int id, final int len, final int cap, Direction dir,
+                    int speed) {
         idNum = id;
         length = len;
         passengerCap = cap;
         manifest = new Bag(passengerCap);
         direction = dir;
+        this.speed = speed;
     }
 
     /** Set the location of this Vehicle on the grid in provided state at the
@@ -219,6 +226,15 @@ public class Vehicle implements Steppable, Driveable {
         speed = s;
     }
 
+    public void updateState(AgentCity ac) {
+        this.ac = ac;
+        location = ac.agentGrid.getObjectLocation(this);
+    }
+
+    private void updateState() {
+        this.updateState(ac);
+    }
+
     /** Actions this vehicle should take on each step.
      *
      * <p> On each step, this Vehicle should update is location and get the next
@@ -229,10 +245,15 @@ public class Vehicle implements Steppable, Driveable {
      */
     public void step(final SimState state) {
         // The current simulation state
-        AgentCity ac = (AgentCity)state;
+        updateState((AgentCity)state);
 
-        // Get location from state
-        location = ac.agentGrid.getObjectLocation(this);
+        // remove vehicle if near end
+        if (location.x > ac.gridWidth - MAX_SPEED - 1) {
+            ((DriverAgent)this.driver).stopper.stop();
+            ac.agentGrid.remove(this);
+            this.stopper.stop();
+            return;
+        }
 
         // Get next directive from Driver
         Driver.Directive nextDirective = driver.getNextDirective();

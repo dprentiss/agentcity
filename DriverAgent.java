@@ -30,7 +30,7 @@ public class DriverAgent implements Steppable, Driver {
     public int speed;
     public int maxSpeed;
 
-    public Driver.Directive nextDirective = Driver.Directive.NONE;
+    public Driver.Directive nextDirective = Driver.Directive.MOVE_FORWARD;
     public int desiredSpeed = maxSpeed;
     public int maxSafeSpeed = maxSpeed;
 
@@ -67,6 +67,7 @@ public class DriverAgent implements Steppable, Driver {
     public void setVehicle(Vehicle v) {
         vehicle = v;
         maxSpeed = v.MAX_SPEED;
+        desiredSpeed = maxSpeed;
     }
     public Driver.Directive getNextDirective() { return nextDirective; }
     public int getDesiredSpeed() { return desiredSpeed; }
@@ -638,6 +639,10 @@ public class DriverAgent implements Steppable, Driver {
         speed = vehicle.getSpeed();
         hasReservation = vehicle.hasReservation;
         inIntersection = ac.roadGrid.field[location.x][location.y] == 9;
+        maxSafeSpeed = getSafeSpeed(ac);
+        if (maxSafeSpeed < desiredSpeed) {
+            desiredSpeed = maxSafeSpeed;
+        }
     }
 
     private void checkReservation() {
@@ -831,7 +836,7 @@ public class DriverAgent implements Steppable, Driver {
 
     boolean safeMerge(Direction dir) {
         Vehicle vehicle;
-        int speed = (this.speed < 1 ? this.speed + 1 : 1);
+        int speed = (this.speed < desiredSpeed ? this.speed + 1 : desiredSpeed);
         int x = location.x + speed * direction.getXOffset() + dir.getXOffset();
         int y = location.y + speed * direction.getYOffset() + dir.getYOffset();
         if (!ac.checkBounds(x, y)) {
@@ -841,16 +846,10 @@ public class DriverAgent implements Steppable, Driver {
             return false;
         }
         for (int i = 0; i < maxSpeed + 1; i++) {
-            //System.out.println(x);
-            //System.out.println(y);
             if (ac.agentGrid.numObjectsAtLocation(x, y) > 0) {
                 vehicle =
                     (Vehicle)ac.agentGrid.getObjectsAtLocation(x, y).objs[0];
                 if (vehicle.getSpeed() >= i - 1) {
-                    //System.out.println(this);
-                    //System.out.println(vehicle);
-                    //System.out.println(x);
-                    //System.out.println(y);
                     return false;
                 }
             }
@@ -866,6 +865,7 @@ public class DriverAgent implements Steppable, Driver {
         // Current Vehicle position and velocity;
         updateState(ac);
 
+        /*
         // get a new destination if needed
         if (nextIntersection == null
             || nextDirective == Driver.Directive.MERGE_LEFT
@@ -958,6 +958,20 @@ public class DriverAgent implements Steppable, Driver {
         if (nextDirective != Driver.Directive.MERGE_RIGHT
             && nextDirective != Driver.Directive.MERGE_LEFT) {
             if (maxSafeSpeed < desiredSpeed) {
+                desiredSpeed = maxSafeSpeed;
+            }
+        }
+        */
+        desiredSpeed = maxSpeed;
+        nextDirective = Driver.Directive.MOVE_FORWARD;
+        maxSafeSpeed = getSafeSpeed(ac);
+        if (maxSafeSpeed < desiredSpeed && location.x > maxSpeed) {
+            desiredSpeed = maxSafeSpeed + 1;
+            if (safeMerge(direction.onLeft())) {
+                nextDirective = Driver.Directive.MERGE_LEFT;
+            } else if (safeMerge(direction.onRight())) {
+                nextDirective = Driver.Directive.MERGE_RIGHT;
+            } else {
                 desiredSpeed = maxSafeSpeed;
             }
         }
