@@ -98,7 +98,7 @@ public class AgentCityWithUI extends GUIState {
         ac.console = (Console)c;
 
         // test comment for branching issue
-        display = new Display2D(1600, 16, this);
+        display = new Display2D(4*1024, 4*2, this);
         displayFrame = display.createFrame();
         c.registerFrame(displayFrame);
         displayFrame.setVisible(true);

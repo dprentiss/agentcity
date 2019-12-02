@@ -976,12 +976,25 @@ public class DriverAgent implements Steppable, Driver {
         nextDirective = Driver.Directive.MOVE_FORWARD;
         maxSafeSpeed = getSafeSpeed(ac);
         desiredSpeed = maxSafeSpeed;
-        if (location.x > 40) {
+        if (location.x > ac.onRampStart) {
             desiredSpeed = maxSafeSpeed + 1 < maxSpeed ? maxSafeSpeed + 1 : maxSpeed;
             if (safeMerge(direction.onRight())) {
                 nextDirective = Driver.Directive.MERGE_RIGHT;
             } else {
                 desiredSpeed = maxSafeSpeed;
+            }
+        }
+        if (nextDirective == Driver.Directive.MOVE_FORWARD) {
+            if (desiredSpeed > 0) {
+                if (speed > 0) {
+                    if (ac.random.nextFloat() < 0.2) {
+                        desiredSpeed--;
+                    }
+                } else {
+                    if (ac.random.nextFloat() < 0.4) {
+                        desiredSpeed--;
+                    }
+                }
             }
         }
     }

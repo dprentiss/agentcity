@@ -29,6 +29,10 @@ public class AgentCity extends SimState {
     public static final int TRIPGEN_SCHEDULE_NUM = 5;
     public static final int REPORT_SCHEDULE_NUM = 6;
 
+    // Units;
+    public static final double METERS_PER_CELL = 7.5;
+    public static final double SECONDS_PER_STEP = 1;
+
     // Utility
     public static final boolean LANE_POLICY = true;
     public static final boolean SMART_TURNS = true;
@@ -36,7 +40,7 @@ public class AgentCity extends SimState {
     public static final boolean RESERVATION_PRIORITY = true;
     public static final boolean PASSENGER_WARM_START = true;
     public static final boolean CONSOLE_OUT = true;
-    public static final boolean FILE_OUT = false;
+    public static final boolean FILE_OUT = true;
     public static final int MAX_SPEED = 5;
     private final boolean checkForCollisions;
     private final boolean isTest;
@@ -51,6 +55,7 @@ public class AgentCity extends SimState {
     public int density;
     public int gridHeight;
     public int gridWidth;
+    public int onRampStart;
 
     // Intersection turning movements
     /*
@@ -138,6 +143,8 @@ public class AgentCity extends SimState {
             .append("{\"AgentCity\": {")
             .append("\"step\": " + step)
             .append(", ")
+            .append("\"timeMins\": " + step * SECONDS_PER_STEP / 60)
+            .append(", ")
             .append("\"numTravelers\": " + (travelers==null ? "null" : travelers.numObjs))
             .append("}},\n")
             .toString();
@@ -148,7 +155,7 @@ public class AgentCity extends SimState {
         travelers = new Bag();
 
         if(isTest) {
-            makeTestGrids(2, 200);
+            makeTestGrids(2, 1024);
         }
 
         System.out.println(filename);
@@ -228,22 +235,41 @@ public class AgentCity extends SimState {
     }
 
     public void makeTestGrids(int numLanes, int width) {
+        int detectorInterval = 60;
+        int downStreamLength = 10;
+        int onRampLengthMeters = 1000;
+        int onRampLength = (int)(onRampLengthMeters / METERS_PER_CELL);
+        int onRampEnd;
+        int onRampCenter;
 
         gridHeight = numLanes;
         gridWidth = width;
+        onRampEnd = width - downStreamLength;
+        onRampStart = onRampEnd - onRampLength;
+        onRampCenter = onRampStart + onRampLength / 2;
+
 
         int numIntersections = 0;
 
         roadGrid = new IntGrid2D(gridWidth, gridHeight, Direction.EAST.toInt());
         agentGrid = new SparseGrid2D(gridWidth, gridHeight);
 
-        // make a temporary detector
-        Detector tmpDetector = new Detector(this, 0, new Int2D(20,1), 2);
-        tmpDetector.stopper =
-            schedule.scheduleRepeating(tmpDetector, DETECTOR_SCHEDULE_NUM, 1);
+        // make a temporary detectors
+        Int2D detectorLocation;
+        int[] detectorOffsets = new int[] {1000, 3000, 5000, 7000};
+        for (int i = 0; i < detectorOffsets.length; i++) {
+            detectorLocation =
+                new Int2D(onRampCenter - (int)(detectorOffsets[i] / METERS_PER_CELL), 1);
+            Detector tmpDetector = new Detector(this, i, detectorLocation, 2,
+                                                detectorInterval);
+            tmpDetector.stopper =
+                schedule.scheduleRepeating(tmpDetector,
+                                           DETECTOR_SCHEDULE_NUM, 1);
+            System.out.println(detectorLocation);
+        }
 
         // make an obstacle
-        roadGrid.field[174][0] = 0;
+        roadGrid.field[onRampEnd][0] = 0;
 
         // make some vehicles
         /*
@@ -262,11 +288,16 @@ public class AgentCity extends SimState {
             schedule.scheduleRepeating(newDriver, DRIVER_SCHEDULE_NUM, 1);
         */
         VehicleGenerator testGen1 =
-            new VehicleGenerator(0, new Int2D(0,0), 0.2, Direction.EAST, 3);
+            new VehicleGenerator(0, new Int2D(0,0), 0.15, Direction.EAST,
+                                 //random.nextInt(MAX_SPEED) + 1);
+                                 3);
         testGen1.stopper =
             schedule.scheduleRepeating(testGen1, TRIPGEN_SCHEDULE_NUM, 1);
         VehicleGenerator testGen2 =
-            new VehicleGenerator(0, new Int2D(0,1), 0.8, Direction.EAST, 3);
+            new VehicleGenerator(2, new Int2D(0,1), 0.3, Direction.EAST,
+                                 //random.nextInt(MAX_SPEED) + 1);
+                                 3,
+                                 0.00006);
         testGen2.stopper =
             schedule.scheduleRepeating(testGen2, TRIPGEN_SCHEDULE_NUM, 1);
     }

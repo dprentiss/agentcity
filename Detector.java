@@ -48,6 +48,8 @@ public class Detector implements Steppable {
     private int[] distanceHeadways;
     private double[] flow;
     private double[] density;
+    private double totalFlow;
+    private double totalDensity;
 
     @Override
     public String toString() {
@@ -60,6 +62,12 @@ public class Detector implements Steppable {
             .append("\"orientation\": \"" + orientation + "\"")
             .append(", ")
             .append("\"step\": " + step)
+            .append(", ")
+            .append("\"timeMins\": " + step * AgentCity.SECONDS_PER_STEP / 60)
+            .append(", ")
+            .append(String.format("\"totalFlow\": %.0f", totalFlow))
+            .append(", ")
+            .append(String.format("\"totalDensity\": %.2f", totalDensity))
             .append(", ")
             .append("\"lanes\": [")
             .append("\n");
@@ -171,6 +179,8 @@ public class Detector implements Steppable {
         }
         buffer.clear();
 
+        totalDensity = 0;
+        totalFlow = 0;
         if ((int)step % INTERVAL == 0) {
             for (int i = 0; i < numLanes; i++) {
                 flow[i] =
@@ -179,6 +189,8 @@ public class Detector implements Steppable {
                 density[i] =
                     (double)(vehicleCount[i] - previousCount[i])
                     / distanceHeadways[i] / 7.5 * 1000;
+                totalFlow += flow[i];
+                totalDensity += density[i];
                 previousCount[i] = vehicleCount[i];
                 distanceHeadways[i] = 1;
             }

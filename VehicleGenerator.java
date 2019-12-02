@@ -25,6 +25,7 @@ public class VehicleGenerator implements Steppable {
     public final Int2D cell;
     public final Direction direction;
     public final int speed;
+    public final double rampRate;
 
     // Variables
     private final double mean;
@@ -79,26 +80,35 @@ public class VehicleGenerator implements Steppable {
      * @param id (required) int label for this class. Should be unique but
      * uniqueness is not checked.
      */
-    public VehicleGenerator(int id, Int2D cell, double mean, Direction direction) {
+    public VehicleGenerator(int id, Int2D cell, double mean,
+                            Direction direction) {
         this.idNum = id;
         this.cell = cell;
         this.mean = mean;
         this.direction = direction;
         this.speed = 0;
+        this.rampRate = 0;
     }
 
-    public VehicleGenerator(int id, Int2D cell, double mean, Direction direction, int speed) {
+    public VehicleGenerator(int id, Int2D cell, double mean,
+                            Direction direction, int speed) {
+        this(id, cell, mean, direction, speed, 0);
+    }
+
+    public VehicleGenerator(int id, Int2D cell, double mean,
+                            Direction direction, int speed, double rampRate) {
         this.idNum = id;
         this.cell = cell;
         this.mean = mean;
         this.direction = direction;
         this.speed = speed;
+        this.rampRate = rampRate;
     }
 
     public void step(final SimState state) {
         AgentCity ac = (AgentCity)state;
         step = ac.schedule.getSteps();
-        if (ac.random.nextFloat() < mean
+        if (ac.random.nextFloat() < mean + step * rampRate
             && ac.agentGrid.getObjectsAtLocation(cell) == null) {
             Vehicle newVehicle = new Vehicle((int)step*10 + cell.y, direction, speed);
             ac.agentGrid.setObjectLocation(newVehicle, cell);
