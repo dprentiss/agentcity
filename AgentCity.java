@@ -125,7 +125,7 @@ public class AgentCity extends SimState {
             DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
             .withZone(ZoneId.systemDefault());
         String dateTimeString = formatter.format(Instant.now());
-        filename = String.format("%s-%d.csv",
+        filename = String.format("%s-%d.json",
                                  dateTimeString,
                                  seed);
         if (FILE_OUT) {
@@ -169,7 +169,9 @@ public class AgentCity extends SimState {
                             System.out.print(ac);
                         }
                     }
-                    if (FILE_OUT) { ac.fileout.print(ac); }
+                    if (FILE_OUT) {
+                        //ac.fileout.print(ac);
+                    }
                 }
             };
 
@@ -265,7 +267,6 @@ public class AgentCity extends SimState {
             tmpDetector.stopper =
                 schedule.scheduleRepeating(tmpDetector,
                                            DETECTOR_SCHEDULE_NUM, 1);
-            System.out.println(detectorLocation);
         }
 
         // make an obstacle
@@ -304,9 +305,9 @@ public class AgentCity extends SimState {
 
     /** Main */
     public static void main(String[] args) {
-        //long seed = System.currentTimeMillis();
+        long seed = System.currentTimeMillis();
         //long seed = 1324367672;
-        long seed = 1324367673;
+        //long seed = 1324367673;
 
         SimState state = new AgentCity(seed);
         state.start();

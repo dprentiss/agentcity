@@ -57,8 +57,8 @@ public class Detector implements Steppable {
         s.append("{\"Detector\": {")
             .append("\"idNum\": " + idNum)
             .append(", ")
-            .append("\"cell\": " + cell)
-            .append(", ")
+            //.append("\"cell\": " + cell)
+            //.append(", ")
             .append("\"orientation\": \"" + orientation + "\"")
             .append(", ")
             .append("\"step\": " + step)
@@ -75,8 +75,8 @@ public class Detector implements Steppable {
             s.append("\t{")
                 .append("\"laneNum\": " + i)
                 .append(", ")
-                .append("\"cell: " + cells[i][0])
-                .append(", ")
+                //.append("\"cell\": " + cells[i][0])
+                //.append(", ")
                 .append(String.format("\"flow\": %.0f", flow[i]))
                 .append(", ")
                 .append(String.format("\"density\": %.2f", density[i]))
@@ -194,7 +194,12 @@ public class Detector implements Steppable {
                 previousCount[i] = vehicleCount[i];
                 distanceHeadways[i] = 1;
             }
-            System.out.print(this);
+            if (ac.CONSOLE_OUT) {
+                System.out.print(this);
+            }
+            if (ac.FILE_OUT) {
+                ac.fileout.print(this);
+            }
         }
     }
 }
