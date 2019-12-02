@@ -15,16 +15,19 @@ public class Detector implements Steppable {
     // Stopper
     Stoppable stopper;
 
+
     // Properties
     public final int idNum;
-    public final int minX;
-    public final int maxX;
-    public final int minY;
-    public final int maxY;
+    public final Int2D cell;
+    public final int INTERVAL;
+    public final int numLanes;
+    public final Direction direction;
+    public final String orientation;
+    public final int maxSpeed;
+    public final int[] laneIdx;
 
     // Variables
     AgentCity ac;
-    Direction direction;
     long step;
     int stepIdx;
     int nextIdx;
@@ -35,51 +38,129 @@ public class Detector implements Steppable {
     Bag buffer = new Bag();
     private int width;
     private int height;
-    private Int2D[] cells;
+    private Int2D[][] cells;
 
-    // Accessors
+    private int[] vehicleCount;
+    private int[] previousCount;
+    private int[] previousSpeed;
+    private long[] previousTime;
+    private int distanceHeadway;
+    private int[] distanceHeadways;
+    private double[] flow;
+    private double[] density;
+
+    @Override
+    public String toString() {
+        StringBuilder s = new StringBuilder();
+        s.append("{\"Detector\": {")
+            .append("\"idNum\": " + idNum)
+            .append(", ")
+            .append("\"cell\": " + cell)
+            .append(", ")
+            .append("\"orientation\": \"" + orientation + "\"")
+            .append(", ")
+            .append("\"step\": " + step)
+            .append(", ")
+            .append("\"lanes\": [")
+            .append("\n");
+        for (int i = 0; i < numLanes; i++) {
+            s.append("\t{")
+                .append("\"laneNum\": " + i)
+                .append(", ")
+                .append("\"cell: " + cells[i][0])
+                .append(", ")
+                .append(String.format("\"flow\": %.0f", flow[i]))
+                .append(", ")
+                .append(String.format("\"density\": %.2f", density[i]))
+                .append("}");
+            if (i < numLanes - 1) {
+                s.append(", \n");
+            } else {
+                s.append("]");
+            }
+        }
+        s.append("}},\n");
+
+        return s.toString();
+    }
 
     /** Constructor */
-    public Detector(int id, int minX, int maxX, int minY, int maxY) {
+    public Detector(AgentCity ac, int id, Int2D cell, int numLanes, int
+                    interval) {
         idNum = id;
-        this.minX = minX;
-        this.maxX = maxX;
-        this.minY = minY;
-        this.maxY = maxY;
+        this.cell = cell;
+        INTERVAL = interval;
+        this.numLanes = numLanes;
+        maxSpeed = AgentCity.MAX_SPEED;
+        laneIdx = new int[numLanes];
+        cells = new Int2D[numLanes][maxSpeed];
+        vehicleCount = new int[numLanes];
+        previousCount = new int[numLanes];
+        previousSpeed = new int[numLanes];
+        previousTime = new long[numLanes];
+        distanceHeadway = 1;
+        distanceHeadways = new int[numLanes];
+        flow = new double[numLanes];
+        density = new double[numLanes];
+        direction = Direction.byInt(ac.roadGrid.get(cell.x, cell.y));
+        if (direction == Direction.EAST || direction == Direction.WEST) {
+            orientation = "x";
+        } else {
+            orientation = "y";
+        }
 
-        this.width = maxX - minX + 1;
-        this.height = maxY - minY + 1;
+        int x = 0;
+        int y = 0;
 
-        cells = new Int2D[this.width * this.height];
-        int i = 0;
-        for (int j = 0; j < this.width; j++) {
-            for (int k = 0; k < this.height; k++) {
-                cells[i] = new Int2D(j + minX, k + minY);
-                i++;
+        for (int i = 0; i < numLanes; i++) {
+            laneIdx[i] = cell.y
+                + i * direction.onLeft().getXOffset()
+                + i * direction.onLeft().getYOffset();
+            vehicleCount[i] = 0;
+            previousCount[i] = 0;
+            previousSpeed[i] = 0;
+            previousTime[i] = 0;
+            distanceHeadways[i] = 1;
+            flow[i] = 0;
+            density[i] = 0;
+            for (int j = 0; j < maxSpeed; j++) {
+                x = cell.x + i * direction.onLeft().getXOffset()
+                    + j * direction.getXOffset();
+                y = cell.y + i * direction.onLeft().getYOffset()
+                    + j * direction.getYOffset();
+                cells[i][j] = new Int2D(x, y);
             }
         }
     }
 
     /** Constructor */
-    /*
-    public Detector(int id, Int2D cell, int numLanes) {
-        direction = Direction.byInt(ac.roadGrid.get(cell.x, cell.y));
+    public Detector(AgentCity ac, int id, Int2D cell, int numLanes) {
+        this(ac, id, cell, numLanes, 600);
     }
-    */
 
     public void step(final SimState state) {
         ac = (AgentCity)state;
+        step = ac.schedule.getSteps();
 
-        for (int i = 0; i < cells.length; i++) {
-            b = ac.agentGrid.getObjectsAtLocation(cells[i]);
-            if (b == null) { continue; }
-            vehicle = (Vehicle)b.objs[0];
-            buffer.add(vehicle);
-            if (vehicles.contains(vehicle)) continue;
-            vehicles.add(vehicle);
-            System.out.print(vehicle);
+
+        for (int i = 0; i < numLanes; i++) {
+            for (int j = 0; j < maxSpeed; j++) {
+                // get Vehicle at cell
+                b = ac.agentGrid.getObjectsAtLocation(cells[i][j]);
+                if (b == null) { continue; } // skip empty cells
+                vehicle = (Vehicle)b.objs[0];
+                buffer.add(vehicle); // add Vehicle to buffer
+                if (vehicles.contains(vehicle)) continue;
+                // if Vehicle not already counted
+                vehicles.add(vehicle);
+                vehicleCount[i]++;
+                distanceHeadway =
+                    previousSpeed[i] * (int)(step - previousTime[i]);
+                distanceHeadways[i] += distanceHeadway;
+                previousTime[i] = step;
+                previousSpeed[i] = vehicle.getSpeed();
+            }
         }
-        //System.out.println(vehicles.numObjs);
         int j = 0;
         while (j < vehicles.numObjs) {
             if (buffer.contains(vehicles.objs[j])) {
@@ -89,5 +170,19 @@ public class Detector implements Steppable {
             }
         }
         buffer.clear();
+
+        if ((int)step % INTERVAL == 0) {
+            for (int i = 0; i < numLanes; i++) {
+                flow[i] =
+                    (double)(vehicleCount[i] - previousCount[i])
+                    / INTERVAL * 3600;
+                density[i] =
+                    (double)(vehicleCount[i] - previousCount[i])
+                    / distanceHeadways[i] / 7.5 * 1000;
+                previousCount[i] = vehicleCount[i];
+                distanceHeadways[i] = 1;
+            }
+            System.out.print(this);
+        }
     }
 }

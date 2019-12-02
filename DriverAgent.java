@@ -835,7 +835,7 @@ public class DriverAgent implements Steppable, Driver {
     }
 
     boolean safeMerge(Direction dir) {
-        Vehicle vehicle;
+        Vehicle otherVehicle;
         int speed = (this.speed < desiredSpeed ? this.speed + 1 : desiredSpeed);
         int x = location.x + speed * direction.getXOffset() + dir.getXOffset();
         int y = location.y + speed * direction.getYOffset() + dir.getYOffset();
@@ -847,9 +847,20 @@ public class DriverAgent implements Steppable, Driver {
         }
         for (int i = 0; i < maxSpeed + 1; i++) {
             if (ac.agentGrid.numObjectsAtLocation(x, y) > 0) {
-                vehicle =
+                otherVehicle =
                     (Vehicle)ac.agentGrid.getObjectsAtLocation(x, y).objs[0];
-                if (vehicle.getSpeed() >= i - 1) {
+                DriverAgent driver = (DriverAgent)otherVehicle.getDriver();
+                /*
+                if (otherVehicle.idNum == 146620) {
+                    driver.updateState(ac);
+                    System.out.print(this);
+                    System.out.print(driver);
+                    System.out.println(driver.getSafeSpeed(ac));
+                }
+                */
+                driver.updateState(ac);
+                if (otherVehicle.getSpeed() >= i - 1
+                    && (otherVehicle.getSpeed() < i + 2 || driver.getSafeSpeed(ac) < i + 2)) {
                     return false;
                 }
             }
@@ -962,14 +973,12 @@ public class DriverAgent implements Steppable, Driver {
             }
         }
         */
-        desiredSpeed = maxSpeed;
         nextDirective = Driver.Directive.MOVE_FORWARD;
         maxSafeSpeed = getSafeSpeed(ac);
-        if (maxSafeSpeed < desiredSpeed && location.x > maxSpeed) {
-            desiredSpeed = maxSafeSpeed + 1;
-            if (safeMerge(direction.onLeft())) {
-                nextDirective = Driver.Directive.MERGE_LEFT;
-            } else if (safeMerge(direction.onRight())) {
+        desiredSpeed = maxSafeSpeed;
+        if (location.x > 40) {
+            desiredSpeed = maxSafeSpeed + 1 < maxSpeed ? maxSafeSpeed + 1 : maxSpeed;
+            if (safeMerge(direction.onRight())) {
                 nextDirective = Driver.Directive.MERGE_RIGHT;
             } else {
                 desiredSpeed = maxSafeSpeed;

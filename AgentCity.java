@@ -238,12 +238,12 @@ public class AgentCity extends SimState {
         agentGrid = new SparseGrid2D(gridWidth, gridHeight);
 
         // make a temporary detector
-        Detector tmpDetector = new Detector(0, 100, 102, 0, 1);
+        Detector tmpDetector = new Detector(this, 0, new Int2D(20,1), 2);
         tmpDetector.stopper =
             schedule.scheduleRepeating(tmpDetector, DETECTOR_SCHEDULE_NUM, 1);
 
         // make an obstacle
-        roadGrid.field[105][0] = 0;
+        roadGrid.field[174][0] = 0;
 
         // make some vehicles
         /*
@@ -262,11 +262,11 @@ public class AgentCity extends SimState {
             schedule.scheduleRepeating(newDriver, DRIVER_SCHEDULE_NUM, 1);
         */
         VehicleGenerator testGen1 =
-            new VehicleGenerator(0, new Int2D(0,0), 0.4, Direction.EAST, MAX_SPEED);
+            new VehicleGenerator(0, new Int2D(0,0), 0.2, Direction.EAST, 3);
         testGen1.stopper =
             schedule.scheduleRepeating(testGen1, TRIPGEN_SCHEDULE_NUM, 1);
         VehicleGenerator testGen2 =
-            new VehicleGenerator(0, new Int2D(0,1), 0.4, Direction.EAST, MAX_SPEED);
+            new VehicleGenerator(0, new Int2D(0,1), 0.8, Direction.EAST, 3);
         testGen2.stopper =
             schedule.scheduleRepeating(testGen2, TRIPGEN_SCHEDULE_NUM, 1);
     }
