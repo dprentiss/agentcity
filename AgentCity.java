@@ -38,13 +38,20 @@ public class AgentCity extends SimState {
     public static final boolean CONSOLE_OUT = true;
     public static final boolean FILE_OUT = false;
     public static final int MAX_SPEED = 2;
+    public static final int REPORT_INTERVAL = 600;
+    public static final int PASSENGER_POLLING_INTERVAL = 600;
+    public static final double SECONDS_PER_STEP = 1;
+    public static final double METERS_PER_CELL = 7.5;
     private final boolean checkForCollisions;
     private final boolean isTest;
-    private long step;
     private final String filename;
-    FileWriter fw;
-    BufferedWriter bw;
+    private FileWriter fw;
+    private BufferedWriter bw;
     public PrintWriter fileout;
+
+    // Variables
+    private int numVehicles;
+    private long step;
 
     // Grid dimensions
     public int grids;
@@ -91,7 +98,6 @@ public class AgentCity extends SimState {
     // Travelers
     private Bag travelers;
     public boolean removeTraveler(Person person) {
-        //travelersInVehicle.remove(person);
         return travelers.remove(person);
     }
     public boolean addTraveler(Person person) {
@@ -138,6 +144,10 @@ public class AgentCity extends SimState {
             .append("{\"AgentCity\": {")
             .append("\"step\": " + step)
             .append(", ")
+            .append("\"timeMins\": " + step * SECONDS_PER_STEP / 60)
+            .append(", ")
+            .append("\"numVehicles\": " + numVehicles)
+            .append(", ")
             .append("\"numTravelers\": " + (travelers==null ? "null" : travelers.numObjs))
             .append("}},\n")
             .toString();
@@ -158,7 +168,7 @@ public class AgentCity extends SimState {
                     AgentCity ac = (AgentCity)state;
                     step = schedule.getSteps();
                     if (CONSOLE_OUT) {
-                        if (step % 60 == 0) {
+                        if (step % REPORT_INTERVAL == 0) {
                             System.out.print(ac);
                         }
                     }
@@ -233,6 +243,7 @@ public class AgentCity extends SimState {
         int vehicleDensity = density;
 
         final int NUM_VEHICLES = n * n * vehicleDensity;
+        numVehicles = NUM_VEHICLES;
         gridHeight = n * 38 + 2;
         gridWidth = gridHeight;
 

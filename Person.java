@@ -81,8 +81,7 @@ public class Person implements Steppable, VehicleClient {
             .append(", ")
             .append("\"stepsTraveling\": " + stepsTraveling)
             .append(", ")
-            .append("\"firstStep\": " + firstStep)
-            .append(", ")
+            .append("\"firstStep\": " + firstStep) .append(", ")
             .append("\"lastStep\": " + lastStep)
             .append("}},\n")
             .toString();
@@ -131,9 +130,11 @@ public class Person implements Steppable, VehicleClient {
                     lastStep = ac.schedule.getSteps();
                 }
                 if (ac.removeTraveler(this)) {
+                    this.stopper.stop();
+                }
+                if (origin != null) {
                     //if (ac.CONSOLE_OUT) { System.out.print(this); }
                     if (ac.FILE_OUT) { ac.fileout.print(this); }
-                    this.stopper.stop();
                 }
             }
         }
