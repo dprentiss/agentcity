@@ -29,12 +29,14 @@ public class AgentCity extends SimState {
     public static final int TRIPGEN_SCHEDULE_NUM = 5;
     public static final int REPORT_SCHEDULE_NUM = 6;
 
-    // Utility
-    public static final boolean LANE_POLICY = true;
+    // Simulation constants
+    public static final double TRIPGEN_RATE = 0.02;
+    public static final boolean LANE_POLICY = false;
     public static final boolean SMART_TURNS = true;
     public static final boolean AVOID_CONGESTION = true;
     public static final boolean RESERVATION_PRIORITY = true;
     public static final boolean PASSENGER_WARM_START = true;
+    public static final double WARM_START_RATE = 0.5;
     public static final boolean CONSOLE_OUT = true;
     public static final boolean FILE_OUT = false;
     public static final int MAX_SPEED = 2;
@@ -42,7 +44,9 @@ public class AgentCity extends SimState {
     public static final int PASSENGER_POLLING_INTERVAL = 600;
     public static final double SECONDS_PER_STEP = 1;
     public static final double METERS_PER_CELL = 7.5;
-    private final boolean checkForCollisions;
+
+    // Utility
+    private final boolean CHECK_FOR_COLLISIONS = false;
     private final boolean isTest;
     private final String filename;
     private FileWriter fw;
@@ -111,7 +115,7 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 2, 128);
+        this(seed, 16, 128);
     }
 
     /** Constructor */
@@ -119,7 +123,6 @@ public class AgentCity extends SimState {
         // Required by SimState
         super(seed);
         isTest = true;
-        checkForCollisions = true;
         this.grids = grids;
         this.density = density;
         DateTimeFormatter formatter =
@@ -199,7 +202,7 @@ public class AgentCity extends SimState {
                 }
             };
 
-        if (checkForCollisions) {
+        if (CHECK_FOR_COLLISIONS) {
             schedule.scheduleRepeating(collisionCheck,
                                        COLLISION_SCHEDULE_NUM, 1);
         }
@@ -334,7 +337,7 @@ public class AgentCity extends SimState {
                 schedule.scheduleRepeating(intersectionAgents[i],
                                            INTERSECTION_SCHEDULE_NUM, 1);
             TripGenerator gen =
-                new TripGenerator(i, intersections[i], 0.02, random);
+                new TripGenerator(i, intersections[i], TRIPGEN_RATE, random);
             gen.stopper =
                 schedule.scheduleRepeating(gen, TRIPGEN_SCHEDULE_NUM, 1);
         }
@@ -367,7 +370,7 @@ public class AgentCity extends SimState {
             newDriver.stopper =
                 schedule.scheduleRepeating(newDriver, DRIVER_SCHEDULE_NUM, 1);
             // add passenger if appropriate
-            if (PASSENGER_WARM_START && random.nextFloat() < 0.25) {
+            if (PASSENGER_WARM_START && random.nextFloat() < WARM_START_RATE) {
                 Intersection destination =
                     intersections[random.nextInt(intersections.length - 1) + 1];
                 Person newPerson = new Person(i, null, destination, newVehicle);
@@ -380,9 +383,9 @@ public class AgentCity extends SimState {
 
     /** Main */
     public static void main(String[] args) {
-        //long seed = System.currentTimeMillis();
+        long seed = System.currentTimeMillis();
         //long seed = 1324367672;
-        long seed = 1324367673;
+        //long seed = 1324367673;
 
         SimState state = new AgentCity(seed);
         state.start();
