@@ -40,7 +40,7 @@ public class AgentCity extends SimState {
     public static final boolean RESERVATION_PRIORITY = true;
     public static final boolean PASSENGER_WARM_START = true;
     public static final boolean CONSOLE_OUT = true;
-    public static final boolean FILE_OUT = true;
+    public static final boolean FILE_OUT = false;
     public static final int MAX_SPEED = 5;
     private final boolean checkForCollisions;
     private final boolean isTest;
@@ -289,7 +289,7 @@ public class AgentCity extends SimState {
             schedule.scheduleRepeating(newDriver, DRIVER_SCHEDULE_NUM, 1);
         */
         VehicleGenerator testGen1 =
-            new VehicleGenerator(0, new Int2D(0,0), 0.15, Direction.EAST,
+            new VehicleGenerator(0, new Int2D(0,0), 0.6, Direction.EAST,
                                  //random.nextInt(MAX_SPEED) + 1);
                                  3);
         testGen1.stopper =
