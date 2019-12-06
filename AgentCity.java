@@ -258,7 +258,7 @@ public class AgentCity extends SimState {
 
         // make a temporary detectors
         Int2D detectorLocation;
-        int[] detectorOffsets = new int[] {1000, 3000, 5000, 7000};
+        int[] detectorOffsets = new int[] {1000};
         for (int i = 0; i < detectorOffsets.length; i++) {
             detectorLocation =
                 new Int2D(onRampCenter - (int)(detectorOffsets[i] / METERS_PER_CELL), 1);
@@ -274,31 +274,17 @@ public class AgentCity extends SimState {
 
         // make some vehicles
         /*
-        // One Vehicle on a road cell in the correct direction
-        Vehicle newVehicle = new Vehicle(0, Direction.EAST);
-        agentGrid.setObjectLocation(newVehicle, 100, 0);
-        // Add Vehicle to Schedule
-        newVehicle.stopper =
-            schedule.scheduleRepeating(newVehicle, VEHICLE_SCHEDULE_NUM, 1);
-        // DriverAgent for Vehicle
-        DriverAgent newDriver = new DriverAgent(0);
-        newVehicle.setDriver(newDriver);
-        newDriver.setVehicle(newVehicle);
-        // add Driver to Schedule
-        newDriver.stopper =
-            schedule.scheduleRepeating(newDriver, DRIVER_SCHEDULE_NUM, 1);
-        */
         VehicleGenerator testGen1 =
-            new VehicleGenerator(0, new Int2D(0,0), 0.15, Direction.EAST,
+            new VehicleGenerator(1, new Int2D(0,0), 0.15, Direction.EAST,
                                  //random.nextInt(MAX_SPEED) + 1);
                                  3);
         testGen1.stopper =
             schedule.scheduleRepeating(testGen1, TRIPGEN_SCHEDULE_NUM, 1);
+        */
         VehicleGenerator testGen2 =
-            new VehicleGenerator(2, new Int2D(0,1), 0.3, Direction.EAST,
+            new VehicleGenerator(2, new Int2D(0,1), 1.0, Direction.EAST,
                                  //random.nextInt(MAX_SPEED) + 1);
-                                 3,
-                                 0.00006);
+                                 5);
         testGen2.stopper =
             schedule.scheduleRepeating(testGen2, TRIPGEN_SCHEDULE_NUM, 1);
     }

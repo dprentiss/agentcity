@@ -44,6 +44,7 @@ public class Detector implements Steppable {
     private int[] previousCount;
     private int[] previousSpeed;
     private long[] previousTime;
+    private int densityCount;
     private int distanceHeadway;
     private int[] distanceHeadways;
     private double[] flow;
@@ -106,6 +107,7 @@ public class Detector implements Steppable {
         previousCount = new int[numLanes];
         previousSpeed = new int[numLanes];
         previousTime = new long[numLanes];
+        densityCount = 0;
         distanceHeadway = 1;
         distanceHeadways = new int[numLanes];
         flow = new double[numLanes];
@@ -152,10 +154,12 @@ public class Detector implements Steppable {
 
 
         for (int i = 0; i < numLanes; i++) {
+            densityCount = 0;
             for (int j = 0; j < maxSpeed; j++) {
                 // get Vehicle at cell
                 b = ac.agentGrid.getObjectsAtLocation(cells[i][j]);
                 if (b == null) { continue; } // skip empty cells
+                densityCount += 1;
                 vehicle = (Vehicle)b.objs[0];
                 buffer.add(vehicle); // add Vehicle to buffer
                 if (vehicles.contains(vehicle)) continue;
@@ -168,6 +172,8 @@ public class Detector implements Steppable {
                 previousTime[i] = step;
                 previousSpeed[i] = vehicle.getSpeed();
             }
+            density[i]
+                += densityCount / 5.0 / INTERVAL / ac.METERS_PER_CELL * 1000;
         }
         int j = 0;
         while (j < vehicles.numObjs) {
@@ -186,19 +192,24 @@ public class Detector implements Steppable {
                 flow[i] =
                     (double)(vehicleCount[i] - previousCount[i])
                     / INTERVAL * 3600;
+                /*
                 density[i] =
                     (double)(vehicleCount[i] - previousCount[i])
                     / distanceHeadways[i] / 7.5 * 1000;
+                */
                 totalFlow += flow[i];
                 totalDensity += density[i];
                 previousCount[i] = vehicleCount[i];
-                distanceHeadways[i] = 1;
+                distanceHeadways[i] = 0;
             }
             if (ac.CONSOLE_OUT) {
                 System.out.print(this);
             }
             if (ac.FILE_OUT) {
                 ac.fileout.print(this);
+            }
+            for (int i = 0; i < numLanes; i++) {
+                density[i] = 0;
             }
         }
     }

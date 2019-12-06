@@ -53,6 +53,7 @@ public class Vehicle implements Steppable, Driveable {
     public Int2D location;
     private Direction direction;
     private int speed;
+    private float delta = 0;
 
     // Accessors
 
@@ -246,9 +247,11 @@ public class Vehicle implements Steppable, Driveable {
     public void step(final SimState state) {
         // The current simulation state
         updateState((AgentCity)state);
+        delta = (float)0.14 * ac.schedule.getSteps() / 180 / 60;
 
         // remove vehicle if near end
-        if (location.x > ac.gridWidth - MAX_SPEED - 1) {
+        if (location.x >= ac.gridWidth - MAX_SPEED
+            && ac.random.nextFloat() < 0.15 - delta) {
             ((DriverAgent)this.driver).stopper.stop();
             ac.agentGrid.remove(this);
             this.stopper.stop();
