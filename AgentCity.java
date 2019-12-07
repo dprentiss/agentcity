@@ -258,7 +258,7 @@ public class AgentCity extends SimState {
 
         // make a temporary detectors
         Int2D detectorLocation;
-        int[] detectorOffsets = new int[] {1000};
+        int[] detectorOffsets = new int[] {1000, 3000, 5000, 7000};
         for (int i = 0; i < detectorOffsets.length; i++) {
             detectorLocation =
                 new Int2D(onRampCenter - (int)(detectorOffsets[i] / METERS_PER_CELL), 1);
@@ -282,7 +282,7 @@ public class AgentCity extends SimState {
             schedule.scheduleRepeating(testGen1, TRIPGEN_SCHEDULE_NUM, 1);
         */
         VehicleGenerator testGen2 =
-            new VehicleGenerator(2, new Int2D(0,1), 1.0, Direction.EAST,
+            new VehicleGenerator(2, new Int2D(0,1), 0.8, Direction.EAST,
                                  //random.nextInt(MAX_SPEED) + 1);
                                  5);
         testGen2.stopper =

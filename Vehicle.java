@@ -247,11 +247,13 @@ public class Vehicle implements Steppable, Driveable {
     public void step(final SimState state) {
         // The current simulation state
         updateState((AgentCity)state);
-        delta = (float)0.14 * ac.schedule.getSteps() / 180 / 60;
+        long step = ac.schedule.getSteps();
+        delta = step > 1800 ? (float)0.2 * (step - 1800) / 90 / 60 : 0;
+
 
         // remove vehicle if near end
         if (location.x >= ac.gridWidth - MAX_SPEED
-            && ac.random.nextFloat() < 0.15 - delta) {
+            && ac.random.nextFloat() < delta) {
             ((DriverAgent)this.driver).stopper.stop();
             ac.agentGrid.remove(this);
             this.stopper.stop();
