@@ -987,11 +987,11 @@ public class DriverAgent implements Steppable, Driver {
         if (nextDirective == Driver.Directive.MOVE_FORWARD) {
             if (desiredSpeed > 0) {
                 if (speed > 0) {
-                    if (ac.random.nextFloat() < 0.15) {
+                    if (ac.random.nextFloat() < 0.04) {
                         desiredSpeed--;
                     }
                 } else {
-                    if (ac.random.nextFloat() < 0.3) {
+                    if (ac.random.nextFloat() < 0.08) {
                         desiredSpeed--;
                     }
                 }
