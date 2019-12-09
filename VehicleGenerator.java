@@ -8,6 +8,7 @@ import sim.util.distribution.*;
 import sim.engine.*;
 import ec.util.MersenneTwisterFast;
 import java.util.Arrays;
+import java.awt.Color;
 
 /**
  * Generates Vehicle objects at a cell with a Poisson distribution.
@@ -19,6 +20,7 @@ public class VehicleGenerator implements Steppable {
     private static final long serialVersionUID = 1;
     Stoppable stopper;
     long step;
+    Color color;
 
     // Properties
     public final int idNum;
@@ -90,12 +92,12 @@ public class VehicleGenerator implements Steppable {
         this.rampRate = 0;
     }
 
-    public VehicleGenerator(int id, Int2D cell, double mean,
+    public VehicleGenerator(int id, Color color, Int2D cell, double mean,
                             Direction direction, int speed) {
-        this(id, cell, mean, direction, speed, 0);
+        this(id, color, cell, mean, direction, speed, 0);
     }
 
-    public VehicleGenerator(int id, Int2D cell, double mean,
+    public VehicleGenerator(int id, Color color, Int2D cell, double mean,
                             Direction direction, int speed, double rampRate) {
         this.idNum = id;
         this.cell = cell;
@@ -103,6 +105,7 @@ public class VehicleGenerator implements Steppable {
         this.direction = direction;
         this.speed = speed;
         this.rampRate = rampRate;
+        this.color = color;
     }
 
     public void step(final SimState state) {
@@ -110,7 +113,7 @@ public class VehicleGenerator implements Steppable {
         step = ac.schedule.getSteps();
         if (ac.random.nextFloat() < mean + step * rampRate
             && ac.agentGrid.getObjectsAtLocation(cell) == null) {
-            Vehicle newVehicle = new Vehicle((int)step*10 + cell.y, direction, speed);
+            Vehicle newVehicle = new Vehicle(color, (int)step*10 + cell.y, direction, speed, ac);
             ac.agentGrid.setObjectLocation(newVehicle, cell);
             newVehicle.stopper =
                 ac.schedule.scheduleRepeating(newVehicle, ac.VEHICLE_SCHEDULE_NUM, 1);

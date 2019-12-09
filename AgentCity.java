@@ -13,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.io.*;
+import java.awt.Color;
 
 public class AgentCity extends SimState {
 
@@ -262,7 +263,7 @@ public class AgentCity extends SimState {
         for (int i = 0; i < detectorOffsets.length; i++) {
             detectorLocation =
                 new Int2D(onRampCenter - (int)(detectorOffsets[i] / METERS_PER_CELL), 1);
-            Detector tmpDetector = new Detector(this, i, detectorLocation, 1,
+            Detector tmpDetector = new Detector(this, i, detectorLocation, 2,
                                                 detectorInterval);
             tmpDetector.stopper =
                 schedule.scheduleRepeating(tmpDetector,
@@ -289,13 +290,13 @@ public class AgentCity extends SimState {
             schedule.scheduleRepeating(newDriver, DRIVER_SCHEDULE_NUM, 1);
         */
         VehicleGenerator testGen1 =
-            new VehicleGenerator(0, new Int2D(0,0), 0.3, Direction.EAST,
+            new VehicleGenerator(0, new Color(0, 0, 255), new Int2D(0,0), 0.3, Direction.EAST,
                                  //random.nextInt(MAX_SPEED) + 1);
                                  5);
         testGen1.stopper =
             schedule.scheduleRepeating(testGen1, TRIPGEN_SCHEDULE_NUM, 1);
         VehicleGenerator testGen2 =
-            new VehicleGenerator(2, new Int2D(0,1), 0.3, Direction.EAST,
+            new VehicleGenerator(2, new Color(0, 255, 0), new Int2D(0,1), 0.3, Direction.EAST,
                                  //random.nextInt(MAX_SPEED) + 1);
                                  5,
                                  0.00006);

@@ -5,11 +5,14 @@
 package sim.app.agentcity;
 import sim.util.*;
 import sim.engine.*;
+import java.awt.*;
 
 /**
  * @author David Prentiss
  */
 public class Vehicle implements Steppable, Driveable {
+
+    public Color color;
 
     // MASON
     private static final long serialVersionUID = 1;
@@ -169,8 +172,8 @@ public class Vehicle implements Steppable, Driveable {
         this(id, 1, 1, dir, 0);
     }
 
-    public Vehicle(int id, Direction dir, int speed) {
-        this(id, 1, 1, dir, speed);
+    public Vehicle(Color color, int id, Direction dir, int speed, AgentCity ac) {
+        this(color, id, 1, 1, dir, speed, ac);
     }
 
     /** Creates a Vehicle object with the given ID number, passenger capacity
@@ -195,6 +198,17 @@ public class Vehicle implements Steppable, Driveable {
         manifest = new Bag(passengerCap);
         direction = dir;
         this.speed = speed;
+    }
+
+    private Vehicle(Color color, int id, final int len, final int cap, Direction dir,
+                    int speed, AgentCity ac) {
+        idNum = id;
+        length = len;
+        passengerCap = cap;
+        manifest = new Bag(passengerCap);
+        direction = dir;
+        this.speed = speed;
+        this.color = color;
     }
 
     /** Set the location of this Vehicle on the grid in provided state at the

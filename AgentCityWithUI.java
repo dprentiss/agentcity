@@ -54,18 +54,13 @@ public class AgentCityWithUI extends GUIState {
                 new sim.portrayal.simple.OvalPortrayal2D(Color.red));
         Bag vehicles = ac.agentGrid.getAllObjects();
         //if (ac.LANE_POLICY) {
-        if (false) {
+        if (true) {
             Color newColor = new Color(0, 255, 0);
             agentPortrayal.setPortrayalForAll(new sim.portrayal.simple.OvalPortrayal2D()
                 {
                     public void draw(Object object, Graphics2D graphics, DrawInfo2D info)
                     {
-                        Vehicle vehicle = (Vehicle)object;
-                        if (vehicle.hasPassengers) {
-                            paint = new Color(0, 0, 255);
-                        } else {
-                            paint = new Color(0, 255, 0);
-                        }
+                        paint = ((Vehicle)object).color;
                         super.draw(object, graphics, info);
                     }
                 });
