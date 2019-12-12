@@ -17,6 +17,8 @@ public class Detector implements Steppable {
 
 
     // Properties
+    //static final boolean FILE_OUT = AgentCity.FILE_OUT;
+    static final boolean FILE_OUT = false;
     public final int idNum;
     public final Int2D cell;
     public final int INTERVAL;
@@ -205,7 +207,7 @@ public class Detector implements Steppable {
             if (ac.CONSOLE_OUT) {
                 System.out.print(this);
             }
-            if (ac.FILE_OUT) {
+            if (FILE_OUT) {
                 ac.fileout.print(this);
             }
             for (int i = 0; i < numLanes; i++) {

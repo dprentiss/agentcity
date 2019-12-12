@@ -41,7 +41,7 @@ public class AgentCity extends SimState {
     public static final boolean RESERVATION_PRIORITY = true;
     public static final boolean PASSENGER_WARM_START = true;
     public static final boolean CONSOLE_OUT = true;
-    public static final boolean FILE_OUT = false;
+    public static final boolean FILE_OUT = true;
     public static final int MAX_SPEED = 5;
     private final boolean checkForCollisions;
     private final boolean isTest;
@@ -126,9 +126,8 @@ public class AgentCity extends SimState {
             DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
             .withZone(ZoneId.systemDefault());
         String dateTimeString = formatter.format(Instant.now());
-        filename = String.format("%s-%d.json",
-                                 dateTimeString,
-                                 seed);
+        //filename = String.format("%s-%d.json", dateTimeString, seed);
+        filename = String.format("%s-%d.csv", dateTimeString, seed);
         if (FILE_OUT) {
             try {
                 fw = new FileWriter(filename, true);

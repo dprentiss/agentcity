@@ -13,6 +13,8 @@ import java.awt.*;
 public class Vehicle implements Steppable, Driveable {
 
     public Color color;
+    //static final boolean FILE_OUT = false;
+    static final boolean FILE_OUT = AgentCity.FILE_OUT;
 
     // MASON
     private static final long serialVersionUID = 1;
@@ -352,6 +354,14 @@ public class Vehicle implements Steppable, Driveable {
                             );
             }
             break;
+        }
+        if (FILE_OUT) {
+            ac.fileout.printf("%d,%d,%d,%d,%d\n",
+                              idNum,
+                              ac.schedule.getSteps(),
+                              location.x,
+                              location.y,
+                              speed);
         }
     }
 }
