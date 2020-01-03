@@ -40,8 +40,8 @@ public class AgentCity extends SimState {
     public static final boolean CONSOLE_OUT = true;
     public static final boolean FILE_OUT = false;
     public static final int MAX_SPEED = 2;
-    public static final int REPORT_INTERVAL = 600;
-    public static final int PASSENGER_POLLING_INTERVAL = 600;
+    public static final int REPORT_INTERVAL = 300;
+    //public static final int PASSENGER_POLLING_INTERVAL = 600;
     public static final double SECONDS_PER_STEP = 1;
     public static final double METERS_PER_CELL = 7.5;
 
@@ -56,6 +56,10 @@ public class AgentCity extends SimState {
     // Variables
     private int numVehicles;
     private long step;
+    private int tripsCompleted = 0;
+    private int tripsCompletedTmp = 0;
+    private int passengerSteps = 0;
+    private int passengerStepsTmp = 0;
 
     // Grid dimensions
     public int grids;
@@ -115,7 +119,7 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 16, 128);
+        this(seed, 4, 64);
     }
 
     /** Constructor */
@@ -143,17 +147,51 @@ public class AgentCity extends SimState {
 
     @Override
     public String toString() {
-        return new StringBuilder()
-            .append("{\"AgentCity\": {")
+        int trips = printAverageTrips();
+        int steps = printAverageSteps();
+        int stepsPerTrip = (trips > 0 ? steps/trips : 0);
+        StringBuilder s = new StringBuilder();
+        s.append("{\"AgentCity\": {")
             .append("\"step\": " + step)
             .append(", ")
             .append("\"timeMins\": " + step * SECONDS_PER_STEP / 60)
             .append(", ")
+            .append("\"numTravelers\": " + (travelers==null ? "null" : travelers.numObjs))
+            .append(", ");
+
+        s.append("\"averageTrips\": " + trips)
+            .append(", ")
+            .append("\"averageSteps\": " + steps)
+            .append(", ")
+            .append("\"averageStepsPerTrip\": " + stepsPerTrip)
+            .append(", ")
+            .append("\"tripsCompleted\": " + tripsCompleted)
+            .append(", ")
+            .append("\"passengerSteps\": " + passengerSteps)
+            .append(", ")
             .append("\"numVehicles\": " + numVehicles)
             .append(", ")
-            .append("\"numTravelers\": " + (travelers==null ? "null" : travelers.numObjs))
-            .append("}},\n")
-            .toString();
+            .append("\"lanePolicy\": " + LANE_POLICY)
+            .append("}},\n");
+
+        return s.toString();
+    }
+
+    private int printAverageTrips() {
+        int trips = tripsCompleted - tripsCompletedTmp;
+        tripsCompletedTmp = tripsCompleted;
+        return trips;
+    }
+
+    private int printAverageSteps() {
+        int steps = passengerSteps - passengerStepsTmp;
+        passengerStepsTmp = passengerSteps;
+        return steps;
+    }
+
+    public void reportTrip(Person person) {
+        tripsCompleted++;
+        passengerSteps += person.getStepsTraveling();
     }
 
     public void start() {
@@ -302,9 +340,9 @@ public class AgentCity extends SimState {
 
         // make a temporary detector
         /*
-        Detector tmpDetector = new Detector(0, 18, 19, 12, 13);
-        tmpDetector.stopper =
-            schedule.scheduleRepeating(tmpDetector, DETECTOR_SCHEDULE_NUM, 1);
+          Detector tmpDetector = new Detector(0, 18, 19, 12, 13);
+          tmpDetector.stopper =
+          schedule.scheduleRepeating(tmpDetector, DETECTOR_SCHEDULE_NUM, 1);
         */
 
         // make some intersections

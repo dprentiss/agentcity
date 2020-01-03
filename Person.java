@@ -29,8 +29,11 @@ public class Person implements Steppable, VehicleClient {
     private int stepsTraveling = 0;
     private long lastStep = -1;
     private long firstStep = -1;
+    private int cellsTraveled = 0;
+    private int cellsPlanned = 0;
 
     // Accessors
+    public int getStepsTraveling() { return stepsTraveling; }
     public Intersection getOrigin() { return origin; }
     public Vehicle getVehicle() { return vehicle; }
     public Intersection getDestination() { return destination; }
@@ -50,15 +53,19 @@ public class Person implements Steppable, VehicleClient {
         idNum = id;
         this.origin = origin;
         this.destination = destination;
-        this.boardVehicle(vehicle);
+        if (vehicle != null) {
+            this.boardVehicle(vehicle);
+        }
+        if (origin != null) {
+            cellsPlanned = Math.abs(destination.minX - origin.minX) +
+                Math.abs(destination.minY - origin.minY);
+        }
     }
 
     /** Constructor */
     public Person(int id,
                   Intersection origin, Intersection destination) {
-        idNum = id;
-        this.origin = origin;
-        this.destination = destination;
+        this(id, origin, destination, null);
     }
 
     @Override
@@ -80,6 +87,10 @@ public class Person implements Steppable, VehicleClient {
             .append("\"stepsWaiting\": " + stepsWaiting)
             .append(", ")
             .append("\"stepsTraveling\": " + stepsTraveling)
+            .append(", ")
+            .append("\"cellsPlanned\": " + cellsPlanned)
+            .append(", ")
+            .append("\"cellsTraveled\": " + cellsTraveled)
             .append(", ")
             .append("\"firstStep\": " + firstStep) .append(", ")
             .append("\"lastStep\": " + lastStep)
@@ -125,9 +136,11 @@ public class Person implements Steppable, VehicleClient {
             }
         } else {
             stepsTraveling++;
+            cellsTraveled += vehicle.getSpeed();
             if (atDestination()) {
                 if (exitVehicle()) {
                     lastStep = ac.schedule.getSteps();
+                    ac.reportTrip(this);
                 }
                 if (ac.removeTraveler(this)) {
                     this.stopper.stop();
