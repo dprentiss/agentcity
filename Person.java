@@ -147,7 +147,7 @@ public class Person implements Steppable, VehicleClient {
                 }
                 if (origin != null) {
                     //if (ac.CONSOLE_OUT) { System.out.print(this); }
-                    if (ac.FILE_OUT) { ac.fileout.print(this); }
+                    //if (ac.FILE_OUT) { ac.fileout.print(this); }
                 }
             }
         }

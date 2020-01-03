@@ -30,17 +30,20 @@ public class AgentCity extends SimState {
     public static final int REPORT_SCHEDULE_NUM = 6;
 
     // Simulation constants
+    long lastTripStep = 0;
     public static final double TRIPGEN_RATE = 0.02;
-    public static final boolean LANE_POLICY = false;
+    final boolean LANE_POLICY;
+    final long seed;
     public static final boolean SMART_TURNS = true;
     public static final boolean AVOID_CONGESTION = true;
     public static final boolean RESERVATION_PRIORITY = true;
     public static final boolean PASSENGER_WARM_START = true;
     public static final double WARM_START_RATE = 0.5;
-    public static final boolean CONSOLE_OUT = true;
-    public static final boolean FILE_OUT = false;
+    public static final boolean CONSOLE_OUT = false;
+    public static final boolean FILE_OUT = true;
     public static final int MAX_SPEED = 2;
     public static final int REPORT_INTERVAL = 300;
+    public static final int FILE_INTERVAL = 3600;
     //public static final int PASSENGER_POLLING_INTERVAL = 600;
     public static final double SECONDS_PER_STEP = 1;
     public static final double METERS_PER_CELL = 7.5;
@@ -119,16 +122,19 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 4, 64);
+        this(seed, 8, 128, true);
     }
 
     /** Constructor */
-    public AgentCity(long seed, int grids, int density) {
+    public AgentCity(long seed, int grids, int density, boolean lanePolicy) {
         // Required by SimState
         super(seed);
+        this.seed = seed;
         isTest = true;
         this.grids = grids;
         this.density = density;
+        this.LANE_POLICY = lanePolicy;
+        /*
         DateTimeFormatter formatter =
             DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
             .withZone(ZoneId.systemDefault());
@@ -136,6 +142,8 @@ public class AgentCity extends SimState {
         filename = String.format("%s-%d.csv",
                                  dateTimeString,
                                  seed);
+        */
+        filename = "test.json";
         if (FILE_OUT) {
             try {
                 fw = new FileWriter(filename, true);
@@ -151,7 +159,7 @@ public class AgentCity extends SimState {
         int steps = printAverageSteps();
         int stepsPerTrip = (trips > 0 ? steps/trips : 0);
         StringBuilder s = new StringBuilder();
-        s.append("{\"AgentCity\": {")
+        s.append("{")
             .append("\"step\": " + step)
             .append(", ")
             .append("\"timeMins\": " + step * SECONDS_PER_STEP / 60)
@@ -169,10 +177,18 @@ public class AgentCity extends SimState {
             .append(", ")
             .append("\"passengerSteps\": " + passengerSteps)
             .append(", ")
-            .append("\"numVehicles\": " + numVehicles)
+            .append("\"lastTripStep\": " + lastTripStep)
             .append(", ")
             .append("\"lanePolicy\": " + LANE_POLICY)
-            .append("}},\n");
+            .append(", ")
+            .append("\"numVehicles\": " + numVehicles)
+            .append(", ")
+            .append("\"grids\": " + grids)
+            .append(", ")
+            .append("\"density\": " + density)
+            .append(", ")
+            .append("\"seed\": " + seed)
+            .append("},\n");
 
         return s.toString();
     }
@@ -191,6 +207,7 @@ public class AgentCity extends SimState {
 
     public void reportTrip(Person person) {
         tripsCompleted++;
+        lastTripStep = step;
         passengerSteps += person.getStepsTraveling();
     }
 
@@ -213,7 +230,13 @@ public class AgentCity extends SimState {
                             System.out.print(ac);
                         }
                     }
-                    if (FILE_OUT) { ac.fileout.print(ac); }
+                    if (FILE_OUT) {
+                        if (step > 0 && step % FILE_INTERVAL == 0) {
+                            System.out.print(ac);
+                            fileout.println(ac);
+                            fileout.close();
+                        }
+                    }
                 }
             };
 
@@ -421,14 +444,31 @@ public class AgentCity extends SimState {
 
     /** Main */
     public static void main(String[] args) {
-        long seed = System.currentTimeMillis();
-        //long seed = 1324367672;
+        //long seed = System.currentTimeMillis();
+        long seed = 1324367672;
+        int numRuns = 1;
+        int numMins = 60;
+        int stepLimit = numMins * 60 + 1;
         //long seed = 1324367673;
+        SimState state;
+        int grids = 4;
+        int density = 128;
 
-        SimState state = new AgentCity(seed);
-        state.start();
-        do {
-        } while (state.schedule.step(state));
+        for (int i = 0; i < numRuns; i++) {
+            state = new AgentCity(seed, grids, density, true);
+            state.start();
+            for (int j = 0; j < stepLimit; j++) {
+                state.schedule.step(state);
+            }
+            state.kill();
+            state = new AgentCity(seed, grids, density, false);
+            state.start();
+            for (int j = 0; j < stepLimit; j++) {
+                state.schedule.step(state);
+            }
+            state.kill();
+            seed++;
+        }
         System.exit(0);
     }
 }
