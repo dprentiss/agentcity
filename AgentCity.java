@@ -9,6 +9,7 @@ import sim.util.*;
 import sim.util.distribution.*;
 import sim.field.grid.*;
 import java.util.Arrays;
+import java.util.Random;
 import java.time.format.DateTimeFormatter;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -31,7 +32,7 @@ public class AgentCity extends SimState {
 
     // Simulation constants
     long lastTripStep = 0;
-    public static final double TRIPGEN_RATE = 0.02;
+    public final double TRIPGEN_RATE;
     final boolean LANE_POLICY;
     final long seed;
     public static final boolean SMART_TURNS = true;
@@ -39,11 +40,11 @@ public class AgentCity extends SimState {
     public static final boolean RESERVATION_PRIORITY = true;
     public static final boolean PASSENGER_WARM_START = true;
     public static final double WARM_START_RATE = 0.5;
-    public static final boolean CONSOLE_OUT = false;
+    public static final boolean CONSOLE_OUT = true;
     public static final boolean FILE_OUT = true;
     public static final int MAX_SPEED = 2;
-    public static final int REPORT_INTERVAL = 300;
-    public static final int FILE_INTERVAL = 3600;
+    public static final int REPORT_INTERVAL = 3600;
+    //public static final int FILE_INTERVAL = 3600;
     //public static final int PASSENGER_POLLING_INTERVAL = 600;
     public static final double SECONDS_PER_STEP = 1;
     public static final double METERS_PER_CELL = 7.5;
@@ -122,11 +123,13 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 8, 128, true);
+        this(seed, 8, 128, true, "default.json", 0.02);
     }
 
     /** Constructor */
-    public AgentCity(long seed, int grids, int density, boolean lanePolicy) {
+    public AgentCity(long seed, int grids, int density, boolean lanePolicy,
+                     String outputFileName,
+                     Double tripGenRate) {
         // Required by SimState
         super(seed);
         this.seed = seed;
@@ -134,16 +137,8 @@ public class AgentCity extends SimState {
         this.grids = grids;
         this.density = density;
         this.LANE_POLICY = lanePolicy;
-        /*
-        DateTimeFormatter formatter =
-            DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-            .withZone(ZoneId.systemDefault());
-        String dateTimeString = formatter.format(Instant.now());
-        filename = String.format("%s-%d.csv",
-                                 dateTimeString,
-                                 seed);
-        */
-        filename = "test.json";
+        this.filename = outputFileName;
+        this.TRIPGEN_RATE = tripGenRate;
         if (FILE_OUT) {
             try {
                 fw = new FileWriter(filename, true);
@@ -187,6 +182,8 @@ public class AgentCity extends SimState {
             .append(", ")
             .append("\"density\": " + density)
             .append(", ")
+            .append("\"tripGenRate\": " + TRIPGEN_RATE)
+            .append(", ")
             .append("\"seed\": " + seed)
             .append("},\n");
 
@@ -225,15 +222,13 @@ public class AgentCity extends SimState {
                 public void step(final SimState state) {
                     AgentCity ac = (AgentCity)state;
                     step = schedule.getSteps();
-                    if (CONSOLE_OUT) {
-                        if (step % REPORT_INTERVAL == 0) {
-                            System.out.print(ac);
+                    if (step % REPORT_INTERVAL == 0) {
+                        String reportString = ac.toString();
+                        if (CONSOLE_OUT) {
+                            System.out.print(reportString);
                         }
-                    }
-                    if (FILE_OUT) {
-                        if (step > 0 && step % FILE_INTERVAL == 0) {
-                            System.out.print(ac);
-                            fileout.println(ac);
+                        if (FILE_OUT && step > 0) {
+                            fileout.println(reportString);
                             fileout.close();
                         }
                     }
@@ -446,22 +441,39 @@ public class AgentCity extends SimState {
     public static void main(String[] args) {
         //long seed = System.currentTimeMillis();
         long seed = 1324367672;
-        int numRuns = 1;
+        Random random = new Random(seed);
+        int numRuns = 32;
         int numMins = 60;
         int stepLimit = numMins * 60 + 1;
-        //long seed = 1324367673;
         SimState state;
         int grids = 4;
-        int density = 128;
+        int density;
+        int minDensity = 32;
+        int maxDensity = 256;
+        // Double tripGenRate;
+        Double tripGenRate;
+
+        DateTimeFormatter formatter =
+            DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
+            .withZone(ZoneId.systemDefault());
+        String dateTimeString = formatter.format(Instant.now());
+        String filename = String.format("%s-%d.json",
+                                        dateTimeString,
+                                        seed);
 
         for (int i = 0; i < numRuns; i++) {
-            state = new AgentCity(seed, grids, density, true);
+            density = random.nextInt(maxDensity - minDensity) + minDensity;
+            //tripGenRate = random.nextDouble() * 0.1;
+            tripGenRate = 0.02;
+            state = new AgentCity(seed, grids, density, true, filename,
+                                  tripGenRate);
             state.start();
             for (int j = 0; j < stepLimit; j++) {
                 state.schedule.step(state);
             }
             state.kill();
-            state = new AgentCity(seed, grids, density, false);
+            state = new AgentCity(seed, grids, density, false, filename,
+                                  tripGenRate);
             state.start();
             for (int j = 0; j < stepLimit; j++) {
                 state.schedule.step(state);
