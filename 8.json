@@ -78,3 +78,67 @@
 
 {"step": 3600, "timeMins": 60.0, "numTravelers": 877, "averageTrips": 21488, "averageSteps": 3039727, "averageStepsPerTrip": 141, "tripsCompleted": 21488, "passengerSteps": 3039727, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 2688, "grids": 8, "density": 42, "tripGenRate": 0.02, "seed": 1578229586713},
 
+{"step": 3600, "timeMins": 60.0, "numTravelers": 1743, "averageTrips": 23905, "averageSteps": 7565898, "averageStepsPerTrip": 316, "tripsCompleted": 23905, "passengerSteps": 7565898, "lastTripStep": 3599, "lanePolicy": true, "numVehicles": 9792, "grids": 8, "density": 153, "tripGenRate": 0.02, "seed": 1578240408591},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 15192, "averageTrips": 10512, "averageSteps": 3620243, "averageStepsPerTrip": 344, "tripsCompleted": 10512, "passengerSteps": 3620243, "lastTripStep": 1885, "lanePolicy": false, "numVehicles": 9792, "grids": 8, "density": 153, "tripGenRate": 0.02, "seed": 1578240408591},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 21976, "averageTrips": 6787, "averageSteps": 5208270, "averageStepsPerTrip": 767, "tripsCompleted": 6787, "passengerSteps": 5208270, "lastTripStep": 2694, "lanePolicy": true, "numVehicles": 16064, "grids": 8, "density": 251, "tripGenRate": 0.02, "seed": 1578240408592},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 4779, "averageTrips": 23737, "averageSteps": 20308384, "averageStepsPerTrip": 855, "tripsCompleted": 23737, "passengerSteps": 20308384, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 16064, "grids": 8, "density": 251, "tripGenRate": 0.02, "seed": 1578240408592},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 6843, "averageTrips": 21042, "averageSteps": 16228740, "averageStepsPerTrip": 771, "tripsCompleted": 21042, "passengerSteps": 16228740, "lastTripStep": 3599, "lanePolicy": true, "numVehicles": 13760, "grids": 8, "density": 215, "tripGenRate": 0.02, "seed": 1578240408593},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 3379, "averageTrips": 24479, "averageSteps": 13995635, "averageStepsPerTrip": 571, "tripsCompleted": 24479, "passengerSteps": 13995635, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 13760, "grids": 8, "density": 215, "tripGenRate": 0.02, "seed": 1578240408593},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 3704, "averageTrips": 23648, "averageSteps": 13983059, "averageStepsPerTrip": 591, "tripsCompleted": 23648, "passengerSteps": 13983059, "lastTripStep": 3599, "lanePolicy": true, "numVehicles": 13120, "grids": 8, "density": 205, "tripGenRate": 0.02, "seed": 1578240408594},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 3028, "averageTrips": 24410, "averageSteps": 12839847, "averageStepsPerTrip": 526, "tripsCompleted": 24410, "passengerSteps": 12839847, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 13120, "grids": 8, "density": 205, "tripGenRate": 0.02, "seed": 1578240408594},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 18524, "averageTrips": 4773, "averageSteps": 804479, "averageStepsPerTrip": 168, "tripsCompleted": 4773, "passengerSteps": 804479, "lastTripStep": 1339, "lanePolicy": true, "numVehicles": 5184, "grids": 8, "density": 81, "tripGenRate": 0.02, "seed": 1578240408595},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 1198, "averageTrips": 22636, "averageSteps": 4493695, "averageStepsPerTrip": 198, "tripsCompleted": 22636, "passengerSteps": 4493695, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 5184, "grids": 8, "density": 81, "tripGenRate": 0.02, "seed": 1578240408595},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 890, "averageTrips": 21811, "averageSteps": 3358655, "averageStepsPerTrip": 153, "tripsCompleted": 21811, "passengerSteps": 3358655, "lastTripStep": 3599, "lanePolicy": true, "numVehicles": 3776, "grids": 8, "density": 59, "tripGenRate": 0.02, "seed": 1578240408596},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 879, "averageTrips": 21789, "averageSteps": 3491796, "averageStepsPerTrip": 160, "tripsCompleted": 21789, "passengerSteps": 3491796, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 3776, "grids": 8, "density": 59, "tripGenRate": 0.02, "seed": 1578240408596},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 1459, "averageTrips": 23408, "averageSteps": 6394013, "averageStepsPerTrip": 273, "tripsCompleted": 23408, "passengerSteps": 6394013, "lastTripStep": 3599, "lanePolicy": true, "numVehicles": 8512, "grids": 8, "density": 133, "tripGenRate": 0.02, "seed": 1578240408597},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 1882, "averageTrips": 23176, "averageSteps": 7201796, "averageStepsPerTrip": 310, "tripsCompleted": 23176, "passengerSteps": 7201796, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 8512, "grids": 8, "density": 133, "tripGenRate": 0.02, "seed": 1578240408597},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 1424, "averageTrips": 23281, "averageSteps": 5697367, "averageStepsPerTrip": 244, "tripsCompleted": 23281, "passengerSteps": 5697367, "lastTripStep": 3599, "lanePolicy": true, "numVehicles": 7808, "grids": 8, "density": 122, "tripGenRate": 0.02, "seed": 1578240408598},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 8248, "averageTrips": 16713, "averageSteps": 4696853, "averageStepsPerTrip": 281, "tripsCompleted": 16713, "passengerSteps": 4696853, "lastTripStep": 3115, "lanePolicy": false, "numVehicles": 7808, "grids": 8, "density": 122, "tripGenRate": 0.02, "seed": 1578240408598},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 2340, "averageTrips": 24341, "averageSteps": 10782424, "averageStepsPerTrip": 442, "tripsCompleted": 24341, "passengerSteps": 10782424, "lastTripStep": 3599, "lanePolicy": true, "numVehicles": 11840, "grids": 8, "density": 185, "tripGenRate": 0.02, "seed": 1578240408599},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 20302, "averageTrips": 6496, "averageSteps": 2466043, "averageStepsPerTrip": 379, "tripsCompleted": 6496, "passengerSteps": 2466043, "lastTripStep": 2265, "lanePolicy": false, "numVehicles": 11840, "grids": 8, "density": 185, "tripGenRate": 0.02, "seed": 1578240408599},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 17053, "averageTrips": 11751, "averageSteps": 11961954, "averageStepsPerTrip": 1017, "tripsCompleted": 11751, "passengerSteps": 11961954, "lastTripStep": 3598, "lanePolicy": true, "numVehicles": 16000, "grids": 8, "density": 250, "tripGenRate": 0.02, "seed": 1578240408600},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 4745, "averageTrips": 24097, "averageSteps": 20700174, "averageStepsPerTrip": 859, "tripsCompleted": 24097, "passengerSteps": 20700174, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 16000, "grids": 8, "density": 250, "tripGenRate": 0.02, "seed": 1578240408600},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 14408, "averageTrips": 13563, "averageSteps": 12114410, "averageStepsPerTrip": 893, "tripsCompleted": 13563, "passengerSteps": 12114410, "lastTripStep": 3598, "lanePolicy": true, "numVehicles": 14656, "grids": 8, "density": 229, "tripGenRate": 0.02, "seed": 1578240408601},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 3744, "averageTrips": 24267, "averageSteps": 16937916, "averageStepsPerTrip": 697, "tripsCompleted": 24267, "passengerSteps": 16937916, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 14656, "grids": 8, "density": 229, "tripGenRate": 0.02, "seed": 1578240408601},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 2191, "averageTrips": 24381, "averageSteps": 9964712, "averageStepsPerTrip": 408, "tripsCompleted": 24381, "passengerSteps": 9964712, "lastTripStep": 3599, "lanePolicy": true, "numVehicles": 11520, "grids": 8, "density": 180, "tripGenRate": 0.02, "seed": 1578240408602},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 2552, "averageTrips": 24180, "averageSteps": 10471253, "averageStepsPerTrip": 433, "tripsCompleted": 24180, "passengerSteps": 10471253, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 11520, "grids": 8, "density": 180, "tripGenRate": 0.02, "seed": 1578240408602},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 787, "averageTrips": 20967, "averageSteps": 2819145, "averageStepsPerTrip": 134, "tripsCompleted": 20967, "passengerSteps": 2819145, "lastTripStep": 3599, "lanePolicy": true, "numVehicles": 2112, "grids": 8, "density": 33, "tripGenRate": 0.02, "seed": 1578240408603},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 767, "averageTrips": 20953, "averageSteps": 2806071, "averageStepsPerTrip": 133, "tripsCompleted": 20953, "passengerSteps": 2806071, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 2112, "grids": 8, "density": 33, "tripGenRate": 0.02, "seed": 1578240408603},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 2076, "averageTrips": 24347, "averageSteps": 9269013, "averageStepsPerTrip": 380, "tripsCompleted": 24347, "passengerSteps": 9269013, "lastTripStep": 3599, "lanePolicy": true, "numVehicles": 11072, "grids": 8, "density": 173, "tripGenRate": 0.02, "seed": 1578240408604},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 9525, "averageTrips": 17093, "averageSteps": 6976181, "averageStepsPerTrip": 408, "tripsCompleted": 17093, "passengerSteps": 6976181, "lastTripStep": 2993, "lanePolicy": false, "numVehicles": 11072, "grids": 8, "density": 173, "tripGenRate": 0.02, "seed": 1578240408604},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 5110, "averageTrips": 22474, "averageSteps": 17208169, "averageStepsPerTrip": 765, "tripsCompleted": 22474, "passengerSteps": 17208169, "lastTripStep": 3599, "lanePolicy": true, "numVehicles": 13824, "grids": 8, "density": 216, "tripGenRate": 0.02, "seed": 1578240408605},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 3386, "averageTrips": 24206, "averageSteps": 13627549, "averageStepsPerTrip": 562, "tripsCompleted": 24206, "passengerSteps": 13627549, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 13824, "grids": 8, "density": 216, "tripGenRate": 0.02, "seed": 1578240408605},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 2123, "averageTrips": 24243, "averageSteps": 9430307, "averageStepsPerTrip": 388, "tripsCompleted": 24243, "passengerSteps": 9430307, "lastTripStep": 3599, "lanePolicy": true, "numVehicles": 11200, "grids": 8, "density": 175, "tripGenRate": 0.02, "seed": 1578240408606},
+
+{"step": 3600, "timeMins": 60.0, "numTravelers": 3941, "averageTrips": 22334, "averageSteps": 9461131, "averageStepsPerTrip": 423, "tripsCompleted": 22334, "passengerSteps": 9461131, "lastTripStep": 3599, "lanePolicy": false, "numVehicles": 11200, "grids": 8, "density": 175, "tripGenRate": 0.02, "seed": 1578240408606},
+
