@@ -439,20 +439,21 @@ public class AgentCity extends SimState {
 
     /** Main */
     public static void main(String[] args) {
-        //long seed = System.currentTimeMillis();
-        long seed = 1324367672;
+        long seed = System.currentTimeMillis();
+        //long seed = 1324367672;
         Random random = new Random(seed);
-        int numRuns = 32;
+        int numRuns = 16;
         int numMins = 60;
         int stepLimit = numMins * 60 + 1;
         SimState state;
-        int grids = 4;
+        int grids = 8;
         int density;
         int minDensity = 32;
         int maxDensity = 256;
         // Double tripGenRate;
         Double tripGenRate;
 
+        /*
         DateTimeFormatter formatter =
             DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
             .withZone(ZoneId.systemDefault());
@@ -460,6 +461,8 @@ public class AgentCity extends SimState {
         String filename = String.format("%s-%d.json",
                                         dateTimeString,
                                         seed);
+        */
+        String filename = String.format("%d.json", grids);
 
         for (int i = 0; i < numRuns; i++) {
             density = random.nextInt(maxDensity - minDensity) + minDensity;
