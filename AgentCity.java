@@ -153,6 +153,21 @@ public class AgentCity extends SimState {
         int trips = printAverageTrips();
         int steps = printAverageSteps();
         int stepsPerTrip = (trips > 0 ? steps/trips : 0);
+        int stepsWithPassenger = 0;
+        int stepsWithoutPassenger = 0;
+        int stepsTravelingWithPassenger = 0;
+        int stepsTravelingWithoutPassenger = 0;
+        int distWithPassenger = 0;
+        int distWithoutPassenger = 0;
+        Bag vehicles = agentGrid.allObjects;
+        for (int i = 0; i < vehicles.numObjs; i++) {
+            stepsWithPassenger += ((Vehicle)vehicles.objs[i]).stepsWithPassenger;
+            stepsWithoutPassenger += ((Vehicle)vehicles.objs[i]).stepsWithoutPassenger;
+            stepsTravelingWithPassenger += ((Vehicle)vehicles.objs[i]).stepsTravelingWithPassenger;
+            stepsTravelingWithoutPassenger += ((Vehicle)vehicles.objs[i]).stepsTravelingWithoutPassenger;
+            distWithPassenger += ((Vehicle)vehicles.objs[i]).distWithPassenger;
+            distWithoutPassenger += ((Vehicle)vehicles.objs[i]).distWithoutPassenger;
+        }
         StringBuilder s = new StringBuilder();
         s.append("{")
             .append("\"step\": " + step)
@@ -171,6 +186,19 @@ public class AgentCity extends SimState {
             .append("\"tripsCompleted\": " + tripsCompleted)
             .append(", ")
             .append("\"passengerSteps\": " + passengerSteps)
+            .append(", ")
+//
+            .append("\"stepsWithPassenger\": " + stepsWithPassenger)
+            .append(", ")
+            .append("\"stepsWithoutPassenger\": " + stepsWithoutPassenger)
+            .append(", ")
+            .append("\"stepsTravelingWithPassenger\": " + stepsTravelingWithPassenger)
+            .append(", ")
+            .append("\"stepsTravelingWithoutPassenger\": " + stepsTravelingWithoutPassenger)
+            .append(", ")
+            .append("\"distWithPassenger\": " + distWithPassenger)
+            .append(", ")
+            .append("\"distWithoutPassenger\": " + distWithoutPassenger)
             .append(", ")
             .append("\"lastTripStep\": " + lastTripStep)
             .append(", ")
@@ -356,6 +384,7 @@ public class AgentCity extends SimState {
             }
         }
 
+
         // make a temporary detector
         /*
           Detector tmpDetector = new Detector(0, 18, 19, 12, 13);
@@ -442,11 +471,11 @@ public class AgentCity extends SimState {
         long seed = System.currentTimeMillis();
         //long seed = 1324367672;
         Random random = new Random(seed);
-        int numRuns = 16;
+        int numRuns = 64;
         int numMins = 60;
         int stepLimit = numMins * 60 + 1;
         SimState state;
-        int grids = 8;
+        int grids = 4;
         int density;
         int minDensity = 32;
         int maxDensity = 256;
@@ -467,7 +496,7 @@ public class AgentCity extends SimState {
         for (int i = 0; i < numRuns; i++) {
             density = random.nextInt(maxDensity - minDensity) + minDensity;
             //tripGenRate = random.nextDouble() * 0.1;
-            tripGenRate = 0.02;
+            tripGenRate = 0.04;
             state = new AgentCity(seed, grids, density, true, filename,
                                   tripGenRate);
             state.start();

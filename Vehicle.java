@@ -53,6 +53,14 @@ public class Vehicle implements Steppable, Driveable {
     private Direction direction;
     private int speed;
 
+    // Reporting variables
+    public int stepsWithPassenger = 0;
+    public int stepsWithoutPassenger = 0;
+    public int stepsTravelingWithPassenger = 0;
+    public int stepsTravelingWithoutPassenger = 0;
+    public int distWithPassenger = 0;
+    public int distWithoutPassenger = 0;
+
     // Accessors
 
     public boolean boardVehicle(Person person) {
@@ -317,6 +325,20 @@ public class Vehicle implements Steppable, Driveable {
                             );
             }
             break;
+        }
+
+        if (hasPassengers) {
+            stepsWithPassenger++;
+            if (speed > 0) {
+                distWithPassenger += speed;
+                stepsTravelingWithPassenger++;
+            }
+        } else {
+            stepsWithoutPassenger++;
+            if (speed > 0) {
+                distWithoutPassenger += speed;
+                stepsTravelingWithoutPassenger++;
+            }
         }
     }
 }
