@@ -491,12 +491,12 @@ public class AgentCity extends SimState {
                                         dateTimeString,
                                         seed);
         */
-        String filename = String.format("%d.json", grids);
+        String filename = String.format("%drand.json", grids);
 
         for (int i = 0; i < numRuns; i++) {
             density = random.nextInt(maxDensity - minDensity) + minDensity;
-            //tripGenRate = random.nextDouble() * 0.1;
-            tripGenRate = 0.04;
+            tripGenRate = random.nextDouble() * 0.1;
+            //tripGenRate = 0.04;
             state = new AgentCity(seed, grids, density, true, filename,
                                   tripGenRate);
             state.start();
