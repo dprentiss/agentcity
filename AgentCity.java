@@ -384,14 +384,6 @@ public class AgentCity extends SimState {
             }
         }
 
-
-        // make a temporary detector
-        /*
-          Detector tmpDetector = new Detector(0, 18, 19, 12, 13);
-          tmpDetector.stopper =
-          schedule.scheduleRepeating(tmpDetector, DETECTOR_SCHEDULE_NUM, 1);
-        */
-
         // make some intersections
         int maxXs[] = new int[numIntersections + 1];
         int minXs[] = new int[numIntersections + 1];
