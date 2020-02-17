@@ -57,7 +57,7 @@ public class DriverAgent implements Steppable, Driver {
     public boolean inIntersection = false;
     public boolean nearNextLeg = false;
     public boolean atNextLeg = false;
-    public boolean laneOnLeft = false;
+     public boolean laneOnLeft = false;
     public boolean laneOnRight = false;
 
     public boolean hasAssignment = false;
@@ -716,7 +716,7 @@ public class DriverAgent implements Steppable, Driver {
         nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
 
         // choose departure lane by occupancy policy
-        if (ac.LANE_POLICY) {
+        if (nextIntersection.getLanePolicy()) {
             if (vehicle.hasPassengers) {
                 /*
                 nextLeg =

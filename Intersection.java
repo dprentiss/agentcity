@@ -26,8 +26,10 @@ public class Intersection {
     private IntersectionAgent controller;
     private Int2D[] approachLegs;
     private Int2D[] departureLegs;
+    private boolean lanePolicy = true;
 
     // Accessors
+    public boolean getLanePolicy() { return lanePolicy; }
     public Int2D[] getDepartureLegs() { return departureLegs; }
     public Int2D[] getApproachLegs() { return approachLegs; }
     public int getNumApproachLegs(AgentCity ac, Direction direction) {
