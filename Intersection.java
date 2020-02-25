@@ -26,10 +26,11 @@ public class Intersection {
     private IntersectionAgent controller;
     private Int2D[] approachLegs;
     private Int2D[] departureLegs;
-    private boolean lanePolicy = true;
+    private boolean lanePolicy;
 
     // Accessors
     public boolean getLanePolicy() { return lanePolicy; }
+    public void setLanePolicy(boolean policy) { lanePolicy = policy; }
     public Int2D[] getDepartureLegs() { return departureLegs; }
     public Int2D[] getApproachLegs() { return approachLegs; }
     public int getNumApproachLegs(AgentCity ac, Direction direction) {
@@ -47,6 +48,14 @@ public class Intersection {
     public IntersectionAgent getController() { return controller; }
     public int getNumCells() {
         return (maxX - minX + 1) * (maxY - minY + 1);
+    }
+
+    public void addApproachVehicle(Vehicle vehicle) {
+        controller.addApproachVehicle(vehicle);
+    }
+
+    public void removeApproachVehicle(Vehicle vehicle) {
+        controller.removeApproachVehicle(vehicle);
     }
 
     public Direction[] getDirectionsTo(Intersection other) {
@@ -85,6 +94,7 @@ public class Intersection {
         this.minY = minY;
         this.maxY = maxY;
         setLegs(ac);
+        setLanePolicy(false);
     }
 
     /** Constructor */

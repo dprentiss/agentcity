@@ -34,6 +34,7 @@ public class AgentCity extends SimState {
     long lastTripStep = 0;
     public final double TRIPGEN_RATE;
     final boolean LANE_POLICY;
+    final boolean DIST_LANE_POLICY;
     final long seed;
     public static final boolean SMART_TURNS = true;
     public static final boolean AVOID_CONGESTION = true;
@@ -41,7 +42,7 @@ public class AgentCity extends SimState {
     public static final boolean PASSENGER_WARM_START = true;
     public static final double WARM_START_RATE = 0.5;
     public static final boolean CONSOLE_OUT = true;
-    public static final boolean FILE_OUT = false;
+    public static final boolean FILE_OUT = true;
     public static final int MAX_SPEED = 2;
     public static final int REPORT_INTERVAL = 3600;
     //public static final int FILE_INTERVAL = 3600;
@@ -123,11 +124,13 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 8, 128, true, "default.json", 0.02);
+        this(seed, 8, 200, true, true, "default.json", 0.02);
     }
 
     /** Constructor */
-    public AgentCity(long seed, int grids, int density, boolean lanePolicy,
+    public AgentCity(long seed, int grids, int density,
+                     boolean lanePolicy,
+                     boolean distPolicy,
                      String outputFileName,
                      Double tripGenRate) {
         // Required by SimState
@@ -137,6 +140,11 @@ public class AgentCity extends SimState {
         this.grids = grids;
         this.density = density;
         this.LANE_POLICY = lanePolicy;
+        if (this.LANE_POLICY == false) {
+            this.DIST_LANE_POLICY = false;
+        } else {
+            this.DIST_LANE_POLICY = distPolicy;
+        }
         this.filename = outputFileName;
         this.TRIPGEN_RATE = tripGenRate;
         if (FILE_OUT) {
@@ -150,7 +158,7 @@ public class AgentCity extends SimState {
 
     @Override
     public String toString() {
-        /*
+        if (agentGrid == null) { return ""; }
         int trips = printAverageTrips();
         int steps = printAverageSteps();
         int stepsPerTrip = (trips > 0 ? steps/trips : 0);
@@ -205,6 +213,8 @@ public class AgentCity extends SimState {
             .append(", ")
             .append("\"lanePolicy\": " + LANE_POLICY)
             .append(", ")
+            .append("\"distLanePolicy\": " + DIST_LANE_POLICY)
+            .append(", ")
             .append("\"numVehicles\": " + numVehicles)
             .append(", ")
             .append("\"grids\": " + grids)
@@ -217,8 +227,7 @@ public class AgentCity extends SimState {
             .append("},\n");
 
         return s.toString();
-        */
-        return "String";
+        //return "String";
     }
 
     private int printAverageTrips() {
@@ -486,20 +495,20 @@ public class AgentCity extends SimState {
                                         dateTimeString,
                                         seed);
         */
-        String filename = String.format("%drand.json", grids);
+        String filename = String.format("distvsall4.json", grids);
 
         for (int i = 0; i < numRuns; i++) {
             density = random.nextInt(maxDensity - minDensity) + minDensity;
-            tripGenRate = random.nextDouble() * 0.1;
-            //tripGenRate = 0.04;
-            state = new AgentCity(seed, grids, density, true, filename,
+            //tripGenRate = random.nextDouble() * 0.1;
+            tripGenRate = 0.04;
+            state = new AgentCity(seed, grids, density, true, true, filename,
                                   tripGenRate);
             state.start();
             for (int j = 0; j < stepLimit; j++) {
                 state.schedule.step(state);
             }
             state.kill();
-            state = new AgentCity(seed, grids, density, false, filename,
+            state = new AgentCity(seed, grids, density, true, false, filename,
                                   tripGenRate);
             state.start();
             for (int j = 0; j < stepLimit; j++) {

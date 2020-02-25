@@ -63,6 +63,7 @@ public class Vehicle implements Steppable, Driveable {
 
     // Accessors
 
+
     public boolean boardVehicle(Person person) {
         if (manifest.numObjs < passengerCap) {
             manifest.add(person);

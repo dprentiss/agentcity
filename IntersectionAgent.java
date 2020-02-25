@@ -31,6 +31,7 @@ public class IntersectionAgent implements Steppable {
     public int width;
     public int height;
     public int scheduleSize;
+    public int approachLegsLength;
 
     // Variables
     private AgentCity ac; // state
@@ -38,13 +39,21 @@ public class IntersectionAgent implements Steppable {
     private Int2D[] approachLegs;
     private Vehicle[][][] schedule;
     private Bag vehicles;
+    private Bag approachVehicles;
     private boolean acceptingReservations;
     private boolean passengerPriority;
     private long step;
+    private double policyThreshold = 0.45;
 
     // Accessors
     public void setPriority(boolean priority) { passengerPriority = priority; }
     public boolean getPriority(boolean priority) { return passengerPriority; }
+    public void addApproachVehicle(Vehicle vehicle) {
+        approachVehicles.add(vehicle);
+    }
+    public void removeApproachVehicle(Vehicle vehicle) {
+        approachVehicles.remove(vehicle);
+    }
 
     public Bag getVehicles() { return vehicles; }
 
@@ -64,6 +73,8 @@ public class IntersectionAgent implements Steppable {
         scheduleSize = width + height;
         vehicles = new Bag((width + 2) * (height + 2));
         approachLegs = intersection.getApproachLegs();
+        approachLegsLength = 16 * approachLegs.length;
+        approachVehicles = new Bag(approachLegsLength);
         schedule = new Vehicle[scheduleSize][width][height];
         cells = new Int2D[width][height];
         for (int i = 0; i < width; i++) {
@@ -521,11 +532,28 @@ public class IntersectionAgent implements Steppable {
         }
     }
 
+    private double getDensity() {
+        //System.out.println(approachVehicles.numObjs);
+        //System.out.println(approachLegsLength);
+        //System.out.println((double)approachVehicles.numObjs/(double)approachLegsLength);
+        //System.out.println((double)approachVehicles.numObjs / (double)approachLegsLength);
+        return (double)approachVehicles.numObjs / (double)approachLegsLength;
+    }
+
+    private void updateLanePolicy() {
+        if (getDensity() >= policyThreshold) {
+            intersection.setLanePolicy(false);
+        } else {
+            intersection.setLanePolicy(true);
+        }
+    }
+
     public void step(final SimState state) {
         ac = (AgentCity)state;
         step = ac.schedule.getSteps();
         trimSchedule(ac);
         checkSchedule();
+        updateLanePolicy();
         if (intersection.idNum == intIdNum) {
             System.out.println();
             System.out.printf("Step %d, schedule %d/%d\n",

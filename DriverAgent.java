@@ -691,7 +691,11 @@ public class DriverAgent implements Steppable, Driver {
     }
 
     private void updateDestination() {
+        if (nextIntersection != null) {
+            nextIntersection.removeApproachVehicle(vehicle);
+        }
         nextIntersection = getIntersectionAhead(ac, location);
+        nextIntersection.addApproachVehicle(vehicle);
 
         // chose direction
         if (ac.SMART_TURNS && vehicle.hasPassengers) {
@@ -716,7 +720,7 @@ public class DriverAgent implements Steppable, Driver {
         nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
 
         // choose departure lane by occupancy policy
-        if (nextIntersection.getLanePolicy()) {
+        if (ac.LANE_POLICY && nextIntersection.getLanePolicy()) {
             if (vehicle.hasPassengers) {
                 /*
                 nextLeg =
@@ -901,7 +905,7 @@ public class DriverAgent implements Steppable, Driver {
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
         // check if lane change is required
-        if (ac.LANE_POLICY) {
+        if (ac.LANE_POLICY && nextIntersection.getLanePolicy()) {
             if (!inIntersection && !nearIntersection) {
                 if (vehicle.hasPassengers) {
                     if (safeMerge(direction.onLeft())) {
