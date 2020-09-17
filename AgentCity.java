@@ -150,6 +150,7 @@ public class AgentCity extends SimState {
 
     @Override
     public String toString() {
+        if (agentGrid == null) { return ""; }
         int trips = printAverageTrips();
         int steps = printAverageSteps();
         int stepsPerTrip = (trips > 0 ? steps/trips : 0);
