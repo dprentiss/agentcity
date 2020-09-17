@@ -41,7 +41,7 @@ public class AgentCity extends SimState {
     public static final boolean PASSENGER_WARM_START = true;
     public static final double WARM_START_RATE = 0.5;
     public static final boolean CONSOLE_OUT = true;
-    public static final boolean FILE_OUT = true;
+    public static final boolean FILE_OUT = false;
     public static final int MAX_SPEED = 2;
     public static final int REPORT_INTERVAL = 3600;
     //public static final int FILE_INTERVAL = 3600;
