@@ -50,7 +50,7 @@ public class AgentCity extends SimState {
     public static final double METERS_PER_CELL = 7.5;
 
     // Utility
-    private final boolean CHECK_FOR_COLLISIONS = false;
+    private final boolean CHECK_FOR_COLLISIONS = true;
     private final boolean isTest;
     private final String filename;
     private FileWriter fw;
@@ -123,7 +123,7 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 8, 128, true, "default.json", 0.02);
+        this(seed, 4, 128, true, "default.json", 0.02);
     }
 
     /** Constructor */
@@ -188,7 +188,6 @@ public class AgentCity extends SimState {
             .append(", ")
             .append("\"passengerSteps\": " + passengerSteps)
             .append(", ")
-//
             .append("\"stepsWithPassenger\": " + stepsWithPassenger)
             .append(", ")
             .append("\"stepsWithoutPassenger\": " + stepsWithoutPassenger)

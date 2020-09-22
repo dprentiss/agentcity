@@ -120,6 +120,9 @@ public class Vehicle implements Steppable, Driveable {
      * passengers.
      */
     public Bag getManifest() { return manifest; }
+
+    /** Returns the most distant destination this Vehicle's current passengers.
+     */
     public Intersection getPassengerDestination() {
         if (hasPassengers) {
             return ((Person)manifest.objs[0]).getDestination();

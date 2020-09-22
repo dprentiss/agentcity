@@ -28,8 +28,8 @@ public class AgentCityWithUI extends GUIState {
     }
 
     public AgentCityWithUI() {
-        //super(new AgentCity(System.currentTimeMillis()));
-        super(new AgentCity(1324367673));
+        super(new AgentCity(System.currentTimeMillis()));
+        //super(new AgentCity(1324367673));
     }
 
     public AgentCityWithUI(SimState state) { super(state); }
