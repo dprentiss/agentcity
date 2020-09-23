@@ -723,6 +723,7 @@ public class DriverAgent implements Steppable, Driver {
 
     private Intersection getNextPassengerDestination() {
         Intersection[] destinations = vehicle.getPassengerDestinations();
+        if (destinations == null) { return null; }
         int idx = 0;
         long  dist = Long.MAX_VALUE;
         long tmpDist = 0;
@@ -756,7 +757,7 @@ public class DriverAgent implements Steppable, Driver {
         nextIntersection = getIntersectionAhead(ac, location);
 
         // chose direction
-        if (ac.SMART_TURNS && vehicle.hasPassengers) {
+        if (ac.SMART_TURNS && vehicle.meetsHovMin()) {
             Intersection destination = getNextPassengerDestination();
             if (destination.idNum == nextIntersection.idNum) {
                 nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
@@ -778,7 +779,7 @@ public class DriverAgent implements Steppable, Driver {
 
         // choose departure lane by occupancy policy
         if (ac.LANE_POLICY) {
-            if (vehicle.hasPassengers) {
+            if (vehicle.meetsHovMin()) {
                 /*
                 nextLeg =
                     nextIntersection.getDepartureLeg(ac, nextDirection,
@@ -820,7 +821,7 @@ public class DriverAgent implements Steppable, Driver {
     private void updateDestination() {
         nextIntersection = getIntersectionAhead(ac, location);
         if (ac.LANE_POLICY) {
-            if (vehicle.hasPassengers) {
+            if (vehicle.meetsHOVmin) {
                 if (ac.SMART_TURNS) {
                     Intersection destination =
                         vehicle.getPassengerDestination();
@@ -964,7 +965,7 @@ public class DriverAgent implements Steppable, Driver {
         // check if lane change is required
         if (ac.LANE_POLICY) {
             if (!inIntersection && !nearIntersection) {
-                if (vehicle.hasPassengers) {
+                if (vehicle.meetsHovMin()) {
                     if (safeMerge(direction.onLeft())) {
                         //System.out.println("MERGING_LEFT");
                         nextDirective = Driver.Directive.MERGE_LEFT;

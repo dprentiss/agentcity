@@ -63,6 +63,10 @@ public class Vehicle implements Steppable, Driveable {
 
     // Accessors
 
+    public boolean meetsHovMin() {
+        return getNumPassengers() >= AgentCity.HOV_MIN;
+    }
+
     public boolean boardVehicle(Person person) {
         if (manifest.numObjs < passengerCap & driver.allowTrip(person)) {
             manifest.add(person);

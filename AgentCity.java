@@ -35,15 +35,16 @@ public class AgentCity extends SimState {
     public final double TRIPGEN_RATE;
     final boolean LANE_POLICY;
     final long seed;
+    public static final int HOV_MIN = 1;
     public static final boolean SMART_TURNS = true;
     public static final boolean AVOID_CONGESTION = true;
-    public static final boolean RESERVATION_PRIORITY = true;
-    public static final boolean PASSENGER_WARM_START = true;
+    public static final boolean RESERVATION_PRIORITY = false;
+    public static final boolean PASSENGER_WARM_START = false;
     public static final double WARM_START_RATE = 0.5;
     public static final boolean CONSOLE_OUT = true;
     public static final boolean FILE_OUT = false;
     public static final int MAX_SPEED = 2;
-    public static final int REPORT_INTERVAL = 3600;
+    public static final int REPORT_INTERVAL = 600;
     //public static final int FILE_INTERVAL = 3600;
     //public static final int PASSENGER_POLLING_INTERVAL = 600;
     public static final double SECONDS_PER_STEP = 1;
@@ -123,7 +124,7 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 8, 128, true, "default.json", 0.06);
+        this(seed, 8, 128, true, "default.json", 0.12);
     }
 
     /** Constructor */

@@ -180,11 +180,11 @@ public class IntersectionAgent implements Steppable {
                     y = path[i][j].y - intersection.minY;
                     if (schedule[timeIndex][x][y] != null) {
                         if (passengerPriority && height * width > 4) {
-                            if (vehicle.hasPassengers) {
+                            if (vehicle.meetsHovMin()) {
                                 otherVehicle = schedule[timeIndex][x][y];
                                 otherDriver = (DriverAgent)otherVehicle.getDriver();
                                 otherDriver.updateState(ac);
-                                if (otherVehicle.hasPassengers
+                                if (otherVehicle.meetsHovMin()
                                     || otherDriver.inIntersection) {
                                     return false;
                                 }
