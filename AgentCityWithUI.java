@@ -78,8 +78,12 @@ public class AgentCityWithUI extends GUIState {
                     public void draw(Object object, Graphics2D graphics, DrawInfo2D info)
                     {
                         Vehicle vehicle = (Vehicle)object;
-                        if (vehicle.hasPassengers) {
+                        if (vehicle.getNumPassengers() == 1) {
                             paint = new Color(0, 0, 255);
+                        } else if (vehicle.getNumPassengers() == 2) {
+                            paint = new Color(255, 255, 0);
+                        } else if (vehicle.getNumPassengers() > 2) {
+                            paint = new Color(255, 0, 0);
                         } else {
                             paint = new Color(0, 255, 0);
                         }

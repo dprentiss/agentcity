@@ -123,7 +123,7 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 4, 128, true, "default.json", 0.02);
+        this(seed, 8, 128, true, "default.json", 0.06);
     }
 
     /** Constructor */

@@ -64,13 +64,12 @@ public class Vehicle implements Steppable, Driveable {
     // Accessors
 
     public boolean boardVehicle(Person person) {
-        if (manifest.numObjs < passengerCap) {
+        if (manifest.numObjs < passengerCap & driver.allowTrip(person)) {
             manifest.add(person);
             hasPassengers = true;
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     public boolean exitVehicle(Person person) {
@@ -79,9 +78,8 @@ public class Vehicle implements Steppable, Driveable {
                 hasPassengers = false;
             }
             return true;
-        } else {
-            return false;
         }
+        return false;
     }
 
     @Override
@@ -121,25 +119,20 @@ public class Vehicle implements Steppable, Driveable {
      */
     public Bag getManifest() { return manifest; }
 
+    public int getNumPassengers() { return manifest.numObjs; }
+
     /** Returns the most distant destination this Vehicle's current passengers.
      */
-    public Intersection getPassengerDestination() {
+    public Intersection[] getPassengerDestinations() {
         if (hasPassengers) {
-            return ((Person)manifest.objs[0]).getDestination();
+            Intersection[] destinations = new Intersection[manifest.numObjs];
+            for (int i = 0; i < destinations.length; i++) {
+                destinations[i] = ((Person)manifest.objs[i]).getDestination();
+            }
+        return destinations;
         }
         return null;
     }
-
-    /** Adds the provide Person object as a passenger of this Vehicle if there
-     * is room.
-     */
-    public void addPassenger(Person passenger) { /*TODO*/ }
-
-    /** Removes the provided Person object as a passenger of this Vehicle.
-     *
-     * @param passenger the Person object to be added this Vehicle.
-     */
-    public void removePassenger(Person passenger) { /*TODO*/ }
 
     // Physical
 
@@ -167,7 +160,7 @@ public class Vehicle implements Steppable, Driveable {
      * capacity of four, and Direction of NONE.
      */
     public Vehicle(int id) {
-        this(id, 1, 1, Direction.NONE);
+        this(id, 1, 4, Direction.NONE);
     }
 
     /** Creates a Vehicle object with the given ID number and initial direction.
@@ -176,7 +169,7 @@ public class Vehicle implements Steppable, Driveable {
      * capacity of four.
      */
     public Vehicle(int id, Direction dir) {
-        this(id, 1, 1, dir);
+        this(id, 1, 4, dir);
     }
 
     /** Creates a Vehicle object with the given ID number, passenger capacity

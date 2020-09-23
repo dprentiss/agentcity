@@ -690,13 +690,74 @@ public class DriverAgent implements Steppable, Driver {
 
     }
 
+    private boolean isOnTheWay(Intersection start,
+                       Intersection end,
+                       Intersection loc) {
+        return isOnTheWay(start.getOrigin(), end.getOrigin(), loc.getOrigin());
+    }
+
+
+    private boolean isOnTheWay(Int2D start, Int2D end, Int2D loc) {
+        boolean x = !(loc.x < start.x & loc.x < end.x);
+        x = x & !(loc.x > start.x & loc.x > end.x);
+        boolean y = !(loc.y < start.y & loc.y < end.y);
+        y = y & !(loc.y > start.y & loc.y > end.y);
+        return x & y;
+    }
+
+    public boolean allowTrip(Person person) {
+        boolean canAppendTrip = false;
+        boolean canInsertTrip = false;
+        Intersection newDestination = person.getDestination();
+        Intersection lastDestination = getLastPassengerDestination();
+        if (lastDestination == null) {
+            canAppendTrip = true;
+        } else if (isOnTheWay(location,
+                              newDestination.getOrigin(),
+                              lastDestination.getOrigin())) {
+            canAppendTrip = true;
+        }
+
+        return canAppendTrip | canInsertTrip;
+    }
+
+    private Intersection getNextPassengerDestination() {
+        Intersection[] destinations = vehicle.getPassengerDestinations();
+        int idx = 0;
+        long  dist = Long.MAX_VALUE;
+        long tmpDist = 0;
+        for (int i = 0; i < destinations.length; i++) {
+            tmpDist = location.manhattanDistance(destinations[i].getOrigin());
+            if (tmpDist < dist) {
+                dist = tmpDist;
+                idx = i;
+            }
+        }
+        return destinations[idx];
+    }
+
+    private Intersection getLastPassengerDestination() {
+        Intersection[] destinations = vehicle.getPassengerDestinations();
+        if (destinations == null) { return null; }
+        int idx = 0;
+        long  dist = 0;
+        long tmpDist = 0;
+        for (int i = 0; i < destinations.length; i++) {
+            tmpDist = location.manhattanDistance(destinations[i].getOrigin());
+            if (tmpDist > dist) {
+                dist = tmpDist;
+                idx = i;
+            }
+        }
+        return destinations[idx];
+    }
+
     private void updateDestination() {
         nextIntersection = getIntersectionAhead(ac, location);
 
         // chose direction
         if (ac.SMART_TURNS && vehicle.hasPassengers) {
-            Intersection destination =
-                vehicle.getPassengerDestination();
+            Intersection destination = getNextPassengerDestination();
             if (destination.idNum == nextIntersection.idNum) {
                 nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
             } else {

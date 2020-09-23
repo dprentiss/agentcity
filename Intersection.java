@@ -47,6 +47,8 @@ public class Intersection {
         return (maxX - minX + 1) * (maxY - minY + 1);
     }
 
+    public Int2D getOrigin() { return new Int2D(minX, minY); }
+
     public Direction[] getDirectionsTo(Intersection other) {
         Direction[] directions = new Direction[2];
         int xOffset = other.minX - this.minX;

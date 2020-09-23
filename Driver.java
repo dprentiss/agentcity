@@ -17,4 +17,5 @@ public interface Driver {
 
     Directive getNextDirective();
     int getDesiredSpeed();
+    boolean allowTrip(Person person);
 }
