@@ -47,6 +47,7 @@ public class Vehicle implements Steppable, Driveable {
     private Driver.Directive nextDirective;
     /** The speed desired by this Vehicle's Driver. */
     private int desiredSpeed;
+    private int hovMin;
 
     // Physical Variables
     public Int2D location;
@@ -64,7 +65,7 @@ public class Vehicle implements Steppable, Driveable {
     // Accessors
 
     public boolean meetsHovMin() {
-        return getNumPassengers() >= AgentCity.HOV_MIN;
+        return getNumPassengers() >= hovMin;
     }
 
     public boolean boardVehicle(Person person) {
@@ -238,6 +239,7 @@ public class Vehicle implements Steppable, Driveable {
     public void step(final SimState state) {
         // The current simulation state
         AgentCity ac = (AgentCity)state;
+        hovMin = ac.HOV_MIN;
 
         // Get location from state
         location = ac.agentGrid.getObjectLocation(this);

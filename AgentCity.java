@@ -3,6 +3,7 @@
  */
 
 package sim.app.agentcity;
+import ec.util.MersenneTwisterFast;
 import sim.display.Console;
 import sim.engine.*;
 import sim.util.*;
@@ -35,23 +36,27 @@ public class AgentCity extends SimState {
     public final double TRIPGEN_RATE;
     final boolean LANE_POLICY;
     final long seed;
-    public static final int HOV_MIN = 1;
+    public final int HOV_MIN;
     public static final boolean SMART_TURNS = true;
     public static final boolean AVOID_CONGESTION = true;
-    public static final boolean RESERVATION_PRIORITY = false;
+    public static final boolean RESERVATION_PRIORITY = true;
     public static final boolean PASSENGER_WARM_START = false;
     public static final double WARM_START_RATE = 0.5;
     public static final boolean CONSOLE_OUT = true;
-    public static final boolean FILE_OUT = false;
+    public static final boolean FILE_OUT = true;
     public static final int MAX_SPEED = 2;
     public static final int REPORT_INTERVAL = 600;
-    //public static final int FILE_INTERVAL = 3600;
     //public static final int PASSENGER_POLLING_INTERVAL = 600;
     public static final double SECONDS_PER_STEP = 1;
     public static final double METERS_PER_CELL = 7.5;
 
     // Utility
-    private final boolean CHECK_FOR_COLLISIONS = true;
+    private static final int DEFAULT_HOV_MIN = 2;
+    private static final boolean DEFAULT_LANE_USE_POLICY = true;
+    private static final double DEFAULT_TRIP_GEN_RATE = 0.2;
+    private static final int DEFAULT_VEHICLE_DENSITY = 144;
+    private static final int DEFAULT_NUM_GRIDS = 4;
+    private final boolean CHECK_FOR_COLLISIONS = false;
     private final boolean isTest;
     private final String filename;
     private FileWriter fw;
@@ -124,13 +129,20 @@ public class AgentCity extends SimState {
 
     /** Constructor default */
     public AgentCity(long seed) {
-        this(seed, 8, 128, true, "default.json", 0.12);
+        this(seed,
+             DEFAULT_NUM_GRIDS,
+             DEFAULT_VEHICLE_DENSITY,
+             DEFAULT_LANE_USE_POLICY,
+             "default.json",
+             DEFAULT_TRIP_GEN_RATE,
+             DEFAULT_HOV_MIN);
     }
 
     /** Constructor */
     public AgentCity(long seed, int grids, int density, boolean lanePolicy,
                      String outputFileName,
-                     Double tripGenRate) {
+                     Double tripGenRate,
+                     int hovMin) {
         // Required by SimState
         super(seed);
         this.seed = seed;
@@ -140,6 +152,7 @@ public class AgentCity extends SimState {
         this.LANE_POLICY = lanePolicy;
         this.filename = outputFileName;
         this.TRIPGEN_RATE = tripGenRate;
+        this.HOV_MIN = hovMin;
         if (FILE_OUT) {
             try {
                 fw = new FileWriter(filename, true);
@@ -213,6 +226,8 @@ public class AgentCity extends SimState {
             .append(", ")
             .append("\"tripGenRate\": " + TRIPGEN_RATE)
             .append(", ")
+            .append("\"hovMin\": " + HOV_MIN)
+            .append(", ")
             .append("\"seed\": " + seed)
             .append("},\n");
 
@@ -258,7 +273,7 @@ public class AgentCity extends SimState {
                         }
                         if (FILE_OUT && step > 0) {
                             fileout.println(reportString);
-                            fileout.close();
+                            //fileout.close();
                         }
                     }
                 }
@@ -415,7 +430,8 @@ public class AgentCity extends SimState {
                 schedule.scheduleRepeating(intersectionAgents[i],
                                            INTERSECTION_SCHEDULE_NUM, 1);
             TripGenerator gen =
-                new TripGenerator(i, intersections[i], TRIPGEN_RATE, random);
+                new TripGenerator(i, intersections[i], TRIPGEN_RATE,
+                                  new MersenneTwisterFast(seed));
             gen.stopper =
                 schedule.scheduleRepeating(gen, TRIPGEN_SCHEDULE_NUM, 1);
         }
@@ -470,10 +486,14 @@ public class AgentCity extends SimState {
         SimState state;
         int grids = 4;
         int density;
-        int minDensity = 32;
+        int minDensity = 128;
         int maxDensity = 256;
         // Double tripGenRate;
         Double tripGenRate;
+        Double minRate = 0.02;
+        Double maxRate = 0.20;
+        int hovMin;
+
 
         /*
         DateTimeFormatter formatter =
@@ -487,22 +507,34 @@ public class AgentCity extends SimState {
         String filename = String.format("%drand.json", grids);
 
         for (int i = 0; i < numRuns; i++) {
-            density = random.nextInt(maxDensity - minDensity) + minDensity;
-            tripGenRate = random.nextDouble() * 0.1;
-            //tripGenRate = 0.04;
+            //density = random.nextInt(maxDensity - minDensity) + minDensity;
+            density = 144;
+            //tripGenRate = random.nextDouble() * (maxRate - minRate) + minRate;
+            //hovMin = random.nextInt(4 - 1) + 1;
+            tripGenRate = 0.2;
             state = new AgentCity(seed, grids, density, true, filename,
-                                  tripGenRate);
+                                  tripGenRate, 1);
             state.start();
             for (int j = 0; j < stepLimit; j++) {
                 state.schedule.step(state);
             }
+            ((AgentCity)state).fileout.close();
+            state.kill();
+            state = new AgentCity(seed, grids, density, true, filename,
+                                  tripGenRate, 2);
+            state.start();
+            for (int j = 0; j < stepLimit; j++) {
+                state.schedule.step(state);
+            }
+            ((AgentCity)state).fileout.close();
             state.kill();
             state = new AgentCity(seed, grids, density, false, filename,
-                                  tripGenRate);
+                                  tripGenRate, 1);
             state.start();
             for (int j = 0; j < stepLimit; j++) {
                 state.schedule.step(state);
             }
+            ((AgentCity)state).fileout.close();
             state.kill();
             seed++;
         }

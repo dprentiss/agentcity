@@ -19,6 +19,7 @@ public class TripGenerator implements Steppable {
     private static final long serialVersionUID = 1;
     Stoppable stopper;
     long step;
+    MersenneTwisterFast rand;
 
     // Properties
     public final int idNum;
@@ -79,11 +80,12 @@ public class TripGenerator implements Steppable {
      * uniqueness is not checked.
      */
     public TripGenerator(int id, Intersection intersection, double mean,
-                         MersenneTwisterFast randomGenerator) {
+                         MersenneTwisterFast rand) {
         idNum = id;
         this.intersection = intersection;
         this.mean = mean;
-        distribution = new Poisson(mean, randomGenerator);
+        this.rand = rand;
+        distribution = new Poisson(mean, rand);
     }
 
     public void step(final SimState state) {
@@ -93,10 +95,10 @@ public class TripGenerator implements Steppable {
         Person newPerson;
         for (int i = numPersons; i > 0; i--) {
             Intersection destination =
-                ac.intersections[ac.random.nextInt(ac.intersections.length - 1) + 1];
+                ac.intersections[rand.nextInt(ac.intersections.length - 1) + 1];
             while (destination == intersection) {
                 destination =
-                    ac.intersections[ac.random.nextInt(ac.intersections.length - 1) + 1];
+                    ac.intersections[rand.nextInt(ac.intersections.length - 1) + 1];
             }
             int newId = (int)step * 10000 + 100 * intersection.idNum + destination.idNum;
             newPerson = new Person(newId, intersection, destination);
