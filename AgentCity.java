@@ -40,10 +40,11 @@ public class AgentCity extends SimState {
     public static final boolean SMART_TURNS = true;
     public static final boolean AVOID_CONGESTION = true;
     public static final boolean RESERVATION_PRIORITY = true;
+    public static final boolean RESERVATION_PRIORITY_SMALL = false;
     public static final boolean PASSENGER_WARM_START = false;
     public static final double WARM_START_RATE = 0.5;
     public static final boolean CONSOLE_OUT = true;
-    public static final boolean FILE_OUT = true;
+    public static final boolean FILE_OUT = false;
     public static final int MAX_SPEED = 2;
     public static final int REPORT_INTERVAL = 600;
     //public static final int PASSENGER_POLLING_INTERVAL = 600;
@@ -51,8 +52,8 @@ public class AgentCity extends SimState {
     public static final double METERS_PER_CELL = 7.5;
 
     // Utility
-    private static final int DEFAULT_HOV_MIN = 2;
-    private static final boolean DEFAULT_LANE_USE_POLICY = true;
+    private static final int DEFAULT_HOV_MIN = 4;
+    private static final boolean DEFAULT_LANE_USE_POLICY = false;
     private static final double DEFAULT_TRIP_GEN_RATE = 0.2;
     private static final int DEFAULT_VEHICLE_DENSITY = 144;
     private static final int DEFAULT_NUM_GRIDS = 4;
@@ -76,28 +77,6 @@ public class AgentCity extends SimState {
     public int density;
     public int gridHeight;
     public int gridWidth;
-
-    // Intersection turning movements
-    /*
-    enum TurningMovements {
-        NONE,
-        STOP,
-        STRAIGHT,
-        RIGHT,
-        LEFT,
-        STRAIGHT_RIGHT,
-        STRAIGHT_LEFT,
-        RIGHT_LEFT,
-        ALL,
-        STRAIGHT_YEILD,
-        RIGHT_YEILD,
-        LEFT_YEILD,
-        STRAIGHT_RIGHT_YEILD,
-        STRAIGHT_LEFT_YEILD,
-        RIGHT_LEFT_YEILD,
-        ALL_YEILD
-    }
-    */
 
     // Grid of agent locations
     public SparseGrid2D agentGrid;
@@ -123,9 +102,6 @@ public class AgentCity extends SimState {
         //travelersInVehicle.add(person);
         return travelers.add(person);
     }
-
-    // Temporary dispatcher
-    //public DispatchAgent dispatcher;
 
     /** Constructor default */
     public AgentCity(long seed) {
