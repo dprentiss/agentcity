@@ -44,7 +44,7 @@ public class IntersectionAgent implements Steppable {
 
     // Accessors
     public void setPriority(boolean priority) { passengerPriority = priority; }
-    public boolean getPriority(boolean priority) { return passengerPriority; }
+    public boolean getPriority() { return passengerPriority; }
 
     public Bag getVehicles() { return vehicles; }
 
@@ -88,17 +88,6 @@ public class IntersectionAgent implements Steppable {
         setIntersection(intersection);
     }
 
-
-    /** Considers a request from an approaching Vehicle object and returns
-     * whether or not the the request is approved
-     */
-    /*
-    public boolean requestReservation(Vehicle vehicle, long time,
-                                      Int2D[] path) {
-        // check path against schedule
-        return addVehicleToSchedule(vehicle, time, path);
-    }
-    */
 
     /** Considers a request from an approaching Vehicle object and returns
      * whether or not the the request is approved
@@ -215,6 +204,8 @@ public class IntersectionAgent implements Steppable {
                         otherVehicle.hasReservation = false;
                         otherDriver.hasReservation = false;
                         otherDriver.checkReservation(ac);
+                        //System.out.print(vehicle.toString());
+                        //System.out.print(otherVehicle.toString());
                     }
                     schedule[timeIndex][x][y] = vehicle;
                 }
