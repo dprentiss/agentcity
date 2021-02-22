@@ -100,6 +100,8 @@ public class Vehicle implements Steppable, Driveable {
             .append("speed: " + speed)
             .append(", ")
             .append("hasPassengers: " + hasPassengers)
+            .append(", ")
+            .append("numPassengers: " + getNumPassengers())
             .append("}\n")
             .toString();
     }
