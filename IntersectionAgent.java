@@ -291,95 +291,6 @@ public class IntersectionAgent implements Steppable {
         return true;
     }
 
-    /*
-    private void allowPriorityReservations(AgentCity ac) {
-        int x;
-        int y;
-        Vehicle vehicle;
-        Bag bag;
-        Bag tmp = new Bag(vehicles);
-        long steps = ac.schedule.getSteps();
-        boolean addedReservation = true;
-        vehicles.clear();
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                x = cells[i][j].x;
-                y = cells[i][j].y;
-                bag = ac.agentGrid.getObjectsAtLocation(x, y);
-                if (bag == null) continue;
-                vehicle = (Vehicle)bag.objs[0];
-                for (int k = 0; k < scheduleSize; k++) {
-                    schedule[k][i][j] = vehicle;
-                }
-            }
-        }
-        while (addedReservation == true) {
-            addedReservation = false;
-            for (int m = 0; m < tmp.numObjs; m++) {
-                vehicle = (Vehicle)tmp.objs[m];
-                removeVehicleFromSchedule(vehicle);
-                vehicles.add(vehicle);
-                ((DriverAgent)vehicle.getDriver()).updateReservation(ac);
-                if (vehicle.hasReservation) {
-                    tmp.remove(vehicle);
-                    addedReservation = true;
-                    break;
-                } else {
-                    vehicles.remove(vehicle);
-                    if (((DriverAgent)vehicle.getDriver()).inIntersection) {
-                        x = vehicle.location.x - intersection.minX;
-                        y = vehicle.location.y - intersection.minY;
-                        for (int n = 0; n < scheduleSize; n++) {
-                            schedule[n][x][y] = vehicle;
-                        }
-                    }
-                }
-            }
-        }
-        while (!tmp.isEmpty()) {
-            vehicle = (Vehicle)tmp.pop();
-            vehicles.add(vehicle);
-            ((DriverAgent)vehicle.getDriver()).updateReservation(ac);
-        }
-        acceptingReservations = true;
-    }
-    */
-
-    /*
-    private void allowPriorityReservations(AgentCity ac) {
-        int x;
-        int y;
-        Vehicle vehicle;
-        Bag bag;
-        Bag tmp = new Bag(vehicles);
-        long steps = ac.schedule.getSteps();
-        vehicles.clear();
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                x = cells[i][j].x;
-                y = cells[i][j].y;
-                bag = ac.agentGrid.getObjectsAtLocation(x, y);
-                if (bag == null) continue;
-                vehicle = (Vehicle)bag.objs[0];
-                schedule[(int)(steps % scheduleSize)][i][j] = vehicle;
-                tmp.remove(vehicle);
-                vehicles.add(vehicle);
-            }
-        }
-        vehicles.shuffle(ac.random);
-        for (int k = 0; k < vehicles.numObjs; k++) {
-            vehicle = (Vehicle)vehicles.objs[k];
-            ((DriverAgent)vehicle.getDriver()).updateReservation(ac);
-        }
-        while (!tmp.isEmpty()) {
-            vehicle = (Vehicle)tmp.pop();
-            vehicles.add(vehicle);
-            ((DriverAgent)vehicle.getDriver()).updateReservation(ac);
-        }
-        acceptingReservations = true;
-    }
-    */
-
     private void allowPriorityReservations(AgentCity ac) {
         int x;
         int y;
@@ -408,37 +319,6 @@ public class IntersectionAgent implements Steppable {
             return;
         }
     }
-
-    /*
-    private void allowPriorityReservations(AgentCity ac) {
-        int x;
-        int y;
-        Vehicle vehicle;
-        Bag bag;
-        Bag tmp = new Bag(vehicles);
-        long steps = ac.schedule.getSteps();
-        vehicles.clear();
-        for (int i = 0; i < width; i++) {
-            for (int j = 0; j < height; j++) {
-                x = cells[i][j].x;
-                y = cells[i][j].y;
-                bag = ac.agentGrid.getObjectsAtLocation(x, y);
-                if (bag == null) continue;
-                vehicle = (Vehicle)bag.objs[0];
-                schedule[(int)(steps % scheduleSize)][i][j] = vehicle;
-                tmp.remove(vehicle);
-                vehicles.add(vehicle);
-                ((DriverAgent)vehicle.getDriver()).updateReservation(ac);
-            }
-        }
-        while (!tmp.isEmpty()) {
-            vehicle = (Vehicle)tmp.pop();
-            vehicles.add(vehicle);
-            ((DriverAgent)vehicle.getDriver()).updateReservation(ac);
-        }
-        acceptingReservations = true;
-    }
-    */
 
     private void checkSchedule() {
         int x;
