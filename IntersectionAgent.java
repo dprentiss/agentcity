@@ -232,11 +232,11 @@ public class IntersectionAgent implements Steppable {
                         otherVehicle.hasReservation = false;
                         otherDriver.hasReservation = false;
                         otherDriver.checkReservation(ac);
-                        //System.out.print(vehicle.toString());
-                        //System.out.print(otherVehicle.toString());
-                        //System.out.println(getPriority(vehicle));
-                        //System.out.println(getPriority(otherVehicle));
-                        //System.out.print("\n");
+                        System.out.print(vehicle.toString());
+                        System.out.print(otherVehicle.toString());
+                        System.out.println(getVehiclePriority(vehicle));
+                        System.out.println(getVehiclePriority(otherVehicle));
+                        System.out.print("\n");
                     }
                     schedule[timeIndex][x][y] = vehicle;
                 }
