@@ -25,6 +25,7 @@ public class Intersection {
     // Variables
     private IntersectionAgent controller;
     private Int2D[] approachLegs;
+    private int[] approachLegLength;
     private Int2D[] departureLegs;
 
     // Accessors
@@ -187,6 +188,26 @@ public class Intersection {
                 index++;
             }
         }
+
+        // Count cells on legs
+        approachLegLength = new int[approachLegs.length];
+        for (int i = 0; i < approachLegLength.length; i++) {
+            approachLegLength[i] = getLegLength(ac, approachLegs[i], true);
+        }
+    }
+
+    private int getLegLength(AgentCity ac, Int2D leg, boolean isApproachLeg) {
+        int count = 0;
+        Direction dir = Direction.byInt(ac.roadGrid.get(leg.x, leg.y));
+        Int2D cell = leg;
+        Direction cellDir = dir;
+        Direction countDir = (isApproachLeg ? dir.opposite(): dir);
+        while (cellDir == dir) {
+            cell = ac.getCellAhead(cell, countDir, 1);
+            cellDir = Direction.byInt(ac.roadGrid.get(cell.x, cell.y));
+            count++;
+        }
+        return count;
     }
 
     public Int2D[] getDepartureLegsByDirection(AgentCity ac, Direction dir) {
@@ -254,11 +275,4 @@ public class Intersection {
         }
         return departureLegs[nextDepartureIdx];
     }
-
-/*
-    public void step(final SimState state) {
-        // World state
-        AgentCity ac = (AgentCity)state;
-    }
-*/
 }
