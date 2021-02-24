@@ -126,6 +126,7 @@ public class Vehicle implements Steppable, Driveable {
      */
     public Bag getManifest() { return manifest; }
 
+    /** Returns the current number of passengers */
     public int getNumPassengers() { return manifest.numObjs; }
 
     /** Returns the most distant destination this Vehicle's current passengers.
