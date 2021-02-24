@@ -144,7 +144,7 @@ public class IntersectionAgent implements Steppable {
         return toString(NONE);
     }
 
-    private int getPriority(Vehicle vehicle) {
+    private int getVehiclePriority(Vehicle vehicle) {
         int priority = 0;
         DriverAgent driver = (DriverAgent)vehicle.getDriver();
         Int2D leg = driver.nextApproachLeg;
@@ -202,7 +202,7 @@ public class IntersectionAgent implements Steppable {
                                 otherVehicle = schedule[timeIndex][x][y];
                                 otherDriver = (DriverAgent)otherVehicle.getDriver();
                                 otherDriver.updateState(ac);
-                                if (getPriority(otherVehicle) >= getPriority(vehicle)
+                                if (getVehiclePriority(otherVehicle) >= getVehiclePriority(vehicle)
                                     || otherDriver.inIntersection) {
                                     return false;
                                 }
