@@ -39,7 +39,6 @@ public class AgentCity extends SimState {
     public static final boolean SMART_TURNS = true;
     public static final boolean AVOID_CONGESTION = true;
     public static final boolean RESERVATION_PRIORITY = true;
-    public static final boolean RESERVATION_PRIORITY_SMALL = false;
     public static final boolean PASSENGER_WARM_START = false;
     public static final double WARM_START_RATE = 0.5;
     public static final boolean CONSOLE_OUT = true;
@@ -49,9 +48,9 @@ public class AgentCity extends SimState {
     public static final double SECONDS_PER_STEP = 1;
     public static final double METERS_PER_CELL = 7.5;
     public static final int NUM_BLOCKED_LEG_CELLS = 4;
+    public static final int MIN_INTERSECTION_CONTROL_SIZE = 0;
 
     // Utility
-    private long lastTripStep = 0;
     private static final int DEFAULT_HOV_MIN = 1;
     private static final boolean DEFAULT_LANE_USE_POLICY = false;
     private static final double DEFAULT_TRIP_GEN_RATE = 0.2;
@@ -65,6 +64,7 @@ public class AgentCity extends SimState {
     public PrintWriter fileout;
 
     // Variables
+    private long lastTripStep = 0;
     private int numVehicles;
     private long step;
     private int tripsCompleted = 0;

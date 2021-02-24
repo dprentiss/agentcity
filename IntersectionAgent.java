@@ -84,7 +84,8 @@ public class IntersectionAgent implements Steppable {
      */
     public IntersectionAgent(int id, Intersection intersection) {
         this.idNum = id;
-        setPriority(ac.RESERVATION_PRIORITY);
+        setPriority(ac.RESERVATION_PRIORITY
+                    && width * height >= ac.MIN_INTERSECTION_CONTROL_SIZE);
         setIntersection(intersection);
     }
 
@@ -143,6 +144,33 @@ public class IntersectionAgent implements Steppable {
         return toString(NONE);
     }
 
+    private int getPriority(Vehicle vehicle) {
+        int priority = 0;
+        DriverAgent driver = (DriverAgent)vehicle.getDriver();
+        Int2D leg = driver.nextApproachLeg;
+        priority += vehicle.getNumPassengers();
+        priority += countVehicles(ac, leg, true);
+        //System.out.println(vehicle);
+        //System.out.println(priority);
+        return priority;
+    }
+
+    private int countVehicles(AgentCity ac, Int2D leg, boolean isApproachLeg) {
+        int count = 0;
+        Direction dir = Direction.byInt(ac.roadGrid.get(leg.x, leg.y));
+        Int2D cell = leg;
+        Direction cellDir = dir;
+        Direction countDir = (isApproachLeg ? dir.opposite(): dir);
+        while (cellDir == dir) {
+            cell = ac.getCellAhead(cell, countDir, 1);
+            cellDir = Direction.byInt(ac.roadGrid.get(cell.x, cell.y));
+            if (ac.agentGrid.getObjectsAtLocation(cell.x, cell.y) != null) {
+                count++;
+            }
+        }
+        return count;
+    }
+
     /** Handles reservation requests for the Intersection controlled by this
      * intersection agent.
      *
@@ -167,13 +195,14 @@ public class IntersectionAgent implements Steppable {
                     && intersection.inIntersection(path[i][j])) {
                     x = path[i][j].x - intersection.minX;
                     y = path[i][j].y - intersection.minY;
+                    // if reservation conflicts with existing vehicle
                     if (schedule[timeIndex][x][y] != null) {
-                        if (passengerPriority && height * width > 4) {
+                        if (passengerPriority) {
                             if (vehicle.meetsHovMin()) {
                                 otherVehicle = schedule[timeIndex][x][y];
                                 otherDriver = (DriverAgent)otherVehicle.getDriver();
                                 otherDriver.updateState(ac);
-                                if (otherVehicle.meetsHovMin()
+                                if (getPriority(otherVehicle) >= getPriority(vehicle)
                                     || otherDriver.inIntersection) {
                                     return false;
                                 }
@@ -196,8 +225,7 @@ public class IntersectionAgent implements Steppable {
                     x = path[i][j].x - intersection.minX;
                     y = path[i][j].y - intersection.minY;
                     if (passengerPriority
-                        && schedule[timeIndex][x][y] != null
-                        && height * width > 4) {
+                        && schedule[timeIndex][x][y] != null) {
                         otherVehicle = schedule[timeIndex][x][y];
                         otherDriver = (DriverAgent)otherVehicle.getDriver();
                         removeVehicleFromSchedule(otherVehicle);
@@ -206,6 +234,9 @@ public class IntersectionAgent implements Steppable {
                         otherDriver.checkReservation(ac);
                         //System.out.print(vehicle.toString());
                         //System.out.print(otherVehicle.toString());
+                        //System.out.println(getPriority(vehicle));
+                        //System.out.println(getPriority(otherVehicle));
+                        //System.out.print("\n");
                     }
                     schedule[timeIndex][x][y] = vehicle;
                 }
@@ -339,7 +370,7 @@ public class IntersectionAgent implements Steppable {
         int x = leg.x;
         int y = leg.y;
         Bag b;
-        int numCells = 5;
+        int numCells = ac.NUM_BLOCKED_LEG_CELLS;
         Direction dir = Direction.byInt(ac.roadGrid.get(x, y));
             for (int i = 0; i < numCells; i++) {
                 b = ac.agentGrid.getObjectsAtLocation(x, y);
