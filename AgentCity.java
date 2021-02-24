@@ -32,10 +32,9 @@ public class AgentCity extends SimState {
     public static final int REPORT_SCHEDULE_NUM = 6;
 
     // Simulation constants
-    long lastTripStep = 0;
+    public final long seed;
     public final double TRIPGEN_RATE;
-    final boolean LANE_POLICY;
-    final long seed;
+    public final boolean LANE_POLICY;
     public final int HOV_MIN;
     public static final boolean SMART_TURNS = true;
     public static final boolean AVOID_CONGESTION = true;
@@ -47,12 +46,13 @@ public class AgentCity extends SimState {
     public static final boolean FILE_OUT = false;
     public static final int MAX_SPEED = 2;
     public static final int REPORT_INTERVAL = 600;
-    //public static final int PASSENGER_POLLING_INTERVAL = 600;
     public static final double SECONDS_PER_STEP = 1;
     public static final double METERS_PER_CELL = 7.5;
+    public static final int NUM_BLOCKED_LEG_CELLS = 4;
 
     // Utility
-    private static final int DEFAULT_HOV_MIN = 4;
+    private long lastTripStep = 0;
+    private static final int DEFAULT_HOV_MIN = 1;
     private static final boolean DEFAULT_LANE_USE_POLICY = false;
     private static final double DEFAULT_TRIP_GEN_RATE = 0.2;
     private static final int DEFAULT_VEHICLE_DENSITY = 144;
@@ -449,6 +449,15 @@ public class AgentCity extends SimState {
                 newPerson.stopper = schedule.scheduleRepeating(newPerson, TRIPGEN_SCHEDULE_NUM, 1);
             }
         }
+    }
+
+    Int2D getCellAhead(int cellX, int cellY, Direction dir, int offset) {
+        return new Int2D(cellX + offset * dir.getXOffset(),
+                         cellY + offset * dir.getYOffset());
+    }
+
+    Int2D getCellAhead(Int2D cell, Direction dir, int offset) {
+        return getCellAhead(cell.x, cell.y, dir, offset);
     }
 
     /** Main */
