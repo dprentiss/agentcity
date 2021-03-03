@@ -273,11 +273,13 @@ public class IntersectionAgent implements Steppable {
             System.out.print(vehicle.toString());
         }
         */
-        for (int i = 0; i < scheduleSize; i++) {
-            for (int j = 0; j < width; j++) {
-                for (int k = 0; k < height; k++) {
-                    if (schedule[i][j][k] == vehicle) {
-                        schedule[i][j][k] = null;
+        if (removed) {
+            for (int i = 0; i < scheduleSize; i++) {
+                for (int j = 0; j < width; j++) {
+                    for (int k = 0; k < height; k++) {
+                        if (schedule[i][j][k] == vehicle) {
+                            schedule[i][j][k] = null;
+                        }
                     }
                 }
             }
