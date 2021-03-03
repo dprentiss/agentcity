@@ -61,7 +61,8 @@ public class IntersectionAgent implements Steppable {
         this.intersection = intersection;
         this.width = intersection.maxX - intersection.minX + 1;
         this.height = intersection.maxY - intersection.minY + 1;
-        scheduleSize = width + height;
+        //TODO remove hard-coded scheduleSize bias
+        scheduleSize = width + height + 1;
         vehicles = new Bag((width + 2) * (height + 2));
         approachLegs = intersection.getApproachLegs();
         schedule = new Vehicle[scheduleSize][width][height];
@@ -232,11 +233,14 @@ public class IntersectionAgent implements Steppable {
                         otherVehicle.hasReservation = false;
                         otherDriver.hasReservation = false;
                         otherDriver.checkReservation(ac);
-                        System.out.print(vehicle.toString());
-                        System.out.print(otherVehicle.toString());
-                        System.out.println(getVehiclePriority(vehicle));
-                        System.out.println(getVehiclePriority(otherVehicle));
-                        System.out.print("\n");
+                        //if (otherVehicle.getLocation() ==ac.getCellAhead(vehicle.getLocation(),vehicle.getDirection(),1)) {
+                        if (false) {
+                            System.out.print(vehicle.toString());
+                            System.out.print(otherVehicle.toString());
+                            System.out.println(getVehiclePriority(vehicle));
+                            System.out.println(getVehiclePriority(otherVehicle));
+                            System.out.print("\n");
+                        }
                     }
                     schedule[timeIndex][x][y] = vehicle;
                 }
