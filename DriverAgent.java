@@ -143,7 +143,7 @@ public class DriverAgent implements Steppable, Driver {
 
         Int2D cell;
 
-        int MAX_DEPTH = 16;
+        int MAX_DEPTH = 16; // recursive depth
         if (depth > MAX_DEPTH) {return 0;}
 
         // for each cell ahead of vehicle, check for obstacles and boundaries.
@@ -153,6 +153,9 @@ public class DriverAgent implements Steppable, Driver {
             if (!ac.checkBounds(cell.x, cell.y)) { return i; }
             // check if cell is a road cell
             if (ac.roadGrid.get(cell.x, cell.y) == 0) { return i; }
+            // check if cell is an intersection
+            if (ac.intersectionGrid.get(cell.x, cell.y) != 0
+                && !hasReservation) { return i; }
             // get any vehicles on cell
             Bag b = ac.agentGrid.getObjectsAtLocation(cell.x, cell.y);
             if (b != null) { // if there is another vehicle at the cell
@@ -294,6 +297,19 @@ public class DriverAgent implements Steppable, Driver {
         Int2D[] path;
 
         int dist = getGapToCell(cell, loc, dir) + 1;
+        /*
+        if (this.vehicle.idNum == 574) {
+            String s = new StringBuilder()
+                .append(String.format("Cell %s is ahead of cell %s headed %s.\n",
+                                      cell, loc, dir))
+                .append(this.vehicle.toString())
+                .append(this.toString())
+                .append(Arrays.toString(waypoints))
+                .append(dist)
+                .toString();
+            System.out.print(s);
+        }
+        */
         if (dist < 0) {
             String errorString = new StringBuilder()
                 .append(String.format("Cell %s is not ahead of cell %s headed %s.\n",
@@ -301,7 +317,7 @@ public class DriverAgent implements Steppable, Driver {
                 .append(this.vehicle.toString())
                 .append(this.toString())
                 .append(Arrays.toString(waypoints))
-                .append(vehicle.toString())
+                .append(dist)
                 .toString();
             throw new IllegalArgumentException(errorString);
         }
