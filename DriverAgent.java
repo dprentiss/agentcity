@@ -70,11 +70,13 @@ public class DriverAgent implements Steppable, Driver {
     }
     public Driver.Directive getNextDirective() { return nextDirective; }
     public int getDesiredSpeed() { return desiredSpeed; }
+    /*
     public int assignVehicle(Person person,
                              Intersection pickUp,
                              Intersection dropOff) {
         return -1;
     }
+    */
 
     @Override
     public String toString() {
@@ -677,9 +679,7 @@ public class DriverAgent implements Steppable, Driver {
             if (nextIntersection.legBlocked(nextLeg)) {
                 desiredSpeed = getGapToCell(nextApproachLeg) + 1;
                 nextDirective = Driver.Directive.STOP;
-                //nextIntersection.cancelReservation(vehicle);
-                vehicle.hasReservation = false;
-                hasReservation = false;
+                nextIntersection.cancelReservation(vehicle, false);
                 if (ac.AVOID_CONGESTION) updateDestination();
             }
         }
@@ -687,9 +687,7 @@ public class DriverAgent implements Steppable, Driver {
             if (nextIntersection.legBlocked(nextLeg)) {
                 desiredSpeed = 0;
                 nextDirective = Driver.Directive.STOP;
-                //nextIntersection.cancelReservation(vehicle);
-                vehicle.hasReservation = false;
-                hasReservation = false;
+                nextIntersection.cancelReservation(vehicle, false);
                 if (ac.AVOID_CONGESTION) updateDestination();
             }
         }
@@ -899,9 +897,7 @@ public class DriverAgent implements Steppable, Driver {
 
         // get a new destination if needed
         if (atNextLeg) {
-            nextIntersection.cancelReservation(vehicle);
-            vehicle.hasReservation = false;
-            hasReservation = false;
+            nextIntersection.cancelReservation(vehicle, true);
             updateDestination();
         }
 
@@ -943,10 +939,10 @@ public class DriverAgent implements Steppable, Driver {
         }
 
         if (hasReservation && maxSafeSpeed == 0 && !inIntersection) {
-            nextIntersection.cancelReservation(vehicle);
-            hasReservation = false;
-            vehicle.hasReservation = false;
-            if (inIntersection) updateReservation();
+            if (nextIntersection.cancelReservation(vehicle, false)) {
+                hasReservation = false;
+                vehicle.hasReservation = false;
+            }
         }
 
         // prepare to take appropriate action at Waypoint

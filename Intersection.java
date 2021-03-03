@@ -74,8 +74,8 @@ public class Intersection {
     public boolean requestReservation(Vehicle vehicle, long time, Int2D[][] path) {
         return controller.requestReservation(vehicle, time, path);
     }
-    public boolean cancelReservation(Vehicle vehicle) {
-        return controller.cancelReservation(vehicle);
+    public boolean cancelReservation(Vehicle vehicle, boolean complete) {
+        return controller.cancelReservation(vehicle, complete);
     }
 
     /** Constructor */

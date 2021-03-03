@@ -5,6 +5,7 @@
 package sim.app.agentcity;
 import sim.util.*;
 import sim.engine.*;
+import java.util.Arrays;
 
 /**
  * @author David Prentiss
@@ -55,6 +56,9 @@ public class Vehicle implements Steppable, Driveable {
     private int speed;
 
     // Reporting variables
+    public int[] stepsMoving;
+    public int[] stepsWaiting;
+    public int[] distance;
     public int stepsWithPassenger = 0;
     public int stepsWithoutPassenger = 0;
     public int stepsTravelingWithPassenger = 0;
@@ -177,7 +181,7 @@ public class Vehicle implements Steppable, Driveable {
      * capacity of four.
      */
     public Vehicle(int id, Direction dir) {
-        this(id, 1, 4, dir);
+        this(id, 1, AgentCity.PASSENGER_CAP, dir);
     }
 
     /** Creates a Vehicle object with the given ID number, passenger capacity
@@ -200,6 +204,9 @@ public class Vehicle implements Steppable, Driveable {
         passengerCap = cap;
         manifest = new Bag(passengerCap);
         direction = dir;
+        stepsMoving = new int[passengerCap+1];
+        stepsWaiting = new int[passengerCap+1];
+        distance = new int[passengerCap+1];
     }
 
     /** Set the location of this Vehicle on the grid in provided state at the
@@ -332,6 +339,14 @@ public class Vehicle implements Steppable, Driveable {
             break;
         }
 
+        // Do some logging
+        if (speed > 0) {
+            stepsMoving[manifest.numObjs]++;
+            distance[manifest.numObjs]++;
+        } else {
+            stepsWaiting[manifest.numObjs]++;
+        }
+        //TODO remove old logging variables
         if (hasPassengers) {
             stepsWithPassenger++;
             if (speed > 0) {
