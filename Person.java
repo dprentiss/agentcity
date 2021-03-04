@@ -34,9 +34,12 @@ public class Person implements Steppable, VehicleClient {
 
     // Accessors
     public int getStepsTraveling() { return stepsTraveling; }
+    public int getDist() { return cellsTraveled; }
     public Intersection getOrigin() { return origin; }
     public Vehicle getVehicle() { return vehicle; }
     public Intersection getDestination() { return destination; }
+
+
     public boolean inVehicle() { return inVehicle; }
     public boolean atDestination() {
         atDestination =
@@ -130,9 +133,7 @@ public class Person implements Steppable, VehicleClient {
             Vehicle v;
             for (int i = 0; i < vehicles.numObjs; i++) {
                 v = (Vehicle)vehicles.objs[i];
-                if (boardVehicle(v)) {
-                    break;
-                }
+                if (boardVehicle(v)) { break; }
             }
         } else {
             stepsTraveling++;

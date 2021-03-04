@@ -38,7 +38,7 @@ public class AgentCity extends SimState {
     public final int HOV_MIN;
     public static final boolean SMART_TURNS = true;
     public static final boolean AVOID_CONGESTION = true;
-    public static final boolean RESERVATION_PRIORITY = true;
+    public static final boolean RESERVATION_PRIORITY = false;
     public static final boolean PASSENGER_WARM_START = false;
     public static final double WARM_START_RATE = 0.5;
     public static final boolean CONSOLE_OUT = true;
@@ -49,14 +49,15 @@ public class AgentCity extends SimState {
     public static final double METERS_PER_CELL = 7.5;
     public static final int NUM_BLOCKED_LEG_CELLS = 4;
     public static final int MIN_INTERSECTION_CONTROL_SIZE = 0;
+    public static final int PASSENGER_CAP = 4;
 
     // Utility
-    private static final int DEFAULT_HOV_MIN = 1;
+    private static final int DEFAULT_HOV_MIN = 3;
     private static final boolean DEFAULT_LANE_USE_POLICY = false;
     private static final double DEFAULT_TRIP_GEN_RATE = 0.2;
     private static final int DEFAULT_VEHICLE_DENSITY = 144;
     private static final int DEFAULT_NUM_GRIDS = 4;
-    private final boolean CHECK_FOR_COLLISIONS = false;
+    private final boolean CHECK_FOR_COLLISIONS = true;
     private final boolean isTest;
     private final String filename;
     private FileWriter fw;
@@ -71,6 +72,8 @@ public class AgentCity extends SimState {
     private int tripsCompletedTmp = 0;
     private int passengerSteps = 0;
     private int passengerStepsTmp = 0;
+    private int passengerDist = 0;
+    private int passengerDistTmp = 0;
 
     // Grid dimensions
     public int grids;
@@ -141,23 +144,60 @@ public class AgentCity extends SimState {
     @Override
     public String toString() {
         if (agentGrid == null) { return ""; }
-        int trips = printAverageTrips();
-        int steps = printAverageSteps();
-        int stepsPerTrip = (trips > 0 ? steps/trips : 0);
+        // Travelers
+        int trips = getAverageTrips();
+        int steps = getAverageSteps();
+        int dist = getAverageDist();
+        float stepsPerTrip = (trips > 0 ? (float)steps/trips : 0);
+        float distPerTrip = (trips > 0 ? (float)dist/trips : 0);
+        // Vehicles
+        int[] stepsMoving = new int[PASSENGER_CAP+1];
+        int[] stepsWaiting = new int[PASSENGER_CAP+1];
+        int[] distance = new int[PASSENGER_CAP+1];
+        // Vehicles
+        int[] reservationsCanceled = new int[PASSENGER_CAP+1];
+        int[] reservationsCompleted = new int[PASSENGER_CAP+1];
+        int scheduleInvalid = 0;
+        /*
         int stepsWithPassenger = 0;
         int stepsWithoutPassenger = 0;
         int stepsTravelingWithPassenger = 0;
         int stepsTravelingWithoutPassenger = 0;
         int distWithPassenger = 0;
         int distWithoutPassenger = 0;
+        */
         Bag vehicles = agentGrid.allObjects;
+        // Vehicle reporting
         for (int i = 0; i < vehicles.numObjs; i++) {
-            stepsWithPassenger += ((Vehicle)vehicles.objs[i]).stepsWithPassenger;
-            stepsWithoutPassenger += ((Vehicle)vehicles.objs[i]).stepsWithoutPassenger;
-            stepsTravelingWithPassenger += ((Vehicle)vehicles.objs[i]).stepsTravelingWithPassenger;
-            stepsTravelingWithoutPassenger += ((Vehicle)vehicles.objs[i]).stepsTravelingWithoutPassenger;
-            distWithPassenger += ((Vehicle)vehicles.objs[i]).distWithPassenger;
-            distWithoutPassenger += ((Vehicle)vehicles.objs[i]).distWithoutPassenger;
+            Vehicle v = ((Vehicle)vehicles.objs[i]);
+            for (int k = 0; k < v.stepsMoving.length; k++) {
+                stepsMoving[k] += v.stepsMoving[k];
+            }
+            for (int k = 0; k < v.stepsWaiting.length; k++) {
+                stepsWaiting[k] += v.stepsWaiting[k];
+            }
+            for (int k = 0; k < v.distance.length; k++) {
+                distance[k] += v.distance[k];
+            }
+            /*
+            stepsWithPassenger += v.stepsWithPassenger;
+            stepsWithoutPassenger += v.stepsWithoutPassenger;
+            stepsTravelingWithPassenger += v.stepsTravelingWithPassenger;
+            stepsTravelingWithoutPassenger += v.stepsTravelingWithoutPassenger;
+            distWithPassenger += v.distWithPassenger;
+            distWithoutPassenger += v.distWithoutPassenger;
+            */
+        }
+        // IntersectionAgent reporting
+        for (int i = 1; i < intersectionAgents.length; i++) {
+            IntersectionAgent agent = intersectionAgents[i];
+            for (int k = 0; k < agent.reservationsCanceled.length; k++) {
+                reservationsCanceled[k] += agent.reservationsCanceled[k];
+            }
+            for (int k = 0; k < agent.reservationsCompleted.length; k++) {
+                reservationsCompleted[k] += agent.reservationsCompleted[k];
+            }
+            scheduleInvalid += agent.scheduleInvalid;
         }
         StringBuilder s = new StringBuilder();
         s.append("{")
@@ -174,10 +214,27 @@ public class AgentCity extends SimState {
             .append(", ")
             .append("\"averageStepsPerTrip\": " + stepsPerTrip)
             .append(", ")
+            .append("\"averageDist\": " + dist)
+            .append(", ")
+            .append("\"averageDistPerTrip\": " + distPerTrip)
+            .append(", ")
             .append("\"tripsCompleted\": " + tripsCompleted)
             .append(", ")
             .append("\"passengerSteps\": " + passengerSteps)
             .append(", ")
+            .append("\"stepsMoving\": " + Arrays.toString(stepsMoving))
+            .append(", ")
+            .append("\"stepsWaiting\": " + Arrays.toString(stepsWaiting))
+            .append(", ")
+            .append("\"distanceTraveled\": " + Arrays.toString(distance))
+            .append(", ")
+            .append("\"reservationsCanceled\": " + Arrays.toString(reservationsCanceled))
+            .append(", ")
+            .append("\"reservationsCompleted\": " + Arrays.toString(reservationsCompleted))
+            .append(", ")
+            .append("\"scheduleInvalid\": " + scheduleInvalid)
+            .append(", ")
+            /*
             .append("\"stepsWithPassenger\": " + stepsWithPassenger)
             .append(", ")
             .append("\"stepsWithoutPassenger\": " + stepsWithoutPassenger)
@@ -190,6 +247,7 @@ public class AgentCity extends SimState {
             .append(", ")
             .append("\"distWithoutPassenger\": " + distWithoutPassenger)
             .append(", ")
+            */
             .append("\"lastTripStep\": " + lastTripStep)
             .append(", ")
             .append("\"lanePolicy\": " + LANE_POLICY)
@@ -210,22 +268,29 @@ public class AgentCity extends SimState {
         return s.toString();
     }
 
-    private int printAverageTrips() {
+    private int getAverageTrips() {
         int trips = tripsCompleted - tripsCompletedTmp;
         tripsCompletedTmp = tripsCompleted;
         return trips;
     }
 
-    private int printAverageSteps() {
+    private int getAverageSteps() {
         int steps = passengerSteps - passengerStepsTmp;
         passengerStepsTmp = passengerSteps;
         return steps;
+    }
+
+    private int getAverageDist() {
+        int dist = passengerDist - passengerDistTmp;
+        passengerDistTmp = passengerDist;
+        return dist;
     }
 
     public void reportTrip(Person person) {
         tripsCompleted++;
         lastTripStep = step;
         passengerSteps += person.getStepsTraveling();
+        passengerDist += person.getDist();
     }
 
     public void start() {
