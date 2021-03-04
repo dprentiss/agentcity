@@ -70,8 +70,8 @@ public class LaneAgent implements Steppable {
      */
     public void setLane(Lane lane) {
         this.lane = lane;
-        this.width = lane.width;
-        this.height = lane.height;
+        width = lane.width;
+        height = lane.height;
         //TODO remove hard-coded scheduleSize bias
         /*
         scheduleSize = width + height + 1;
