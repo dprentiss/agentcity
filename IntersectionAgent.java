@@ -43,9 +43,9 @@ public class IntersectionAgent implements Steppable {
     private long step;
 
     // Reporting variables
-    private int numVehicles;
-    private int numReservations;
-    private int numReservationsCanceled;
+    public int[] reservationsCompleted;
+    public int[] reservationsCanceled;
+    public int scheduleInvalid = 0;
 
     // Accessors
     public void setPriority(boolean priority) { reservationPriority = priority; }
@@ -90,6 +90,8 @@ public class IntersectionAgent implements Steppable {
      */
     public IntersectionAgent(int id, Intersection intersection) {
         this.idNum = id;
+        this.reservationsCanceled = new int[ac.PASSENGER_CAP+1];
+        this.reservationsCompleted = new int[ac.PASSENGER_CAP+1];
         setPriority(ac.RESERVATION_PRIORITY
                     && width * height >= ac.MIN_INTERSECTION_CONTROL_SIZE);
         setIntersection(intersection);
@@ -109,9 +111,15 @@ public class IntersectionAgent implements Steppable {
         boolean canceled = removeVehicleFromSchedule(vehicle);
         if (canceled) {
             DriverAgent driver = (DriverAgent)vehicle.getDriver();
+            int numPassengers = vehicle.getNumPassengers();
             vehicle.hasReservation = false;
             driver.hasReservation = false;
             driver.checkReservation(ac);
+            if (complete) {
+                reservationsCompleted[numPassengers]++;
+            } else {
+                reservationsCanceled[numPassengers]++;
+            }
         }
         return canceled;
     }
@@ -240,7 +248,7 @@ public class IntersectionAgent implements Steppable {
                         otherVehicle = schedule[timeIndex][x][y];
                         cancelReservation(otherVehicle, false);
                         //if (otherVehicle.getLocation() == ac.getCellAhead(vehicle.getLocation(),vehicle.getDirection(),1)) {
-                        if (false) {
+                            if (false) {
                             System.out.print(vehicle.toString());
                             System.out.print(otherVehicle.toString());
                             System.out.println(getVehiclePriority(vehicle));
@@ -382,6 +390,7 @@ public class IntersectionAgent implements Steppable {
             clearSchedule();
             // Add Vehicles already in the intersection to schedule and bag
             allowPriorityReservations(ac);
+            scheduleInvalid++;
         } else {
             acceptingReservations = true;
         }
