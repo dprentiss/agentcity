@@ -165,7 +165,15 @@ public class IntersectionAgent implements Steppable {
         return toString(NONE);
     }
 
-    private int getVehiclePriority(Vehicle vehicle) {
+    private double getVehiclePriority(Vehicle vehicle) {
+        double priority;
+        Lane lane = vehicle.getLane(ac);
+        if (lane==null) {
+            System.out.print(vehicle.toString());
+        }
+        priority = lane.countPassengers(ac);
+
+        /*
         int priority = 0;
         DriverAgent driver = (DriverAgent)vehicle.getDriver();
         Int2D leg = driver.nextApproachLeg;
@@ -173,6 +181,7 @@ public class IntersectionAgent implements Steppable {
         priority += countVehicles(ac, leg, true);
         //System.out.println(vehicle);
         //System.out.println(priority);
+        */
         return priority;
     }
 
@@ -221,11 +230,14 @@ public class IntersectionAgent implements Steppable {
                     if (schedule[timeIndex][x][y] != null) {
                         if (reservationPriority) {
                             otherVehicle = schedule[timeIndex][x][y];
-                            otherDriver = (DriverAgent)otherVehicle.getDriver();
-                            otherDriver.updateState(ac);
-                            hasPriority = getVehiclePriority(otherVehicle)
-                                >= getVehiclePriority(vehicle);
-                            if (hasPriority || otherDriver.inIntersection) {
+                            if (!otherVehicle.inIntersection(ac)) {
+                                getVehiclePriority(otherVehicle);
+                                hasPriority = getVehiclePriority(otherVehicle)
+                                    >= getVehiclePriority(vehicle);
+                                if (hasPriority) {
+                                    return false;
+                                }
+                            } else {
                                 return false;
                             }
                         } else {

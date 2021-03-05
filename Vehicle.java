@@ -49,6 +49,8 @@ public class Vehicle implements Steppable, Driveable {
     /** The speed desired by this Vehicle's Driver. */
     private int desiredSpeed;
     private int hovMin;
+    private Lane lane;
+    private boolean inIntersection;
 
     // Physical Variables
     public Int2D location;
@@ -66,10 +68,18 @@ public class Vehicle implements Steppable, Driveable {
     public int distWithPassenger = 0;
     public int distWithoutPassenger = 0;
 
-    // Accessors
+    // Accessor
 
     public boolean meetsHovMin() {
         return getNumPassengers() >= hovMin;
+    }
+
+    public Lane getLane(AgentCity ac) {
+        return setLane(location, ac);
+    }
+
+    public boolean inIntersection(AgentCity ac) {
+        return ac.intersectionGrid.field[location.x][location.y] > 0;
     }
 
     public boolean boardVehicle(Person person) {
@@ -146,19 +156,7 @@ public class Vehicle implements Steppable, Driveable {
         return null;
     }
 
-    // Physical
-
-    /** Gets the current grid location of this Vehicle.
-     *
-     * @param ac the AgentCity state instance containg this Vehicle.
-     */
-    public Int2D getLocation(AgentCity ac) {
-        return ac.agentGrid.getObjectLocation(this);
-    }
-
-    /** Gets the last known grid location of this Vehicle.*/
     public Int2D getLocation() { return location; }
-
 
     /** Gets the current direction of this Vehicle. */
     public Direction getDirection() { return direction; }
@@ -238,6 +236,10 @@ public class Vehicle implements Steppable, Driveable {
         speed = s;
     }
 
+    private Lane setLane(Int2D loc, AgentCity ac) {
+        return ac.lanes[ac.laneGrid.field[loc.x][loc.y]];
+    }
+
     /** Actions this vehicle should take on each step.
      *
      * <p> On each step, this Vehicle should update is location and get the next
@@ -253,6 +255,7 @@ public class Vehicle implements Steppable, Driveable {
 
         // Get location from state
         location = ac.agentGrid.getObjectLocation(this);
+        lane = setLane(location, ac);
 
         // Get next directive from Driver
         Driver.Directive nextDirective = driver.getNextDirective();

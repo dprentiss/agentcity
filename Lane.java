@@ -63,6 +63,35 @@ public class Lane {
 
     public Int2D[] getCells() { return cells; }
 
+    public Bag getVehicles(AgentCity ac) {
+
+        return null;
+    }
+
+    public int countVehicles(AgentCity ac) {
+        int numVehicles = 0;
+        for (int i = 0; i < cells.length; i++) {
+            if (ac.agentGrid.numObjectsAtLocation(cells[i]) > 0) {
+                numVehicles++;
+            }
+        }
+        return numVehicles;
+    }
+
+    public int countPassengers(AgentCity ac) {
+        int numPassengers = 0;
+        Bag b;
+        Vehicle v;
+        for (int i = 0; i < cells.length; i++) {
+            b = ac.agentGrid.getObjectsAtLocation(cells[i]);
+            if (b != null) {
+                v = (Vehicle)b.objs[0];
+                numPassengers += v.getNumPassengers();
+            }
+        }
+        return numPassengers;
+    }
+
     /** Constructor */
     public Lane(int id, int minX, int maxX, int minY, int maxY, AgentCity ac) {
         idNum = id;
