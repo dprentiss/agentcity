@@ -26,10 +26,11 @@ public class AgentCity extends SimState {
     public static final int VEHICLE_SCHEDULE_NUM = 0;
     public static final int DETECTOR_SCHEDULE_NUM = 1;
     public static final int INTERSECTION_SCHEDULE_NUM = 2;
-    public static final int DRIVER_SCHEDULE_NUM = 3;
-    public static final int COLLISION_SCHEDULE_NUM = 4;
-    public static final int TRIPGEN_SCHEDULE_NUM = 5;
-    public static final int REPORT_SCHEDULE_NUM = 6;
+    public static final int LANE_SCHEDULE_NUM = 3;
+    public static final int DRIVER_SCHEDULE_NUM = 4;
+    public static final int COLLISION_SCHEDULE_NUM = 5;
+    public static final int TRIPGEN_SCHEDULE_NUM = 6;
+    public static final int REPORT_SCHEDULE_NUM = 7;
 
     // Simulation constants
     public final long seed;
@@ -38,7 +39,7 @@ public class AgentCity extends SimState {
     public final int HOV_MIN;
     public static final boolean SMART_TURNS = true;
     public static final boolean AVOID_CONGESTION = true;
-    public static final boolean RESERVATION_PRIORITY = false;
+    public static final boolean RESERVATION_PRIORITY = true;
     public static final boolean PASSENGER_WARM_START = false;
     public static final double WARM_START_RATE = 0.5;
     public static final boolean CONSOLE_OUT = true;
@@ -52,8 +53,9 @@ public class AgentCity extends SimState {
     public static final int PASSENGER_CAP = 4;
 
     // Utility
-    private static final int DEFAULT_HOV_MIN = 3;
-    private static final boolean DEFAULT_LANE_USE_POLICY = false;
+    private static final int DEFAULT_HOV_MIN = 2;
+    private static final boolean DEFAULT_LANE_USE_POLICY = true;
+    private static final boolean DEFAULT_RESERVATION_PRIORITY = false;
     private static final double DEFAULT_TRIP_GEN_RATE = 0.2;
     private static final int DEFAULT_VEHICLE_DENSITY = 144;
     private static final int DEFAULT_NUM_GRIDS = 4;
@@ -88,12 +90,17 @@ public class AgentCity extends SimState {
     public IntGrid2D walkwayGrid;
     public IntGrid2D parkingGrid;
     public IntGrid2D intersectionGrid;
+    public IntGrid2D laneGrid;
     public IntGrid2D blockGrid;
 
     // Array of Intersections
     public Intersection[] intersections;
     // Array of Intersection agents
     public IntersectionAgent[] intersectionAgents;
+    // Array of Lanes
+    public Lane[] lanes;
+    // Array of Lane agents
+    public LaneAgent[] laneAgents;
 
     // Travelers
     private Bag travelers;
@@ -159,12 +166,12 @@ public class AgentCity extends SimState {
         int[] reservationsCompleted = new int[PASSENGER_CAP+1];
         int scheduleInvalid = 0;
         /*
-        int stepsWithPassenger = 0;
-        int stepsWithoutPassenger = 0;
-        int stepsTravelingWithPassenger = 0;
-        int stepsTravelingWithoutPassenger = 0;
-        int distWithPassenger = 0;
-        int distWithoutPassenger = 0;
+          int stepsWithPassenger = 0;
+          int stepsWithoutPassenger = 0;
+          int stepsTravelingWithPassenger = 0;
+          int stepsTravelingWithoutPassenger = 0;
+          int distWithPassenger = 0;
+          int distWithoutPassenger = 0;
         */
         Bag vehicles = agentGrid.allObjects;
         // Vehicle reporting
@@ -180,12 +187,12 @@ public class AgentCity extends SimState {
                 distance[k] += v.distance[k];
             }
             /*
-            stepsWithPassenger += v.stepsWithPassenger;
-            stepsWithoutPassenger += v.stepsWithoutPassenger;
-            stepsTravelingWithPassenger += v.stepsTravelingWithPassenger;
-            stepsTravelingWithoutPassenger += v.stepsTravelingWithoutPassenger;
-            distWithPassenger += v.distWithPassenger;
-            distWithoutPassenger += v.distWithoutPassenger;
+              stepsWithPassenger += v.stepsWithPassenger;
+              stepsWithoutPassenger += v.stepsWithoutPassenger;
+              stepsTravelingWithPassenger += v.stepsTravelingWithPassenger;
+              stepsTravelingWithoutPassenger += v.stepsTravelingWithoutPassenger;
+              distWithPassenger += v.distWithPassenger;
+              distWithoutPassenger += v.distWithoutPassenger;
             */
         }
         // IntersectionAgent reporting
@@ -235,20 +242,22 @@ public class AgentCity extends SimState {
             .append("\"scheduleInvalid\": " + scheduleInvalid)
             .append(", ")
             /*
-            .append("\"stepsWithPassenger\": " + stepsWithPassenger)
-            .append(", ")
-            .append("\"stepsWithoutPassenger\": " + stepsWithoutPassenger)
-            .append(", ")
-            .append("\"stepsTravelingWithPassenger\": " + stepsTravelingWithPassenger)
-            .append(", ")
-            .append("\"stepsTravelingWithoutPassenger\": " + stepsTravelingWithoutPassenger)
-            .append(", ")
-            .append("\"distWithPassenger\": " + distWithPassenger)
-            .append(", ")
-            .append("\"distWithoutPassenger\": " + distWithoutPassenger)
-            .append(", ")
+              .append("\"stepsWithPassenger\": " + stepsWithPassenger)
+              .append(", ")
+              .append("\"stepsWithoutPassenger\": " + stepsWithoutPassenger)
+              .append(", ")
+              .append("\"stepsTravelingWithPassenger\": " + stepsTravelingWithPassenger)
+              .append(", ")
+              .append("\"stepsTravelingWithoutPassenger\": " + stepsTravelingWithoutPassenger)
+              .append(", ")
+              .append("\"distWithPassenger\": " + distWithPassenger)
+              .append(", ")
+              .append("\"distWithoutPassenger\": " + distWithoutPassenger)
+              .append(", ")
             */
             .append("\"lastTripStep\": " + lastTripStep)
+            .append(", ")
+            .append("\"reservationPriority\": " + RESERVATION_PRIORITY)
             .append(", ")
             .append("\"lanePolicy\": " + LANE_POLICY)
             .append(", ")
@@ -371,6 +380,25 @@ public class AgentCity extends SimState {
         return 1;
     }
 
+    private int labelLanes(int cellX, int cellY, int num) {
+        int label = 0;
+        Direction dir = Direction.byInt(roadGrid.field[cellX][cellY]);
+        int x = dir.getXOffset();
+        int y = dir.getYOffset();
+        for (int i = -1; i < 2; i++) {
+            if (!checkBounds(cellX + x * i, cellY + y * i)) {
+                continue;
+            }
+            label = laneGrid.field[cellX + x * i][cellY + y * i];
+            if (label != 0) {
+                laneGrid.field[cellX][cellY] = label;
+                return 0;
+            }
+        }
+        laneGrid.field[cellX][cellY] = num + 1;
+        return 1;
+    }
+
     public boolean checkBounds(int x, int y) {
         if (x >= 0 && x < gridWidth && y >= 0 && y < gridHeight)
             return true;
@@ -392,9 +420,11 @@ public class AgentCity extends SimState {
         gridWidth = gridHeight;
 
         int numIntersections = 0;
+        int numLanes = 0;
 
         roadGrid = new IntGrid2D(gridWidth, gridHeight, Direction.NONE.toInt());
         intersectionGrid = new IntGrid2D(gridWidth, gridHeight, 0);
+        laneGrid = new IntGrid2D(gridWidth, gridHeight, 0);
         blockGrid = new IntGrid2D(gridWidth, gridHeight, 1);
 
         agentGrid = new SparseGrid2D(gridWidth, gridHeight);
@@ -440,6 +470,13 @@ public class AgentCity extends SimState {
                 }
             }
         }
+        for (int x = 0; x < gridWidth; x++) {
+            for (int y = 0; y < gridHeight; y++) {
+                if (roadGrid.field[x][y] != 0 && roadGrid.field[x][y] != 9) {
+                    numLanes += labelLanes(x, y, numLanes);
+                }
+            }
+        }
 
         // make some intersections
         int maxXs[] = new int[numIntersections + 1];
@@ -475,6 +512,35 @@ public class AgentCity extends SimState {
                                   new MersenneTwisterFast(seed));
             gen.stopper =
                 schedule.scheduleRepeating(gen, TRIPGEN_SCHEDULE_NUM, 1);
+        }
+
+        // make some lanes
+        maxXs = new int[numLanes + 1];
+        minXs = new int[numLanes + 1];
+        maxYs = new int[numLanes + 1];
+        minYs = new int[numLanes + 1];
+        Arrays.fill(minXs, gridWidth);
+        Arrays.fill(minYs, gridHeight);
+        lanes = new Lane[numLanes + 1];
+        laneAgents = new LaneAgent[numLanes + 1];
+        for (int x = 0; x < gridWidth; x++) {
+            for (int y = 0; y < gridHeight; y++) {
+                inter = laneGrid.field[x][y];
+                if (inter != 0) {
+                    maxXs[inter] = (x > maxXs[inter]) ? x : maxXs[inter];
+                    minXs[inter] = (x < minXs[inter]) ? x : minXs[inter];
+                    maxYs[inter] = (y > maxYs[inter]) ? y : maxYs[inter];
+                    minYs[inter] = (y < minYs[inter]) ? y : minYs[inter];
+                }
+            }
+        }
+        for (int i = 1; i < numLanes + 1; i++) {
+            lanes[i] =
+                new Lane(i, minXs[i], maxXs[i], minYs[i], maxYs[i], this);
+            //laneAgents[i] = new LaneAgent(i, lanes[i]);
+            //laneAgents[i].stopper =
+            //schedule.scheduleRepeating(laneAgents[i],
+            //                             LANE_SCHEDULE_NUM, 1);
         }
 
         // make some vehicles
@@ -546,13 +612,13 @@ public class AgentCity extends SimState {
 
 
         /*
-        DateTimeFormatter formatter =
-            DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-            .withZone(ZoneId.systemDefault());
-        String dateTimeString = formatter.format(Instant.now());
-        String filename = String.format("%s-%d.json",
-                                        dateTimeString,
-                                        seed);
+          DateTimeFormatter formatter =
+          DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
+          .withZone(ZoneId.systemDefault());
+          String dateTimeString = formatter.format(Instant.now());
+          String filename = String.format("%s-%d.json",
+          dateTimeString,
+          seed);
         */
         String filename = String.format("%drand.json", grids);
 
