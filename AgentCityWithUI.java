@@ -17,9 +17,14 @@ public class AgentCityWithUI extends GUIState {
     public Display2D display;
     public JFrame displayFrame;
 
-    FastValueGridPortrayal2D roadPortrayal = new FastValueGridPortrayal2D("Road");
-    FastValueGridPortrayal2D blockPortrayal = new FastValueGridPortrayal2D("Block", true);
-    FastValueGridPortrayal2D intersectionPortrayal = new FastValueGridPortrayal2D("Intersection");
+    FastValueGridPortrayal2D roadPortrayal =
+        new FastValueGridPortrayal2D("Road");
+    FastValueGridPortrayal2D blockPortrayal =
+        new FastValueGridPortrayal2D("Block", true);
+    FastValueGridPortrayal2D intersectionPortrayal =
+        new FastValueGridPortrayal2D("Intersection");
+    FastValueGridPortrayal2D lanePortrayal =
+        new FastValueGridPortrayal2D("Lane");
 
     SparseGridPortrayal2D agentPortrayal = new SparseGridPortrayal2D();
 
@@ -28,8 +33,9 @@ public class AgentCityWithUI extends GUIState {
     }
 
     public AgentCityWithUI() {
-        super(new AgentCity(System.currentTimeMillis()));
+        //super(new AgentCity(System.currentTimeMillis()));
         //super(new AgentCity(1324367673));
+        super(new AgentCity(1324367674));
     }
 
     public AgentCityWithUI(SimState state) { super(state); }
@@ -64,6 +70,13 @@ public class AgentCityWithUI extends GUIState {
         intersectionColors[1] = new Color(0,0,0,0);
         intersectionPortrayal.setField(ac.intersectionGrid);
         intersectionPortrayal.setMap(new sim.util.gui.SimpleColorMap(intersectionColors));
+
+        // Lane colors
+        Color laneColors[] = new Color[2];
+        laneColors[0] = new Color(0,0,0,0);
+        laneColors[1] = new Color(0,0,0,0);
+        lanePortrayal.setField(ac.laneGrid);
+        lanePortrayal.setMap(new sim.util.gui.SimpleColorMap(laneColors));
 
         // Agent Colors
         agentPortrayal.setField(ac.agentGrid);
@@ -128,6 +141,7 @@ public class AgentCityWithUI extends GUIState {
         display.attach(roadPortrayal, "Road");
         display.attach(blockPortrayal, "Block");
         display.attach(intersectionPortrayal, "Intersection");
+        display.attach(lanePortrayal, "Lane");
         display.attach(agentPortrayal, "Agents");
 
         display.setBackdrop(Color.white);
