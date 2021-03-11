@@ -36,14 +36,14 @@ public class AgentCity extends SimState {
     public final long seed;
     public final double TRIPGEN_RATE;
     public final boolean LANE_POLICY;
+    public final boolean RESERVATION_PRIORITY;
     public final int HOV_MIN;
     public static final boolean SMART_TURNS = true;
     public static final boolean AVOID_CONGESTION = true;
-    public static final boolean RESERVATION_PRIORITY = true;
     public static final boolean PASSENGER_WARM_START = false;
     public static final double WARM_START_RATE = 0.5;
     public static final boolean CONSOLE_OUT = true;
-    public static final boolean FILE_OUT = false;
+    public static final boolean FILE_OUT = true;
     public static final int MAX_SPEED = 2;
     public static final int REPORT_INTERVAL = 600;
     public static final double SECONDS_PER_STEP = 1;
@@ -54,7 +54,7 @@ public class AgentCity extends SimState {
 
     // Utility
     private static final int DEFAULT_HOV_MIN = 2;
-    private static final boolean DEFAULT_LANE_USE_POLICY = true;
+    private static final boolean DEFAULT_LANE_USE_POLICY = false;
     private static final boolean DEFAULT_RESERVATION_PRIORITY = false;
     private static final double DEFAULT_TRIP_GEN_RATE = 0.2;
     private static final int DEFAULT_VEHICLE_DENSITY = 144;
@@ -62,6 +62,7 @@ public class AgentCity extends SimState {
     private final boolean CHECK_FOR_COLLISIONS = true;
     private final boolean isTest;
     private final String filename;
+    private int numRoadCells;
     private FileWriter fw;
     private BufferedWriter bw;
     public PrintWriter fileout;
@@ -119,6 +120,7 @@ public class AgentCity extends SimState {
              DEFAULT_NUM_GRIDS,
              DEFAULT_VEHICLE_DENSITY,
              DEFAULT_LANE_USE_POLICY,
+             DEFAULT_RESERVATION_PRIORITY,
              "default.json",
              DEFAULT_TRIP_GEN_RATE,
              DEFAULT_HOV_MIN);
@@ -126,19 +128,22 @@ public class AgentCity extends SimState {
 
     /** Constructor */
     public AgentCity(long seed, int grids, int density, boolean lanePolicy,
+                     boolean reservationPriority,
                      String outputFileName,
                      Double tripGenRate,
                      int hovMin) {
         // Required by SimState
         super(seed);
         this.seed = seed;
+
         isTest = true;
         this.grids = grids;
         this.density = density;
-        this.LANE_POLICY = lanePolicy;
-        this.filename = outputFileName;
-        this.TRIPGEN_RATE = tripGenRate;
-        this.HOV_MIN = hovMin;
+        LANE_POLICY = lanePolicy;
+        RESERVATION_PRIORITY = reservationPriority;
+        filename = outputFileName;
+        TRIPGEN_RATE = tripGenRate;
+        HOV_MIN = hovMin;
         if (FILE_OUT) {
             try {
                 fw = new FileWriter(filename, true);
@@ -165,14 +170,12 @@ public class AgentCity extends SimState {
         int[] reservationsCanceled = new int[PASSENGER_CAP+1];
         int[] reservationsCompleted = new int[PASSENGER_CAP+1];
         int scheduleInvalid = 0;
-        /*
-          int stepsWithPassenger = 0;
-          int stepsWithoutPassenger = 0;
-          int stepsTravelingWithPassenger = 0;
-          int stepsTravelingWithoutPassenger = 0;
-          int distWithPassenger = 0;
-          int distWithoutPassenger = 0;
-        */
+        int stepsWithPassenger = 0;
+        int stepsWithoutPassenger = 0;
+        int stepsTravelingWithPassenger = 0;
+        int stepsTravelingWithoutPassenger = 0;
+        int distWithPassenger = 0;
+        int distWithoutPassenger = 0;
         Bag vehicles = agentGrid.allObjects;
         // Vehicle reporting
         for (int i = 0; i < vehicles.numObjs; i++) {
@@ -186,14 +189,12 @@ public class AgentCity extends SimState {
             for (int k = 0; k < v.distance.length; k++) {
                 distance[k] += v.distance[k];
             }
-            /*
-              stepsWithPassenger += v.stepsWithPassenger;
-              stepsWithoutPassenger += v.stepsWithoutPassenger;
-              stepsTravelingWithPassenger += v.stepsTravelingWithPassenger;
-              stepsTravelingWithoutPassenger += v.stepsTravelingWithoutPassenger;
-              distWithPassenger += v.distWithPassenger;
-              distWithoutPassenger += v.distWithoutPassenger;
-            */
+            stepsWithPassenger += v.stepsWithPassenger;
+            stepsWithoutPassenger += v.stepsWithoutPassenger;
+            stepsTravelingWithPassenger += v.stepsTravelingWithPassenger;
+            stepsTravelingWithoutPassenger += v.stepsTravelingWithoutPassenger;
+            distWithPassenger += v.distWithPassenger;
+            distWithoutPassenger += v.distWithoutPassenger;
         }
         // IntersectionAgent reporting
         for (int i = 1; i < intersectionAgents.length; i++) {
@@ -241,20 +242,18 @@ public class AgentCity extends SimState {
             .append(", ")
             .append("\"scheduleInvalid\": " + scheduleInvalid)
             .append(", ")
-            /*
-              .append("\"stepsWithPassenger\": " + stepsWithPassenger)
-              .append(", ")
-              .append("\"stepsWithoutPassenger\": " + stepsWithoutPassenger)
-              .append(", ")
-              .append("\"stepsTravelingWithPassenger\": " + stepsTravelingWithPassenger)
-              .append(", ")
-              .append("\"stepsTravelingWithoutPassenger\": " + stepsTravelingWithoutPassenger)
-              .append(", ")
-              .append("\"distWithPassenger\": " + distWithPassenger)
-              .append(", ")
-              .append("\"distWithoutPassenger\": " + distWithoutPassenger)
-              .append(", ")
-            */
+            .append("\"stepsWithPassenger\": " + stepsWithPassenger)
+            .append(", ")
+            .append("\"stepsWithoutPassenger\": " + stepsWithoutPassenger)
+            .append(", ")
+            .append("\"stepsTravelingWithPassenger\": " + stepsTravelingWithPassenger)
+            .append(", ")
+            .append("\"stepsTravelingWithoutPassenger\": " + stepsTravelingWithoutPassenger)
+            .append(", ")
+            .append("\"distWithPassenger\": " + distWithPassenger)
+            .append(", ")
+            .append("\"distWithoutPassenger\": " + distWithoutPassenger)
+            .append(", ")
             .append("\"lastTripStep\": " + lastTripStep)
             .append(", ")
             .append("\"reservationPriority\": " + RESERVATION_PRIORITY)
@@ -262,6 +261,8 @@ public class AgentCity extends SimState {
             .append("\"lanePolicy\": " + LANE_POLICY)
             .append(", ")
             .append("\"numVehicles\": " + numVehicles)
+            .append(", ")
+            .append("\"numRoadCells\": " + numRoadCells)
             .append(", ")
             .append("\"grids\": " + grids)
             .append(", ")
@@ -438,7 +439,10 @@ public class AgentCity extends SimState {
                             labelIntersection(x, y, numIntersections);
                         roadGrid.field[x][y] = Direction.ALL.toInt();
                     }
-                    else roadGrid.field[x][y] = Direction.SOUTH.toInt();
+                    else {
+                        roadGrid.field[x][y] = Direction.SOUTH.toInt();
+                        numRoadCells++;
+                    }
                     blockGrid.field[x][y] = 0;
                 }
                 if (x == 1 || (x-2)%38 == 18 || (x-2)%38 == 19 || (x-2)%38 == 37) {
@@ -447,7 +451,10 @@ public class AgentCity extends SimState {
                             labelIntersection(x, y, numIntersections);
                         roadGrid.field[x][y] = Direction.ALL.toInt();
                     }
-                    else roadGrid.field[x][y] = Direction.NORTH.toInt();
+                    else {
+                        roadGrid.field[x][y] = Direction.NORTH.toInt();
+                        numRoadCells++;
+                    }
                     blockGrid.field[x][y] = 0;
                 }
                 if (y == 0 || (y-2)%38 == 16 || (y-2)%38 == 17 || (y-2)%38 == 36) {
@@ -456,7 +463,10 @@ public class AgentCity extends SimState {
                             labelIntersection(x, y, numIntersections);
                         roadGrid.field[x][y] = Direction.ALL.toInt();
                     }
-                    else roadGrid.field[x][y] = Direction.WEST.toInt();
+                    else {
+                        roadGrid.field[x][y] = Direction.WEST.toInt();
+                        numRoadCells++;
+                    }
                     blockGrid.field[x][y] = 0;
                 }
                 if (y == 1 || (y-2)%38 == 18 || (y-2)%38 == 19 || (y-2)%38 == 37) {
@@ -465,7 +475,10 @@ public class AgentCity extends SimState {
                             labelIntersection(x, y, numIntersections);
                         roadGrid.field[x][y] = Direction.ALL.toInt();
                     }
-                    else roadGrid.field[x][y] = Direction.EAST.toInt();
+                    else {
+                        roadGrid.field[x][y] = Direction.EAST.toInt();
+                        numRoadCells++;
+                    }
                     blockGrid.field[x][y] = 0;
                 }
             }
@@ -504,6 +517,7 @@ public class AgentCity extends SimState {
                 new Intersection(i, minXs[i], maxXs[i], minYs[i], maxYs[i],
                                  this);
             intersectionAgents[i] = new IntersectionAgent(i, intersections[i]);
+            intersectionAgents[i].setPriority(RESERVATION_PRIORITY);
             intersectionAgents[i].stopper =
                 schedule.scheduleRepeating(intersectionAgents[i],
                                            INTERSECTION_SCHEDULE_NUM, 1);
@@ -620,7 +634,8 @@ public class AgentCity extends SimState {
           dateTimeString,
           seed);
         */
-        String filename = String.format("%drand.json", grids);
+        //String filename = String.format("%drand.json", grids);
+        String filename = "default.json";
 
         for (int i = 0; i < numRuns; i++) {
             //density = random.nextInt(maxDensity - minDensity) + minDensity;
@@ -628,23 +643,23 @@ public class AgentCity extends SimState {
             //tripGenRate = random.nextDouble() * (maxRate - minRate) + minRate;
             //hovMin = random.nextInt(4 - 1) + 1;
             tripGenRate = 0.2;
-            state = new AgentCity(seed, grids, density, true, filename,
-                                  tripGenRate, 1);
+            state = new AgentCity(seed, grids, density, true, true, filename,
+                                  tripGenRate, 3);
             state.start();
             for (int j = 0; j < stepLimit; j++) {
                 state.schedule.step(state);
             }
             ((AgentCity)state).fileout.close();
             state.kill();
-            state = new AgentCity(seed, grids, density, true, filename,
-                                  tripGenRate, 2);
+            state = new AgentCity(seed, grids, density, false, true, filename,
+                                  tripGenRate, 3);
             state.start();
             for (int j = 0; j < stepLimit; j++) {
                 state.schedule.step(state);
             }
             ((AgentCity)state).fileout.close();
             state.kill();
-            state = new AgentCity(seed, grids, density, false, filename,
+            state = new AgentCity(seed, grids, density, false, false, filename,
                                   tripGenRate, 1);
             state.start();
             for (int j = 0; j < stepLimit; j++) {

@@ -90,10 +90,10 @@ public class IntersectionAgent implements Steppable {
      */
     public IntersectionAgent(int id, Intersection intersection) {
         this.idNum = id;
-        this.reservationsCanceled = new int[ac.PASSENGER_CAP+1];
-        this.reservationsCompleted = new int[ac.PASSENGER_CAP+1];
-        setPriority(ac.RESERVATION_PRIORITY
-                    && width * height >= ac.MIN_INTERSECTION_CONTROL_SIZE);
+        this.reservationsCanceled = new int[AgentCity.PASSENGER_CAP+1];
+        this.reservationsCompleted = new int[AgentCity.PASSENGER_CAP+1];
+        //setPriority(ac.RESERVATION_PRIORITY
+        //&& width * height >= ac.MIN_INTERSECTION_CONTROL_SIZE);
         setIntersection(intersection);
     }
 
