@@ -345,7 +345,7 @@ public class Vehicle implements Steppable, Driveable {
         // Do some logging
         if (speed > 0) {
             stepsMoving[manifest.numObjs]++;
-            distance[manifest.numObjs]++;
+            distance[manifest.numObjs] += speed;
         } else {
             stepsWaiting[manifest.numObjs]++;
         }
