@@ -51,11 +51,12 @@ public class AgentCity extends SimState {
     public static final int NUM_BLOCKED_LEG_CELLS = 4;
     public static final int MIN_INTERSECTION_CONTROL_SIZE = 0;
     public static final int PASSENGER_CAP = 4;
+    public static final long LAST_TRIP_LIMIT = 600;
 
     // Utility
     private static final int DEFAULT_HOV_MIN = 2;
     private static final boolean DEFAULT_LANE_USE_POLICY = false;
-    private static final boolean DEFAULT_RESERVATION_PRIORITY = false;
+    private static final boolean DEFAULT_RESERVATION_PRIORITY = true;
     private static final double DEFAULT_TRIP_GEN_RATE = 0.2;
     private static final int DEFAULT_VEHICLE_DENSITY = 144;
     private static final int DEFAULT_NUM_GRIDS = 4;
@@ -311,7 +312,7 @@ public class AgentCity extends SimState {
             makeTestGrids();
         }
 
-        System.out.println(filename);
+        //System.out.println(filename);
 
         Steppable report = new Steppable() {
                 public void step(final SimState state) {
@@ -320,7 +321,7 @@ public class AgentCity extends SimState {
                     if (step % REPORT_INTERVAL == 0) {
                         String reportString = ac.toString();
                         if (CONSOLE_OUT) {
-                            System.out.print(reportString);
+                            System.out.println(reportString);
                         }
                         if (FILE_OUT && step > 0) {
                             fileout.println(reportString);
@@ -605,23 +606,41 @@ public class AgentCity extends SimState {
         return getCellAhead(cell.x, cell.y, dir, offset);
     }
 
+    interface ScenarioRunner {
+        void run(SimState state, long stepLimit);
+    }
+
     /** Main */
     public static void main(String[] args) {
+
+        ScenarioRunner scenarioLoop = (SimState state, long stepLimit) -> {
+            state.start();
+            for (int i = 0; i < stepLimit; i++) {
+                state.schedule.step(state);
+                if (i - ((AgentCity)state).lastTripStep >= LAST_TRIP_LIMIT) {
+                    break;
+                }
+            }
+            ((AgentCity)state).fileout.close();
+            state.kill();
+        };
+
+        SimState[]  states;
         long seed = System.currentTimeMillis();
         //long seed = 1324367672;
         Random random = new Random(seed);
-        int numRuns = 64;
+        int numRuns = 1;
         int numMins = 60;
         int stepLimit = numMins * 60 + 1;
-        SimState state;
+        //SimState state;
         int grids = 4;
         int density;
-        int minDensity = 128;
+        int minDensity = 64;
         int maxDensity = 256;
         // Double tripGenRate;
         Double tripGenRate;
         Double minRate = 0.02;
-        Double maxRate = 0.20;
+        Double maxRate = 0.30;
         int hovMin;
 
 
@@ -638,36 +657,28 @@ public class AgentCity extends SimState {
         String filename = "default.json";
 
         for (int i = 0; i < numRuns; i++) {
-            //density = random.nextInt(maxDensity - minDensity) + minDensity;
-            density = 144;
-            //tripGenRate = random.nextDouble() * (maxRate - minRate) + minRate;
-            //hovMin = random.nextInt(4 - 1) + 1;
-            tripGenRate = 0.2;
-            state = new AgentCity(seed, grids, density, true, true, filename,
-                                  tripGenRate, 3);
-            state.start();
-            for (int j = 0; j < stepLimit; j++) {
-                state.schedule.step(state);
-            }
-            ((AgentCity)state).fileout.close();
-            state.kill();
-            state = new AgentCity(seed, grids, density, false, true, filename,
-                                  tripGenRate, 3);
-            state.start();
-            for (int j = 0; j < stepLimit; j++) {
-                state.schedule.step(state);
-            }
-            ((AgentCity)state).fileout.close();
-            state.kill();
-            state = new AgentCity(seed, grids, density, false, false, filename,
+            density = random.nextInt(maxDensity - minDensity) + minDensity;
+            //density = 144;
+            tripGenRate = random.nextDouble() * (maxRate - minRate) + minRate;
+            //tripGenRate = 0.2;
+            hovMin = random.nextInt(4 - 1) + 1;
+            //hovMin = 3
+
+            states = new SimState[3];
+            states[0] = new AgentCity(seed, grids, density, true, true, filename,
+                                  tripGenRate, hovMin);
+            states[1] = new AgentCity(seed, grids, density, false, true, filename,
+                                  tripGenRate, hovMin);
+            states[2] = new AgentCity(seed, grids, density, false, false, filename,
                                   tripGenRate, 1);
-            state.start();
-            for (int j = 0; j < stepLimit; j++) {
-                state.schedule.step(state);
+
+            for (int j = 0; j < states.length; j++) {
+                System.out.format("Run %d of %d, Scenario %d of %d: density = %d, tripGenRate = %f.3"
+                                  + " hovMin = %d%n%n",
+                                  i+1, numRuns, j+1, states.length, density, tripGenRate, hovMin);
+
+                scenarioLoop.run(states[j], stepLimit);
             }
-            ((AgentCity)state).fileout.close();
-            state.kill();
-            seed++;
         }
         System.exit(0);
     }
