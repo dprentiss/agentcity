@@ -29,6 +29,9 @@ public class Intersection {
     private Int2D[] departureLegs;
 
     // Accessors
+    public String toString() {
+        return String.format("Intersection %d", idNum);
+    }
     public Int2D[] getDepartureLegs() { return departureLegs; }
     public Int2D[] getApproachLegs() { return approachLegs; }
     public int getNumApproachLegs(AgentCity ac, Direction direction) {

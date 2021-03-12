@@ -54,7 +54,7 @@ public class AgentCity extends SimState {
     public static final long LAST_TRIP_LIMIT = 600;
 
     // Utility
-    private static final int DEFAULT_HOV_MIN = 2;
+    private static final int DEFAULT_HOV_MIN = 3;
     private static final boolean DEFAULT_LANE_USE_POLICY = false;
     private static final boolean DEFAULT_RESERVATION_PRIORITY = true;
     private static final double DEFAULT_TRIP_GEN_RATE = 0.2;
@@ -407,6 +407,10 @@ public class AgentCity extends SimState {
         return false;
     }
 
+    public boolean checkBounds(Int2D cell) {
+        return checkBounds(cell.x, cell.y);
+    }
+
     public void makeTestGrids() {
         makeTestGrids(this.grids, this.density);
     }
@@ -558,6 +562,10 @@ public class AgentCity extends SimState {
             //                             LANE_SCHEDULE_NUM, 1);
         }
 
+        // System.out.print(lanes[1].toString());
+        lanes[1].setNeighbors(this);
+        System.out.print(lanes[1].toString());
+
         // make some vehicles
         for (int i = 0; i < NUM_VEHICLES; i++) {
             // Get random location on road
@@ -632,28 +640,15 @@ public class AgentCity extends SimState {
         int numRuns = 1;
         int numMins = 60;
         int stepLimit = numMins * 60 + 1;
-        //SimState state;
         int grids = 4;
         int density;
         int minDensity = 64;
         int maxDensity = 256;
-        // Double tripGenRate;
         Double tripGenRate;
         Double minRate = 0.02;
         Double maxRate = 0.30;
         int hovMin;
 
-
-        /*
-          DateTimeFormatter formatter =
-          DateTimeFormatter.ofPattern("yyyyMMddHHmmss")
-          .withZone(ZoneId.systemDefault());
-          String dateTimeString = formatter.format(Instant.now());
-          String filename = String.format("%s-%d.json",
-          dateTimeString,
-          seed);
-        */
-        //String filename = String.format("%drand.json", grids);
         String filename = "default.json";
 
         for (int i = 0; i < numRuns; i++) {
@@ -665,18 +660,17 @@ public class AgentCity extends SimState {
             //hovMin = 3
 
             states = new SimState[3];
-            states[0] = new AgentCity(seed, grids, density, true, true, filename,
-                                  tripGenRate, hovMin);
-            states[1] = new AgentCity(seed, grids, density, false, true, filename,
-                                  tripGenRate, hovMin);
-            states[2] = new AgentCity(seed, grids, density, false, false, filename,
-                                  tripGenRate, 1);
+            states[0] = new AgentCity(seed, grids, density, true, true,
+                                      filename, tripGenRate, hovMin);
+            states[1] = new AgentCity(seed, grids, density, false, true,
+                                      filename, tripGenRate, hovMin);
+            states[2] = new AgentCity(seed, grids, density, false, false,
+                                      filename, tripGenRate, hovMin);
 
             for (int j = 0; j < states.length; j++) {
                 System.out.format("Run %d of %d, Scenario %d of %d: density = %d, tripGenRate = %f.3"
                                   + " hovMin = %d%n%n",
                                   i+1, numRuns, j+1, states.length, density, tripGenRate, hovMin);
-
                 scenarioLoop.run(states[j], stepLimit);
             }
         }

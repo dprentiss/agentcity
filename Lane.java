@@ -24,10 +24,15 @@ public class Lane {
     public final int height;
     public final int width;
     public final int length;
-    public Int2D[] cells;
 
     // Variables
     private LaneAgent controller;
+    private Direction direction;
+    private Int2D[] cells;
+    private Int2D minNeighborCell;
+    private Int2D maxNeighborCell;
+    private Object minNeighbor;
+    private Object maxNeighbor;
 
     // Accessors
     @Override
@@ -43,28 +48,31 @@ public class Lane {
             .append("width: " + width)
             .append(", ")
             .append("cells: " + Arrays.toString(cells))
+            .append(", ")
+            .append("minNeighborCell: " + minNeighborCell)
+            .append(", ")
+            .append("maxNeighborCell: " + maxNeighborCell)
+            .append(", ")
+            .append("minNeighbor: " + minNeighbor.toString())
             .append("}\n")
             .toString();
     }
 
-    public void setController(LaneAgent controller) {
-        this.controller = controller;
-    }
     public LaneAgent getController() { return controller; }
 
+
     /*
-    public boolean requestReservation(Vehicle vehicle, long time, Int2D[][] path) {
-        return controller.requestReservation(vehicle, time, path);
-    }
-    public boolean cancelReservation(Vehicle vehicle, boolean complete) {
-        return controller.cancelReservation(vehicle, complete);
-    }
+      public boolean requestReservation(Vehicle vehicle, long time, Int2D[][] path) {
+      return controller.requestReservation(vehicle, time, path);
+      }
+      public boolean cancelReservation(Vehicle vehicle, boolean complete) {
+      return controller.cancelReservation(vehicle, complete);
+      }
     */
 
     public Int2D[] getCells() { return cells; }
 
     public Bag getVehicles(AgentCity ac) {
-
         return null;
     }
 
@@ -103,6 +111,7 @@ public class Lane {
         width = maxX - minX + 1;
         length = height + width - 1;
         setCells(ac);
+        //System.out.print(this.toString());
     }
 
     private void setCells(AgentCity ac) {
@@ -112,5 +121,42 @@ public class Lane {
         for (int i = 0; i < cells.length; i++) {
             cells[i] = new Int2D(minX + i * x, minY + i * y);
         }
+        minNeighborCell = new Int2D(cells[0].x - 1 * x, cells[0].y - 1 * y);
+        if (!ac.checkBounds(minNeighborCell)) {
+            String s = String.format("Cell s% is out of bounds",
+                                     minNeighborCell);
+            throw new IllegalArgumentException(s);
+        }
+        maxNeighborCell = new Int2D(cells[length-1].x + 1 * x,
+                                    cells[length-1].y + 1 * y);
+        if (!ac.checkBounds(maxNeighborCell)) {
+            String s = String.format("Cell s% is out of bounds",
+                                     maxNeighborCell);
+            throw new IllegalArgumentException(s);
+        }
+    }
+
+    public boolean setNeighbors(AgentCity ac) {
+        if (minNeighborCell == null || maxNeighborCell == null) {
+            return false;}
+        int intersectionID =
+            ac.intersectionGrid.field[minNeighborCell.x][minNeighborCell.y];
+        int laneID =
+            ac.laneGrid.field[minNeighborCell.x][minNeighborCell.y];
+        minNeighbor =
+            (laneID == 0 ? (Intersection)ac.intersections[intersectionID]
+             : (Lane)ac.lanes[laneID]);
+        intersectionID =
+            ac.intersectionGrid.field[maxNeighborCell.x][maxNeighborCell.y];
+        laneID =
+            ac.laneGrid.field[maxNeighborCell.x][maxNeighborCell.y];
+        maxNeighbor =
+            (laneID == 0 ? (Intersection)ac.intersections[intersectionID]
+             : (Lane)ac.lanes[laneID]);
+        return true;
+    }
+
+    private void setController(LaneAgent controller) {
+        this.controller = controller;
     }
 }
