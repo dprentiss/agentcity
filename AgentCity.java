@@ -55,7 +55,7 @@ public class AgentCity extends SimState {
 
     // Utility
     private static final int DEFAULT_HOV_MIN = 3;
-    private static final boolean DEFAULT_LANE_USE_POLICY = false;
+    private static final boolean DEFAULT_LANE_USE_POLICY = true;
     private static final boolean DEFAULT_RESERVATION_PRIORITY = true;
     private static final double DEFAULT_TRIP_GEN_RATE = 0.2;
     private static final int DEFAULT_VEHICLE_DENSITY = 144;
@@ -562,9 +562,8 @@ public class AgentCity extends SimState {
             //                             LANE_SCHEDULE_NUM, 1);
         }
 
-        // System.out.print(lanes[1].toString());
         lanes[1].setNeighbors(this);
-        System.out.print(lanes[1].toString());
+        //System.out.print(lanes[1].toString());
 
         // make some vehicles
         for (int i = 0; i < NUM_VEHICLES; i++) {

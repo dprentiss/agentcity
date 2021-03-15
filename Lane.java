@@ -25,10 +25,12 @@ public class Lane {
     public final int width;
     public final int length;
 
+    private Int2D[] cells;
+
     // Variables
     private LaneAgent controller;
     private Direction direction;
-    private Int2D[] cells;
+    private int hovMin;
     private Int2D minNeighborCell;
     private Int2D maxNeighborCell;
     private Object minNeighbor;
@@ -54,8 +56,16 @@ public class Lane {
             .append("maxNeighborCell: " + maxNeighborCell)
             .append(", ")
             .append("minNeighbor: " + minNeighbor.toString())
+            .append(", ")
+            .append("maxNeighbor: " + maxNeighbor.toString())
             .append("}\n")
             .toString();
+    }
+
+    public int getHovMin() { return hovMin; }
+
+    public void setHovMin(int hovMin) {
+        this.hovMin = hovMin;
     }
 
     public LaneAgent getController() { return controller; }
@@ -110,6 +120,7 @@ public class Lane {
         height = maxY - minY + 1;
         width = maxX - minX + 1;
         length = height + width - 1;
+        hovMin = ac.HOV_MIN;
         setCells(ac);
         //System.out.print(this.toString());
     }

@@ -70,12 +70,24 @@ public class Vehicle implements Steppable, Driveable {
 
     // Accessor
 
-    public boolean meetsHovMin() {
+    public boolean meetsHovMin(int hovMin) {
         return getNumPassengers() >= hovMin;
+    }
+
+    public boolean meetsHovMin(Lane lane) {
+        return meetsHovMin(lane.getHovMin());
+    }
+
+    public boolean meetsHovMin() {
+        return meetsHovMin(this.hovMin);
     }
 
     public Lane getLane(AgentCity ac) {
         return setLane(location, ac);
+    }
+
+    public Lane getLane() {
+        return lane;
     }
 
     public boolean inIntersection(AgentCity ac) {

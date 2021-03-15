@@ -26,6 +26,7 @@ public class DriverAgent implements Steppable, Driver {
 
     public Vehicle vehicle = null;
     public Int2D location;
+    public Lane lane;
     public Direction direction;
     public int speed;
     public int maxSpeed;
@@ -421,121 +422,8 @@ public class DriverAgent implements Steppable, Driver {
                 path[i][j] = tmpPath[i + m][j];
             }
         }
-        /*
-          path = new Int2D[k][maxSpeed];
-          for (int i = 0; i < k; i++) {
-          for (int j = 0; j < maxSpeed; j++) {
-          path[i][j] = tmpPath[i][j];
-          }
-          }
-        */
         return path;
     }
-
-    /*
-      Int2D[] getPath(Waypoint[] waypoints, Int2D loc, Direction dir,
-      int currentSpeed, int desiredSpeed) {
-      Int2D[] path;
-      Int2D[] pathToWaypoint;
-      Int2D[] tmpPath = new Int2D[16];
-      Int2D tmpLoc = loc;
-      Direction tmpDir = dir;
-      int tmpSpeed = currentSpeed;
-      int k = 0;
-
-      // loop over waypoints and add to path
-      for (int i = 0; i < waypoints.length; i++) {
-      pathToWaypoint =
-      getPathToWaypoint(waypoints[i], tmpLoc, tmpDir, tmpSpeed,
-      desiredSpeed).clone();
-      for (int j = 0; j < pathToWaypoint.length; j++) {
-      tmpPath[k] = pathToWaypoint[j];
-      if (waypoints[i].directive == Driver.Directive.MOVE_FORWARD) {
-      tmpSpeed = getGapToCell(tmpPath[k], tmpLoc, tmpDir) + 1;
-      } else {
-      tmpSpeed = 0;
-      }
-      tmpLoc = tmpPath[k];
-      k++;
-      }
-      tmpDir = tmpDir.byDirective(waypoints[i].directive);
-      }
-      // copy tmpPath to trimmed path
-      path = new Int2D[k];
-      for (int i = 0; i < k; i++) {
-      path[i] = tmpPath[i];
-      }
-      return path;
-      }
-    */
-
-    /*
-      Int2D[] getPath(Waypoint[] waypoints) {
-      return getPath(waypoints, location, direction, speed, maxSpeed);
-      }
-    */
-
-    /*
-      Int2D[] getPath(AgentCity ac, Int2D loc, Direction dir) {
-      Int2D[] tmpPath = new Int2D[16];
-      Int2D[] returnPath;
-      Int2D tmpCell = new Int2D();
-      int speed = 2;
-      int desiredSpeed = 2;
-      int i = 0;
-      // start at current location
-      int cellX = loc.x;
-      int cellY = loc.y;
-      // advance to intersection
-      while (ac.roadGrid.field[cellX][cellY] != 9) {
-      tmpCell = getCellAhead(cellX, cellY, dir, 1);
-      cellX = tmpCell.x;
-      cellY = tmpCell.y;
-      }
-      // advance to turn cell and add cells to path
-      while (cellX != nextTurnCell.x || cellY != nextTurnCell.y) {
-      tmpPath[i] = new Int2D(cellX, cellY);
-      i++;
-      tmpCell = getCellAhead(cellX, cellY, dir, 1);
-      cellX = tmpCell.x;
-      cellY = tmpCell.y;
-      }
-      // add turning time to path if turning
-      if (dir != nextDirection) {
-      tmpPath[i] = new Int2D(cellX, cellY);
-      i++;
-      }
-      // advance out of intersection and add cells to path
-      while (ac.roadGrid.field[cellX][cellY] == 9) {
-      tmpPath[i] = new Int2D(cellX, cellY);
-      i++;
-      tmpCell = getCellAhead(cellX, cellY, nextDirection, 1);
-      cellX = tmpCell.x;
-      cellY = tmpCell.y;
-      }
-      returnPath = new Int2D[i];
-      for (int j = 0; j < returnPath.length; j++) {
-      returnPath[j] = tmpPath[j];
-      }
-      return returnPath;
-      }
-    */
-
-    /*
-      Int2D[] getUpdatedPath(Int2D location) {
-      int i = 0;
-      Int2D[] updatedPath;
-      while (i < path.length && !location.equals(path[i])) {
-      path[i] = null;
-      i++;
-      }
-      updatedPath = new Int2D[path.length - i];
-      for (int j = 0; j < updatedPath.length; j++) {
-      updatedPath[j] = path[i + j];
-      }
-      return updatedPath;
-      }
-    */
 
     Int2D getCellAhead(int cellX, int cellY, Direction dir, int offset) {
         return new Int2D(cellX + offset * dir.getXOffset(),
@@ -604,17 +492,6 @@ public class DriverAgent implements Steppable, Driver {
         if (hasReservation) {
             int timeIndex = (int)(step - reservationTime);
             stepsToWaypoint = getStepsToCell(nextWaypoint.cell);
-            /*
-              boolean cannotLeave =
-              (timeIndex >= 0
-              && timeIndex < reservationPath.length
-              && !location.equals(reservationPath[timeIndex][0]));
-              if (cannotLeave) {
-              nextIntersection.cancelReservation(vehicle);
-              hasReservation = false;
-              vehicle.hasReservation = false;
-              }
-            */
         }
         // get a reservation if needed
         if (!hasReservation) {
@@ -649,13 +526,42 @@ public class DriverAgent implements Steppable, Driver {
         updateReservation();
     }
 
-    void updateState(AgentCity ac) {
+    public void updateState(AgentCity ac) {
         step = ac.schedule.getSteps();
         location = vehicle.getLocation();
         direction = vehicle.getDirection();
+        lane = vehicle.getLane(ac);
         speed = vehicle.getSpeed();
         hasReservation = vehicle.hasReservation;
         inIntersection = ac.roadGrid.field[location.x][location.y] == 9;
+    }
+
+    Lane laneOnLeft(AgentCity ac) {
+        int x = location.x + direction.onLeft().getXOffset();
+        int y = location.y + direction.onLeft().getYOffset();
+        int laneNum = 0;
+        if (!ac.checkBounds(x, y)) {
+            return null;
+        }
+        laneNum = ac.laneGrid.field[x][y];
+        if (laneNum > 0) {
+            return ac.lanes[laneNum];
+        }
+        return null;
+    }
+
+    Lane laneOnRight(AgentCity ac) {
+        int x = location.x + direction.onRight().getXOffset();
+        int y = location.y + direction.onRight().getYOffset();
+        int laneNum = 0;
+        if (!ac.checkBounds(x, y)) {
+            return null;
+        }
+        laneNum = ac.laneGrid.field[x][y];
+        if (laneNum > 0) {
+            return ac.lanes[laneNum];
+        }
+        return null;
     }
 
     private void checkReservation() {
@@ -906,6 +812,7 @@ public class DriverAgent implements Steppable, Driver {
         nextDirective = Driver.Directive.MOVE_FORWARD;
 
         // check if lane change is required
+        /*
         if (ac.LANE_POLICY) {
             if (!inIntersection && !nearIntersection) {
                 if (vehicle.meetsHovMin()) {
@@ -920,6 +827,26 @@ public class DriverAgent implements Steppable, Driver {
                     //System.out.print(this.vehicle.toString());
                     nextDirective = Driver.Directive.MERGE_RIGHT;
                     desiredSpeed = 1;
+                }
+            }
+        }
+        */
+        if (ac.LANE_POLICY) {
+            if (!inIntersection && !nearIntersection) {
+                if (vehicle.meetsHovMin(laneOnLeft(ac))) {
+                    if (safeMerge(direction.onLeft())) {
+                        //System.out.println("MERGING_LEFT");
+                        nextDirective = Driver.Directive.MERGE_LEFT;
+                        desiredSpeed = 1;
+                    }
+                } else if (!vehicle.meetsHovMin(lane)) {
+                    if (safeMerge(direction.onRight())) {
+                    //System.out.println("MERGING_RIGHT");
+                    //System.out.print(this);
+                    //System.out.print(this.vehicle.toString());
+                    nextDirective = Driver.Directive.MERGE_RIGHT;
+                    desiredSpeed = 1;
+                    }
                 }
             }
         }

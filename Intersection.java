@@ -25,6 +25,7 @@ public class Intersection {
     // Variables
     private IntersectionAgent controller;
     private Int2D[] approachLegs;
+    private Lane[] approachLanes;
     private int[] approachLegLength;
     private Int2D[] departureLegs;
 
@@ -34,6 +35,7 @@ public class Intersection {
     }
     public Int2D[] getDepartureLegs() { return departureLegs; }
     public Int2D[] getApproachLegs() { return approachLegs; }
+    public Lane[] getApproachLanes() { return approachLanes; }
     public int getNumApproachLegs(AgentCity ac, Direction direction) {
         Int2D cell;
         int num = 0;
@@ -108,6 +110,15 @@ public class Intersection {
     }
     public boolean inIntersection(Int2D cell) {
         return inIntersection(cell.x, cell.y);
+    }
+
+    private void setLanes(AgentCity ac) {
+        Int2D cell;
+        approachLanes = new Lane[approachLegs.length];
+        for (int i = 0 ; i < approachLanes.length; i++) {
+            cell = approachLegs[i];
+            approachLanes[i] = ac.lanes[ac.laneGrid.field[cell.x][cell.y]];
+        }
     }
 
     private void setLegs(AgentCity ac) {
