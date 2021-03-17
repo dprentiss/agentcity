@@ -31,6 +31,7 @@ public class IntersectionAgent implements Steppable {
     public int width;
     public int height;
     public int scheduleSize;
+    public int hovLockout = 16;
 
     // Variables
     private AgentCity ac; // state
@@ -41,6 +42,7 @@ public class IntersectionAgent implements Steppable {
     private boolean acceptingReservations;
     private boolean reservationPriority;
     private long step;
+    private long[] lastHovCheck = new long[Direction.values().length];
 
     // Reporting variables
     public int[] reservationsCompleted;
@@ -465,11 +467,65 @@ public class IntersectionAgent implements Steppable {
         }
     }
 
+    private long updateHov(Direction dir) {
+        //TODO accommodate legs with more than two lanes
+        Lane[] lanes = intersection.getApproachLanesByDir(dir, ac);
+        if (lanes.length == 1) {
+            lanes[0].setHovMin(1);
+            return step;
+        } else if (lanes.length == 2) {
+            int hovIdx = 0;
+            int otherIdx;
+            Lane hovLane;
+            Lane otherLane;
+            int[] vehicleCount = new int[lanes.length];
+            for (int i = 0; i < lanes.length; i++) {
+                if (lanes[i] != null) {
+                    if (lanes[i].isLeftOf(lanes[hovIdx])) {
+                        hovIdx = i;
+                    }
+                    vehicleCount[i] = lanes[i].countVehicles(ac);
+                }
+            }
+            otherIdx = (hovIdx == 0 ? 1 : 0);
+            if (lanes[hovIdx] == null) {
+                System.out.println("***************hovLane null");
+                System.out.println(this.toString());
+                System.out.println(Arrays.toString(lanes));
+            }
+            if (lanes[otherIdx] == null) {
+                System.out.println("***************otherLane null");
+                System.out.println(this.toString());
+                System.out.println(Arrays.toString(lanes));
+            }
+            hovLane = lanes[hovIdx];
+            otherLane = lanes[otherIdx];
+            if (vehicleCount[hovIdx]/(double)vehicleCount[otherIdx] > 3/(double)2) {
+                hovLane.setHovMin(hovLane.getHovMin()+(hovLane.getHovMin() == 5 ? 0 : 1));
+                //System.out.printf("Lane %s, %s, step %d, +1, %d%n", hovLane.idNum, dir, step, hovLane.getHovMin());
+                return step;
+            } else if (vehicleCount[hovIdx]/(double)vehicleCount[otherIdx] < 2/(double)3) {
+                hovLane.setHovMin(hovLane.getHovMin()-(hovLane.getHovMin() == 1 ? 0 : 1));
+                //System.out.printf("Lane %s, %s, step %d, -1, %d%n", hovLane.idNum, dir, step, hovLane.getHovMin());
+                return step;
+            } else {
+                return 0;
+            }
+        } else {
+            return 0;
+        }
+    }
+
     public void step(final SimState state) {
         ac = (AgentCity)state;
         step = ac.schedule.getSteps();
         trimSchedule(ac);
         checkSchedule();
+        for (int i = 1; i <= 7; i = i + 2) {
+            if (step - lastHovCheck[i] >= hovLockout) {
+                lastHovCheck[i] = updateHov(Direction.byInt(i));
+            }
+        }
         if (intersection.idNum == intIdNum) {
             System.out.println();
             System.out.printf("Step %d, schedule %d/%d\n",

@@ -25,17 +25,19 @@ public class Intersection {
     // Variables
     private IntersectionAgent controller;
     private Int2D[] approachLegs;
-    private Lane[] approachLanes;
+    private Lane[][] approachLanes;
     private int[] approachLegLength;
     private Int2D[] departureLegs;
+    private Lane[][] departureLanes;
 
     // Accessors
     public String toString() {
         return String.format("Intersection %d", idNum);
     }
     public Int2D[] getDepartureLegs() { return departureLegs; }
+    public Lane[][] getDepartureLanes() { return departureLanes; }
     public Int2D[] getApproachLegs() { return approachLegs; }
-    public Lane[] getApproachLanes() { return approachLanes; }
+    public Lane[][] getApproachLanes() { return approachLanes; }
     public int getNumApproachLegs(AgentCity ac, Direction direction) {
         Int2D cell;
         int num = 0;
@@ -112,12 +114,29 @@ public class Intersection {
         return inIntersection(cell.x, cell.y);
     }
 
-    private void setLanes(AgentCity ac) {
+    public void setLanes(AgentCity ac) {
         Int2D cell;
-        approachLanes = new Lane[approachLegs.length];
-        for (int i = 0 ; i < approachLanes.length; i++) {
+        int dirNum;
+        int[] count =
+            new int[Direction.values().length+1];
+        approachLanes =
+            new Lane[Direction.values().length+1][approachLegs.length];
+        departureLanes =
+            new Lane[Direction.values().length+1][departureLegs.length];
+        for (int i = 0 ; i < approachLegs.length; i++) {
             cell = approachLegs[i];
-            approachLanes[i] = ac.lanes[ac.laneGrid.field[cell.x][cell.y]];
+            dirNum = ac.roadGrid.field[cell.x][cell.y];
+            approachLanes[dirNum][count[dirNum]]
+                = ac.lanes[ac.laneGrid.field[cell.x][cell.y]];
+            count[dirNum]++;
+        }
+        count = new int[Direction.values().length+1];
+        for (int i = 0 ; i < departureLegs.length; i++) {
+            cell = departureLegs[i];
+            dirNum = ac.roadGrid.field[cell.x][cell.y];
+            departureLanes[dirNum][count[dirNum]]
+                = ac.lanes[ac.laneGrid.field[cell.x][cell.y]];
+            count[dirNum]++;
         }
     }
 
@@ -288,5 +307,30 @@ public class Intersection {
             }
         }
         return departureLegs[nextDepartureIdx];
+    }
+
+    public Lane[] getApproachLanesByDir(Direction dir, AgentCity ac) {
+        int dirNum = dir.toInt();
+        int count = 0;
+        int idx = 0;
+        Lane[] lanes;
+        for (int i = 0; i < approachLanes[dirNum].length; i++) {
+            if (approachLanes[dirNum][i] != null) {
+                count++;
+            }
+        }
+        lanes = new Lane[count];
+        for (int i = 0; i < approachLanes[dirNum].length; i++) {
+            if (approachLanes[dirNum][i] != null) {
+                lanes[idx] = approachLanes[dirNum][i];
+                idx++;
+            }
+        }
+        for (int i = 0; i < lanes.length; i++) {
+            if (lanes[i] == null) {
+                System.out.println(Arrays.toString(lanes));
+            }
+        }
+        return lanes;
     }
 }

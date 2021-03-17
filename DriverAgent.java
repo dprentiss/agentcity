@@ -677,7 +677,10 @@ public class DriverAgent implements Steppable, Driver {
         nextIntersection = getIntersectionAhead(ac, location);
 
         // chose direction
-        if (ac.SMART_TURNS && vehicle.meetsHovMin()) {
+        if (ac.SMART_TURNS
+            //&& vehicle.meetsHovMin()
+            && vehicle.hasPassengers
+            ) {
             Intersection destination = getNextPassengerDestination();
             if (destination.idNum == nextIntersection.idNum) {
                 nextLeg = getRandomDepartureLeg(ac, nextIntersection, direction);
@@ -698,19 +701,19 @@ public class DriverAgent implements Steppable, Driver {
         nextDirection = Direction.byInt(ac.roadGrid.field[nextLeg.x][nextLeg.y]);
 
         // choose departure lane by occupancy policy
+        /*
         if (ac.LANE_POLICY) {
             if (vehicle.meetsHovMin()) {
-                /*
                 nextLeg =
                     nextIntersection.getDepartureLeg(ac, nextDirection,
                                                      nextDirection.onLeft());
-            */
             } else {
                 nextLeg =
                     nextIntersection.getDepartureLeg(ac, nextDirection,
                                                      nextDirection.onRight());
             }
         }
+        */
 
         // choose random direction if nextDirection is infeasible
         if (nextDirection == null

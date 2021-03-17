@@ -263,7 +263,7 @@ public class Vehicle implements Steppable, Driveable {
     public void step(final SimState state) {
         // The current simulation state
         AgentCity ac = (AgentCity)state;
-        hovMin = ac.HOV_MIN;
+        //hovMin = ac.HOV_MIN;
 
         // Get location from state
         location = ac.agentGrid.getObjectLocation(this);

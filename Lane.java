@@ -62,6 +62,15 @@ public class Lane {
             .toString();
     }
 
+    public Direction getDirection() {
+        return direction;
+    }
+
+    public Direction getDirection(AgentCity ac) {
+        setDirection(ac);
+        return direction;
+    }
+
     public int getHovMin() { return hovMin; }
 
     public void setHovMin(int hovMin) {
@@ -110,6 +119,17 @@ public class Lane {
         return numPassengers;
     }
 
+    public boolean isLeftOf(Lane lane) {
+        int x = this.maxX + direction.onRight().getXOffset();
+        int y = this.maxY + direction.onRight().getYOffset();
+        /*
+        if (x == lane.maxX && y == lane.maxY) {
+            System.out.printf("%d left of %d", this.idNum, lane.idNum);
+        }
+        */
+        return (x == lane.maxX && y == lane.maxY);
+    }
+
     /** Constructor */
     public Lane(int id, int minX, int maxX, int minY, int maxY, AgentCity ac) {
         idNum = id;
@@ -122,8 +142,14 @@ public class Lane {
         length = height + width - 1;
         hovMin = ac.HOV_MIN;
         setCells(ac);
+        setDirection(ac);
         //System.out.print(this.toString());
     }
+
+    private void setDirection(AgentCity ac) {
+        direction = Direction.byInt(ac.roadGrid.field[maxX][maxY]);
+    }
+
 
     private void setCells(AgentCity ac) {
         cells = new Int2D[length];
@@ -149,7 +175,8 @@ public class Lane {
 
     public boolean setNeighbors(AgentCity ac) {
         if (minNeighborCell == null || maxNeighborCell == null) {
-            return false;}
+            return false;
+        }
         int intersectionID =
             ac.intersectionGrid.field[minNeighborCell.x][minNeighborCell.y];
         int laneID =
