@@ -33,8 +33,8 @@ public class AgentCityWithUI extends GUIState {
     }
 
     public AgentCityWithUI() {
-        //super(new AgentCity(System.currentTimeMillis()));
-        super(new AgentCity(1324367673));
+        super(new AgentCity(System.currentTimeMillis()));
+        //super(new AgentCity(1324367673));
         //super(new AgentCity(1324367674));
     }
 
@@ -80,12 +80,12 @@ public class AgentCityWithUI extends GUIState {
 
         // Agent Colors
         agentPortrayal.setField(ac.agentGrid);
-        agentPortrayal.setPortrayalForClass(Vehicle.class,
-                new sim.portrayal.simple.OvalPortrayal2D(Color.red));
+        //agentPortrayal.setPortrayalForClass(Vehicle.class,
+        //new sim.portrayal.simple.OvalPortrayal2D(Color.red));
         Bag vehicles = ac.agentGrid.getAllObjects();
         //if (ac.LANE_POLICY) {
         if (true) {
-            Color newColor = new Color(0, 255, 0);
+            //Color newColor = new Color(0, 255, 0);
             agentPortrayal.setPortrayalForAll(new sim.portrayal.simple.OvalPortrayal2D()
                 {
                     public void draw(Object object, Graphics2D graphics, DrawInfo2D info)
@@ -97,7 +97,7 @@ public class AgentCityWithUI extends GUIState {
                             paint = Color.yellow;
                         } else if (vehicle.getNumPassengers() == 3) {
                             paint = Color.orange;
-                        } else if (vehicle.getNumPassengers() > 2) {
+                        } else if (vehicle.getNumPassengers() > 3) {
                             paint = Color.red;
                         } else {
                             paint = Color.green;
