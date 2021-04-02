@@ -471,7 +471,7 @@ public class IntersectionAgent implements Steppable {
         //TODO accommodate legs with more than two lanes
         Lane[] lanes = intersection.getApproachLanesByDir(dir, ac);
         if (lanes.length == 1) {
-            lanes[0].setHovMin(1);
+            lanes[0].setHovMin(0);
             return step;
         } else if (lanes.length == 2) {
             int hovIdx = 0;
@@ -505,7 +505,7 @@ public class IntersectionAgent implements Steppable {
                 //System.out.printf("Lane %s, %s, step %d, +1, %d%n", hovLane.idNum, dir, step, hovLane.getHovMin());
                 return step;
             } else if (vehicleCount[hovIdx]/(double)vehicleCount[otherIdx] < 2/(double)3) {
-                hovLane.setHovMin(hovLane.getHovMin()-(hovLane.getHovMin() == 1 ? 0 : 1));
+                hovLane.setHovMin(hovLane.getHovMin()-(hovLane.getHovMin() == 0 ? 0 : 1));
                 //System.out.printf("Lane %s, %s, step %d, -1, %d%n", hovLane.idNum, dir, step, hovLane.getHovMin());
                 return step;
             } else {
@@ -521,11 +521,13 @@ public class IntersectionAgent implements Steppable {
         step = ac.schedule.getSteps();
         trimSchedule(ac);
         checkSchedule();
+        /*
         for (int i = 1; i <= 7; i = i + 2) {
             if (step - lastHovCheck[i] >= hovLockout) {
                 lastHovCheck[i] = updateHov(Direction.byInt(i));
             }
         }
+        */
         if (intersection.idNum == intIdNum) {
             System.out.println();
             System.out.printf("Step %d, schedule %d/%d\n",

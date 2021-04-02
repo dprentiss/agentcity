@@ -55,7 +55,7 @@ public class AgentCity extends SimState {
 
     // Utility
     private static final int DEFAULT_HOV_MIN = 3;
-    private static final boolean DEFAULT_LANE_USE_POLICY = false;
+    private static final boolean DEFAULT_LANE_USE_POLICY = true;
     private static final boolean DEFAULT_RESERVATION_PRIORITY = true;
     private static final double DEFAULT_TRIP_GEN_RATE = 0.2;
     private static final int DEFAULT_VEHICLE_DENSITY = 144;
@@ -635,15 +635,17 @@ public class AgentCity extends SimState {
                     break;
                 }
             }
-            ((AgentCity)state).fileout.close();
+            if (FILE_OUT) {
+                ((AgentCity)state).fileout.close();
+            }
             state.kill();
         };
 
         SimState[]  states;
-        long seed = System.currentTimeMillis();
-        //long seed = 1324367672;
+        //long seed = System.currentTimeMillis();
+        long seed = 1324367687L;
         Random random = new Random(seed);
-        int numRuns = 1;
+        int numRuns = 1024;
         int numMins = 60;
         int stepLimit = numMins * 60 + 1;
         int grids = 4;
@@ -674,11 +676,12 @@ public class AgentCity extends SimState {
                                       filename, tripGenRate, hovMin);
 
             for (int j = 0; j < states.length; j++) {
-                System.out.format("Run %d of %d, Scenario %d of %d: density = %d, tripGenRate = %f.3"
+                System.out.format("Run %d of %d, Scenario %d of %d: density = %d, tripGenRate = %.3f"
                                   + " hovMin = %d%n%n",
                                   i+1, numRuns, j+1, states.length, density, tripGenRate, hovMin);
                 scenarioLoop.run(states[j], stepLimit);
             }
+            seed++;
         }
         System.exit(0);
     }
